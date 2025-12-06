@@ -21,17 +21,37 @@ Explore and analyze your codebase to understand how features are implemented, tr
 /explore --component="Button"
 /explore --api="/api/users"
 /explore --trace="checkout process"
+
+# Save output to file
+/explore "authentication" --output=docs/architecture/auth-analysis.md
+/explore "payment" --output=docs/features/payment-flow.md
 ```
 
 ## Arguments
 
 - `$ARGUMENTS`: Feature name, component, API route, or functionality to explore
 
+## Flags
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--output=path` | Save analysis to specific file | `--output=docs/analysis.md` |
+| `--component="Name"` | Focus on specific component | `--component="Button"` |
+| `--api="route"` | Focus on API endpoint | `--api="/api/users"` |
+| `--trace="flow"` | Trace execution flow | `--trace="checkout"` |
+| `--show-tests` | Include test coverage details | `--show-tests` |
+| `--show-deps` | Deep dependency analysis | `--show-deps` |
+| `--format=json` | Output as JSON | `--format=json` |
+
 ---
 
 ## Workflow
 
 Explore codebase for: **$ARGUMENTS**
+
+{{ if --output flag provided }}
+**Output will be saved to**: `$OUTPUT_PATH`
+{{ endif }}
 
 ### Phase 1: Search & Locate 🔍
 
@@ -128,6 +148,30 @@ Explore codebase for: **$ARGUMENTS**
 ### Phase 4: Document Findings 📋
 
 Generate comprehensive documentation of how the feature works.
+
+{{ if --output flag provided }}
+
+**Save to file**: Write complete analysis to `$OUTPUT_PATH`
+
+Include all sections:
+- ✅ File locations and structure
+- ✅ Architecture overview with diagrams
+- ✅ Data flow explanation
+- ✅ Code snippets with context
+- ✅ Dependencies and patterns
+- ✅ Testing coverage
+- ✅ Security measures
+- ✅ Performance notes
+- ✅ Known issues and TODOs
+- ✅ How to modify guide
+
+**File created**: `$OUTPUT_PATH` ready for team review and documentation
+
+{{ else }}
+
+**Display in chat**: Show analysis in conversation for immediate review
+
+{{ endif }}
 
 ---
 
@@ -628,16 +672,74 @@ This feature interacts with:
 
 ---
 
-## Flags
+## Usage Examples
 
-| Flag | Description | Example |
-|------|-------------|---------|
-| `--component="Name"` | Focus on specific component | `--component="Button"` |
-| `--api="route"` | Focus on API endpoint | `--api="/api/users"` |
-| `--trace="flow"` | Trace execution flow | `--trace="checkout"` |
-| `--show-tests` | Include test coverage details | `--show-tests` |
-| `--show-deps` | Deep dependency analysis | `--show-deps` |
-| `--format=json` | Output as JSON | `--format=json` |
+### Save Analysis for Documentation
+
+```bash
+# Analyze and save authentication flow
+/explore "authentication" --output=docs/architecture/auth-flow.md
+
+# Deep dive into payment with dependencies
+/explore "payment" --show-deps --output=docs/features/payment-analysis.md
+
+# Component analysis for design system docs
+/explore --component="Button" --output=docs/components/button-usage.md
+
+# API endpoint documentation
+/explore --api="/api/users" --show-tests --output=docs/api/users-endpoint.md
+```
+
+### Quick Exploration (Display in Chat)
+
+```bash
+# Quick look at feature
+/explore "user profile"
+
+# Trace flow without saving
+/explore --trace="checkout process"
+
+# Component usage check
+/explore --component="Modal"
+```
+
+---
+
+## Output File Format
+
+When using `--output=path`, the generated file includes:
+
+```markdown
+# Codebase Exploration: [Feature Name]
+
+## Overview
+[Summary and status]
+
+## Architecture
+[Component hierarchy, folder structure]
+
+## Implementation Details
+[Code snippets, patterns, data flow]
+
+## Dependencies
+[External and internal dependencies]
+
+## Testing & Security
+[Coverage, security measures]
+
+## Modification Guide
+[How to extend or modify]
+
+## References
+[Related features, documentation links]
+```
+
+**Benefits of saving to file**:
+- ✅ **Team knowledge base**: Share with new developers
+- ✅ **Architecture documentation**: Auto-generated docs
+- ✅ **Onboarding material**: Understand features quickly
+- ✅ **Planning reference**: Use when modifying features
+- ✅ **Code review context**: Understand changes better
 
 ---
 
@@ -647,19 +749,25 @@ This feature interacts with:
 2. **Use component names**: "Button component" finds exact match
 3. **Use API routes**: "/api/users" finds endpoints
 4. **Check tests**: Use `--show-tests` to see coverage
+5. **Save important analyses**: Use `--output=docs/` for documentation
+6. **Version control**: Commit saved analyses for team reference
 
 ---
 
 ## Related Commands
 
 ```bash
+/auto-plan [feature]         # Auto-explore + analyze + plan (all-in-one)
 /find [search-term]         # Quick file/code search
 /plan-feature [feature]     # Plan new feature
 /plan-refactor [feature]    # Plan refactoring
 /add-tests [file]           # Add tests to file
 /review [file]              # Code review
+/research [technology]      # Research external tech (not codebase)
 ```
+
+**Tip**: Instead of running `/explore` manually, use `/auto-plan` which automatically explores, analyzes, and generates a complete plan!
 
 ---
 
-**Pro Tip**: Use `/explore` to understand before modifying. Use `/plan-refactor` after exploration to improve code!
+**Pro Tip**: Use `/explore --output=docs/` to build your project's architecture documentation automatically!

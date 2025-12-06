@@ -24,6 +24,7 @@ This is a comprehensive Claude Kit for Claude Code, designed to accelerate devel
 | Command | Description |
 |---------|-------------|
 | `/plan --detailed [task]` | Detailed plan with 2-5 min tasks |
+| `/auto-plan [feature]` | Smart planning with auto-exploration (3-phase subagents) |
 | `/brainstorm [topic]` | Interactive design session |
 | `/execute-plan [file]` | Subagent-driven plan execution |
 | `/tdd [feature]` | Test-driven development workflow |
@@ -338,7 +339,7 @@ Enable mandatory verification before completion claims:
 
 | Category | Skills |
 |----------|--------|
-| Planning | brainstorming, writing-plans, executing-plans |
+| Planning | brainstorming, writing-plans, executing-plans, **intelligent-planning** |
 | Testing | test-driven-development, verification-before-completion, testing-anti-patterns |
 | Debugging | systematic-debugging, root-cause-tracing, defense-in-depth |
 | Collaboration | dispatching-parallel-agents, requesting-code-review, receiving-code-review, finishing-development-branch |

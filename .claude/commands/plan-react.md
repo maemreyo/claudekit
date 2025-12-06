@@ -21,17 +21,107 @@ Create detailed implementation plans optimized for React/Next.js development wit
 ## Flags
 
 | Flag | Description | Example |
-|------|-------------|---------|
+|------|-------------|------------|
 | `--tdd` | Include TDD micro-tasks (2-5 min cycles) | `/plan-react --tdd "login feature"` |
 | `--nextjs` | Next.js specific patterns (App Router, API) | `/plan-react --nextjs "blog with SSG"` |
 | `--detailed` | Extra detailed task breakdown | `/plan-react --detailed "complex form"` |
 | `--output=path` | Save plan to specified file | `/plan-react --output=plans/migration.md "tools migration"` |
+| `--auto-explore=query` | **Auto-explore old code before planning** | `/plan-react --auto-explore="old auth" "migrate auth"` |
+| `--source=path` | Source directory for auto-explore | `/plan-react --auto-explore="dashboard" --source=old-app/dashboard "migrate"` |
+| `--analysis=path` | Save exploration analysis to file | `/plan-react --analysis=docs/analysis.md "feature"` |
+| `--context=path` | Use existing context/spec file | `/plan-react --context=specs/auth.md "feature"` |
+
+---
+
+## Auto-Explore Feature ⭐
+
+**Smart planning**: Automatically explore old implementation before generating plan (no manual `/explore` needed!)
+
+### When to Use
+
+✅ **Use `--auto-explore` when**:
+- Migrating from old codebase
+- Reimplementing existing feature
+- Need to preserve business logic
+- Want complete context before planning
+
+❌ **Don't use when**:
+- Building completely new feature
+- Have existing spec document (use `--context` instead)
+- Already explored manually
+
+### How It Works
+
+```
+1. Auto-Explore Phase
+   /plan-react --auto-explore="salary calculator" "migrate to new stack"
+   ↓
+   Automatically:
+   - Searches for "salary calculator" in codebase
+   - Explores old implementation (components, hooks, utils)
+   - Documents business logic, patterns, dependencies
+   - Saves analysis (if --analysis flag provided)
+
+2. Analysis Phase
+   ↓
+   Extracts:
+   - Business rules to preserve
+   - Component patterns
+   - State management approach
+   - API integration details
+   - Edge cases and validations
+
+3. Planning Phase
+   ↓
+   Generates plan with:
+   - References to old code in tasks
+   - "MUST PRESERVE" notes for critical logic
+   - Pattern adaptation strategies
+   - Complete context for execution
+```
+
+### Examples
+
+**Basic Auto-Explore**:
+```bash
+/plan-react --auto-explore="payment form" "migrate payment feature"
+```
+
+**With Source Path**:
+```bash
+/plan-react \
+  --auto-explore="dashboard" \
+  --source=old-app/modules/Dashboard \
+  --output=plans/dashboard-migration.md \
+  "migrate dashboard to Next.js App Router"
+```
+
+**Save Analysis for Review**:
+```bash
+/plan-react \
+  --auto-explore="user profile" \
+  --analysis=docs/migration/profile-old.md \
+  --output=plans/profile-migration.md \
+  "migrate user profile to new component library"
+```
 
 ---
 
 ## Workflow
 
 Create a React/Next.js implementation plan for: **$ARGUMENTS**
+
+{{ if --auto-explore flag provided }}
+**Auto-Explore**: Will automatically explore "$AUTO_EXPLORE_QUERY" before planning
+{{ if --source provided }}
+**Source**: $SOURCE_PATH
+{{ else }}
+**Source**: Auto-detect
+{{ endif }}
+{{ if --analysis provided }}
+**Analysis will be saved to**: `$ANALYSIS_PATH`
+{{ endif }}
+{{ endif }}
 
 {{ if --output flag provided }}
 **Output file**: Save this plan to `$OUTPUT_PATH` for later execution with `/execute-plan`
