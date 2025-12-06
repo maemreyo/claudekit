@@ -8,20 +8,34 @@ Create detailed implementation plans optimized for React/Next.js development wit
 
 ```bash
 /plan-react [feature description]
-/plan-react --tdd [feature]         # Include TDD micro-tasks
-/plan-react --nextjs [feature]      # Next.js specific (SSR, API routes)
-/plan-react --detailed [feature]    # Extra detailed steps
+/plan-react --tdd [feature]           # Include TDD micro-tasks
+/plan-react --nextjs [feature]        # Next.js specific (SSR, API routes)
+/plan-react --detailed [feature]      # Extra detailed steps
+/plan-react --output=path [feature]   # Save plan to specific file
 ```
 
 ## Arguments
 
 - `$ARGUMENTS`: Description of the React/Next.js feature to implement
 
+## Flags
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--tdd` | Include TDD micro-tasks (2-5 min cycles) | `/plan-react --tdd "login feature"` |
+| `--nextjs` | Next.js specific patterns (App Router, API) | `/plan-react --nextjs "blog with SSG"` |
+| `--detailed` | Extra detailed task breakdown | `/plan-react --detailed "complex form"` |
+| `--output=path` | Save plan to specified file | `/plan-react --output=plans/migration.md "tools migration"` |
+
 ---
 
 ## Workflow
 
 Create a React/Next.js implementation plan for: **$ARGUMENTS**
+
+{{ if --output flag provided }}
+**Output file**: Save this plan to `$OUTPUT_PATH` for later execution with `/execute-plan`
+{{ endif }}
 
 ### Phase 1: Component Planning
 
@@ -520,11 +534,80 @@ function useFeatureData(id: string) {
 
 ---
 
+## Usage Examples
+
+### Save and Execute Workflow
+
+```bash
+# 1. Create plan and save to file
+/plan-react --output=plans/user-profile.md "add user profile feature"
+
+# 2. Review the plan in plans/user-profile.md
+
+# 3. Execute the plan
+/execute-plan plans/user-profile.md
+```
+
+### Migration Planning
+
+```bash
+# For large migrations, save plan for team review
+/plan-react --detailed --output=docs/migration-plan.md "migrate tools from old project"
+
+# Team reviews the plan...
+
+# Then execute when approved
+/execute-plan docs/migration-plan.md
+```
+
+### TDD Workflow
+
+```bash
+# Create detailed TDD plan
+/plan-react --tdd --output=plans/checkout.md "build checkout flow"
+
+# Execute with test-first approach
+/execute-plan plans/checkout.md
+```
+
+---
+
 ## Related Commands
 
 ```bash
-/plan              # General planning
-/plan-feature      # Generic feature planning
-/plan-detailed     # TDD micro-tasks only
-/test              # Testing assistance
+/plan                  # General planning
+/plan-feature          # Generic feature planning
+/plan-detailed         # TDD micro-tasks only
+/execute-plan [file]   # Execute saved plan
+/test                  # Testing assistance
 ```
+
+---
+
+## Pro Tips
+
+1. **Use `--output` for large features**: Save plan for review before execution
+   ```bash
+   /plan-react --output=plans/dashboard.md "admin dashboard"
+   ```
+
+2. **Combine flags for comprehensive plans**:
+   ```bash
+   /plan-react --tdd --nextjs --output=plans/blog.md "blog with SSR"
+   ```
+
+3. **Save plans in project docs**: Good for onboarding and reference
+   ```bash
+   /plan-react --output=docs/features/auth.md "authentication system"
+   ```
+
+4. **Review before executing**: Large plans benefit from team review
+   ```bash
+   # Create plan
+   /plan-react --output=plans/complex-feature.md "feature description"
+   
+   # Team reviews plans/complex-feature.md
+   
+   # Execute when approved
+   /execute-plan plans/complex-feature.md
+   ```
