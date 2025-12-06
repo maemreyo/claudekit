@@ -37,23 +37,63 @@ Create a React/Next.js implementation plan for: **$ARGUMENTS**
 **Output file**: Save this plan to `$OUTPUT_PATH` for later execution with `/execute-plan`
 {{ endif }}
 
+### Planning Principles
+
+**This command generates plans optimized for `/execute-plan` automation with**:
+- ✅ **TDD Micro-Tasks**: 2-5 minute cycles (Test → Implement → Verify → Commit)
+- ✅ **Explicit File Paths**: Every task specifies exact file location
+- ✅ **Acceptance Criteria**: Clear checkboxes for each task
+- ✅ **Code Examples**: Test and implementation snippets included
+- ✅ **Sequential Execution**: Tasks designed for one-by-one completion
+
+### Phase 0: Pre-Planning Analysis
+
+Before generating tasks, analyze:
+
+1. **Component Breakdown**
+   - Identify all components (presentational vs container)
+   - Determine component hierarchy
+   - Plan file structure explicitly
+
+2. **State Management**
+   - Identify state types (local, server, global, form)
+   - Choose appropriate tools per state type
+   - Plan state flow through component tree
+
+3. **File Paths**
+   - Map exact file locations for all files
+   - Consider existing project structure
+   - Plan imports and exports
+
+4. **Testing Strategy**
+   - Determine test types needed per component
+   - Plan MSW handlers for API mocking
+   - Identify integration test scenarios
+
 ### Phase 1: Component Planning
 
 1. **Break Down UI**
    - Identify component hierarchy
    - Determine which components are presentational vs container
-   - Plan component composition
+   - **Output**: Component tree diagram with explicit file paths
+   
+2. **Plan File Structure**
+   - Map all files to be created/modified
+   - Include full paths (e.g., `src/features/auth/components/LoginForm.tsx`)
+   - Group by feature/domain
 
-2. **State Strategy**
+3. **State Strategy**
    - Local state (useState, useReducer)
-   - Server state (React Query, SWR)
+   - Server state (React Query, SWR) 
    - Global state (Context, Zustand, Redux)
    - Form state (React Hook Form, Formik)
+   - **Output**: State management plan per component
 
-3. **Data Flow**
+4. **Data Flow**
    - Props drilling analysis
    - Context providers needed
    - API integration points
+   - **Output**: Data flow diagram
 
 ### Phase 2: Testing Strategy
 
@@ -61,23 +101,116 @@ Create a React/Next.js implementation plan for: **$ARGUMENTS**
    - User interactions
    - Render variations
    - Accessibility
+   - **Output**: Test file paths and key test cases
 
 2. **Hook Tests**
    - Custom hooks logic
    - State updates
    - Side effects
+   - **Output**: Hook test structure
 
 3. **Integration Tests**
    - API mocking (MSW)
    - User flows
    - Navigation
+   - **Output**: MSW handlers structure
 
-### Phase 3: Implementation Plan
+### Phase 3: Task Generation (TDD Micro-Tasks)
 
-Generate tasks following Component-Driven Development:
-1. **Bottom-up**: Build leaf components first
-2. **Test-first**: Write tests before implementation
-3. **Iterative**: Add features incrementally
+Generate tasks following this pattern for EACH component/feature:
+
+#### Standard Micro-Task Pattern
+
+For each component, create 4-5 micro-tasks:
+
+1. **Test Task** (2-3 min)
+   - Write failing test
+   - File: `path/to/Component.test.tsx`
+   - Expected: ❌ Test fails (component doesn't exist)
+   
+2. **Minimal Implementation** (3-5 min)
+   - Create component file
+   - File: `path/to/Component.tsx`
+   - Minimal code to pass test
+   - Expected: ✅ Test passes
+   
+3. **Enhance & Refactor** (3-5 min)
+   - Add proper structure, types, styling
+   - Add accessibility
+   - Keep tests passing
+   - Expected: ✅ All tests pass
+   
+4. **Additional Tests** (2-4 min)
+   - Add edge case tests
+   - Add interaction tests
+   - Expected: ✅ All tests pass
+   
+5. **Commit** (1 min)
+   - Git add and commit
+   - Clear commit message
+   - Expected: Clean git status
+
+#### Task Format
+
+Each micro-task MUST include:
+
+```markdown
+## Task X.Y: [Clear Description] (Est: Xm)
+
+**File**: `explicit/path/to/file.tsx`
+
+**Acceptance Criteria**:
+- [ ] Specific checklist item 1
+- [ ] Specific checklist item 2
+- [ ] Specific checklist item 3
+
+**Test** (if applicable):
+```typescript
+// Exact test code
+it('should do something specific', () => {
+  // ...
+});
+```
+
+**Implementation** (if applicable):
+```typescript
+// Exact or example implementation
+export function Component() {
+  // ...
+}
+```
+
+**Expected Result**: ✅ Tests pass / ❌ Tests fail
+```
+
+### Phase 4: Task Sequencing
+
+Order tasks for optimal execution:
+
+1. **Foundation First**
+   - Types/interfaces (no tests needed)
+   - Data modules
+   - Utilities (with tests)
+   
+2. **Shared Components**
+   - UI primitives (Button, Input)
+   - Common containers (Layout)
+   - Can be parallelized mentally but execute sequentially
+   
+3. **Feature Components (Bottom-Up)**
+   - Leaf components first (presentational)
+   - Container components after
+   - Pages/routes last
+   
+4. **Integration**
+   - API integration
+   - State management hookup
+   - Navigation/routing
+   
+5. **Polish**
+   - Optimization
+   - Accessibility audit
+   - Performance tuning
 
 ---
 
@@ -179,48 +312,466 @@ src/
 
 ---
 
-### Tasks (Component-Driven Development)
+### Tasks Format (Component-Driven TDD)
 
-#### Phase 1: Foundation & Types [Xh] 🏗️
-| # | Task | Size | Est | Test |
-|---|------|------|-----|------|
-| 1 | Define TypeScript types/interfaces | S | 20m | - |
-| 2 | Set up API client/functions | S | 25m | Mock |
-| 3 | Create custom hooks | M | 40m | ✅ |
+**IMPORTANT**: Generate tasks as TDD micro-tasks (2-5 min each), NOT large 30-60 min tasks.
 
-#### Phase 2: Presentational Components [Xh] 🎨
-| # | Task | Size | Est | Test |
-|---|------|------|-----|------|
-| 4 | Build FeatureItem component | M | 35m | ✅ |
-| 5 | Build Button component | S | 20m | ✅ |
-| 6 | Build Input component | S | 20m | ✅ |
-| 7 | Build FeatureHeader | S | 25m | ✅ |
+#### Micro-Task Structure
 
-**Testing Focus**: Rendering, props, user events
+Each phase breaks down into micro-tasks following this pattern:
 
-#### Phase 3: Container Components [Xh] 🔗
-| # | Task | Size | Est | Test |
-|---|------|------|-----|------|
-| 8 | Build FeatureList container | M | 45m | ✅ |
-| 9 | Build FeatureForm container | M | 45m | ✅ |
-| 10 | Build FeatureContainer | M | 40m | ✅ |
+```markdown
+#### Phase X: [Phase Name] [Total Est] 🎯
 
-**Testing Focus**: State, side effects, integration
+##### Task X.1: Write Test - [Component Name] (3 min)
 
-#### Phase 4: Integration & Routes [Xh] 🚀
-| # | Task | Size | Est | Test |
-|---|------|------|-----|------|
-| 11 | Create page/route | S | 25m | ✅ |
-| 12 | Connect API endpoints | M | 35m | Mock |
-| 13 | Add loading/error states | S | 20m | ✅ |
+**File**: `src/features/[feature]/components/[Component].test.tsx`
 
-#### Phase 5: Polish & Optimization [Xh] ✨
-| # | Task | Size | Est | Test |
-|---|------|------|-----|------|
-| 14 | Add animations (Framer Motion) | S | 25m | - |
-| 15 | Optimize renders (memo, useMemo) | S | 20m | - |
-| 16 | Accessibility audit (a11y) | M | 30m | ✅ |
-| 17 | Responsive design tweaks | S | 25m | - |
+**Acceptance Criteria**:
+- [ ] Test file created with describe block
+- [ ] Test case for basic rendering
+- [ ] Proper imports and setup
+
+**Test**:
+```typescript
+import { render, screen } from '@testing-library/react';
+import { ComponentName } from './ComponentName';
+
+describe('ComponentName', () => {
+  it('should render with required props', () => {
+    render(<ComponentName prop="value" />);
+    expect(screen.getByText('value')).toBeInTheDocument();
+  });
+});
+```
+
+**Expected**: ❌ Component not found
+
+---
+
+##### Task X.2: Minimal Implementation - [Component Name] (5 min)
+
+**File**: `src/features/[feature]/components/[Component].tsx`
+
+**Acceptance Criteria**:
+- [ ] Component file created
+- [ ] Props interface defined
+- [ ] Minimal JSX to pass test
+- [ ] Exports component
+
+**Implementation**:
+```typescript
+interface ComponentNameProps {
+  prop: string;
+}
+
+export function ComponentName({ prop }: ComponentNameProps) {
+  return <div>{prop}</div>;
+}
+```
+
+**Expected**: ✅ Task X.1 test passes
+
+---
+
+##### Task X.3: Enhance - [Component Name] (4 min)
+
+**File**: `src/features/[feature]/components/[Component].tsx`
+
+**Acceptance Criteria**:
+- [ ] Add proper HTML structure
+- [ ] Add accessibility attributes
+- [ ] Add styling/className
+- [ ] Add TypeScript strict mode compliance
+
+**Enhanced Implementation**:
+```typescript
+export function ComponentName({ prop }: ComponentNameProps) {
+  return (
+    <article className="component-name" aria-label={prop}>
+      <h3>{prop}</h3>
+    </article>
+  );
+}
+```
+
+**Expected**: ✅ All tests still pass
+
+---
+
+##### Task X.4: Additional Tests - [Component Name] (3 min)
+
+**File**: `src/features/[feature]/components/[Component].test.tsx`
+
+**Acceptance Criteria**:
+- [ ] Test user interactions
+- [ ] Test edge cases
+- [ ] Test accessibility
+
+**Additional Tests**:
+```typescript
+it('should handle click events', async () => {
+  const onClick = vi.fn();
+  const user = userEvent.setup();
+  
+  render(<ComponentName prop="value" onClick={onClick} />);
+  await user.click(screen.getByRole('article'));
+  
+  expect(onClick).toHaveBeenCalled();
+});
+```
+
+**Expected**: ✅ All tests pass
+
+---
+
+##### Task X.5: Commit - [Component Name] (1 min)
+
+**Command**:
+```bash
+git add src/features/[feature]/components/[Component].*
+git commit -m "feat([feature]): add [Component] component with tests"
+```
+
+**Acceptance Criteria**:
+- [ ] All new files committed
+- [ ] Tests passing
+- [ ] No uncommitted changes for this component
+
+**Expected**: Clean git status
+
+---
+```
+
+#### Phase Breakdown Example
+
+```markdown
+#### Phase 1: Foundation & Types [45min] 🏗️
+
+##### Task 1.1: Create Types (10 min)
+**File**: `src/features/[feature]/types/[feature].types.ts`
+**AC**:
+- [ ] Interface for main domain object
+- [ ] Zod schema for validation
+- [ ] Export all types
+**No test needed** - Pure types
+
+##### Task 1.2: Write Test - API Client (3 min)
+**File**: `src/features/[feature]/api/__tests__/featureApi.test.ts`
+**Test**: [code]
+**Expected**: ❌ Function not found
+
+##### Task 1.3: Implement - API Client (8 min)
+**File**: `src/features/[feature]/api/featureApi.ts`
+**Implementation**: [code]
+**Expected**: ✅ Test passes
+
+##### Task 1.4: Write Test - Custom Hook (3 min)
+**File**: `src/features/[feature]/hooks/__tests__/useFeature.test.ts`
+**Test**: [code]
+**Expected**: ❌ Hook not found
+
+##### Task 1.5: Implement - Custom Hook (10 min)
+**File**: `src/features/[feature]/hooks/useFeature.ts`
+**Implementation**: [code]
+**Expected**: ✅ Test passes
+
+##### Task 1.6: Commit Foundation (1 min)
+git commit -m "feat([feature]): add types, API client, and hooks"
+
+---
+
+#### Phase 2: Presentational Components [30min] 🎨
+
+##### Task 2.1: Write Test - FeatureItem (3 min)
+**File**: `src/features/[feature]/components/__tests__/FeatureItem.test.tsx`
+**Test**: [code]
+**Expected**: ❌ Component not found
+
+##### Task 2.2: Implement - FeatureItem Minimal (4 min)
+**File**: `src/features/[feature]/components/FeatureItem.tsx`
+**Implementation**: [minimal code]
+**Expected**: ✅ Test passes
+
+##### Task 2.3: Enhance - FeatureItem (4 min)
+**File**: `src/features/[feature]/components/FeatureItem.tsx`
+**Implementation**: [enhanced code]
+**Expected**: ✅ Tests pass
+
+##### Task 2.4: Additional Tests - FeatureItem (3 min)
+**Tests**: [interaction tests]
+**Expected**: ✅ All pass
+
+##### Task 2.5: Commit - FeatureItem (1 min)
+
+[Repeat pattern for each presentational component]
+
+---
+
+#### Phase 3: Container Components [40min] 🔗
+
+[Similar micro-task breakdown]
+
+---
+
+#### Phase 4: Pages & Routes [20min] 🚀
+
+[Similar micro-task breakdown]
+
+---
+
+#### Phase 5: Integration & Polish [25min] ✨
+
+[Integration tests, performance, accessibility]
+```
+
+---
+
+### Task Estimation Guidelines
+
+| Task Type | Time Range | Examples |
+|-----------|-----------|----------|
+| Write Test | 2-4 min | Component render test, hook test |
+| Minimal Implementation | 3-6 min | Pass the test with minimal code |
+| Enhancement | 3-5 min | Add structure, styling, a11y |
+| Additional Tests | 2-4 min | Interactions, edge cases |
+| Commit | 1 min | Git add + commit |
+| Create Types | 8-15 min | Interfaces, Zod schemas |
+| API Integration | 10-20 min | API client, error handling |
+
+**Total for one component**: ~15-25 min (5-6 micro-tasks)
+
+---
+
+### File Path Conventions
+
+Always use explicit full paths:
+
+**Good ✅**:
+```markdown
+**File**: `src/features/auth/components/LoginForm.tsx`
+**File**: `src/features/auth/hooks/useAuth.ts`
+**File**: `src/app/[locale]/auth/login/page.tsx`
+```
+
+**Bad ❌**:
+```markdown
+**File**: LoginForm component
+**File**: auth hooks
+**File**: login page
+```
+
+---
+
+### Example: Complete Component Micro-Tasks
+
+```markdown
+#### Phase 2: Build LoginForm Component [20min] 🎨
+
+##### Task 2.1: Write Test - LoginForm Rendering (3 min)
+
+**File**: `src/features/auth/components/__tests__/LoginForm.test.tsx`
+
+**Acceptance Criteria**:
+- [ ] Test file created with RTL imports
+- [ ] Test renders email and password inputs
+- [ ] Test renders submit button
+
+**Test**:
+```typescript
+import { render, screen } from '@testing-library/react';
+import { LoginForm } from '../LoginForm';
+
+describe('LoginForm', () => {
+  const mockOnSubmit = vi.fn();
+
+  it('should render email and password inputs', () => {
+    render(<LoginForm onSubmit={mockOnSubmit} />);
+    
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+  });
+});
+```
+
+**Expected**: ❌ LoginForm not found
+
+---
+
+##### Task 2.2: Minimal LoginForm Implementation (5 min)
+
+**File**: `src/features/auth/components/LoginForm.tsx`
+
+**Acceptance Criteria**:
+- [ ] Component created with props interface
+- [ ] Email input rendered
+- [ ] Password input rendered  
+- [ ] Submit button rendered
+- [ ] Form has onSubmit handler
+
+**Implementation**:
+```typescript
+interface LoginFormProps {
+  onSubmit: (email: string, password: string) => void;
+}
+
+export function LoginForm({ onSubmit }: LoginFormProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Minimal implementation
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="email">Email</label>
+      <input id="email" type="email" />
+      
+      <label htmlFor="password">Password</label>
+      <input id="password" type="password" />
+      
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+```
+
+**Expected**: ✅ Task 2.1 test passes
+
+---
+
+##### Task 2.3: Enhance LoginForm (5 min)
+
+**File**: `src/features/auth/components/LoginForm.tsx`
+
+**Acceptance Criteria**:
+- [ ] Use React Hook Form
+- [ ] Add Zod validation
+- [ ] Add proper styling classes
+- [ ] Add accessibility attributes
+- [ ] Add loading state support
+
+**Enhanced Implementation**:
+```typescript
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '../schemas/loginSchema';
+
+interface LoginFormProps {
+  onSubmit: (email: string, password: string) => void;
+  isLoading?: boolean;
+}
+
+export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(loginSchema)
+  });
+
+  return (
+    <form 
+      onSubmit={handleSubmit((data) => onSubmit(data.email, data.password))}
+      className="space-y-4"
+    >
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium">
+          Email
+        </label>
+        <input
+          {...register('email')}
+          id="email"
+          type="email"
+          className="mt-1 block w-full rounded border px-3 py-2"
+          aria-invalid={errors.email ? 'true' : 'false'}
+        />
+        {errors.email && (
+          <p className="text-sm text-red-600">{errors.email.message}</p>
+        )}
+      </div>
+      
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium">
+          Password
+        </label>
+        <input
+          {...register('password')}
+          id="password"
+          type="password"
+          className="mt-1 block w-full rounded border px-3 py-2"
+          aria-invalid={errors.password ? 'true' : 'false'}
+        />
+        {errors.password && (
+          <p className="text-sm text-red-600">{errors.password.message}</p>
+        )}
+      </div>
+      
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full bg-blue-600 text-white rounded py-2 disabled:opacity-50"
+      >
+        {isLoading ? 'Logging in...' : 'Login'}
+      </button>
+    </form>
+  );
+}
+```
+
+**Expected**: ✅ All Task 2.1 tests still pass
+
+---
+
+##### Task 2.4: Additional LoginForm Tests (4 min)
+
+**File**: `src/features/auth/components/__tests__/LoginForm.test.tsx`
+
+**Acceptance Criteria**:
+- [ ] Test form submission with valid data
+- [ ] Test validation errors
+- [ ] Test loading state
+
+**Additional Tests**:
+```typescript
+it('should call onSubmit with email and password', async () => {
+  const mockOnSubmit = vi.fn();
+  const user = userEvent.setup();
+  
+  render(<LoginForm onSubmit={mockOnSubmit} />);
+  
+  await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+  await user.type(screen.getByLabelText(/password/i), 'password123');
+  await user.click(screen.getByRole('button', { name: /login/i }));
+  
+  expect(mockOnSubmit).toHaveBeenCalledWith('test@example.com', 'password123');
+});
+
+it('should disabled button when loading', () => {
+  render(<LoginForm onSubmit={vi.fn()} isLoading={true} />);
+  
+  expect(screen.getByRole('button')).toBeDisabled();
+  expect(screen.getByText(/logging in/i)).toBeInTheDocument();
+});
+```
+
+**Expected**: ✅ All tests pass
+
+---
+
+##### Task 2.5: Commit LoginForm (1 min)
+
+**Command**:
+```bash
+git add src/features/auth/components/LoginForm.* src/features/auth/schemas/
+git commit -m "feat(auth): add LoginForm component with validation"
+```
+
+**Acceptance Criteria**:
+- [ ] LoginForm.tsx committed
+- [ ] LoginForm.test.tsx committed  
+- [ ] Related schema committed
+- [ ] All tests passing
+
+**Expected**: Clean git status
+```
 
 ---
 
