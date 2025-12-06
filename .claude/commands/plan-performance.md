@@ -332,6 +332,77 @@ Start with Phase 1 to establish baseline metrics before making changes.
 
 ---
 
+---
+
+## Execution with Subagents
+
+Performance optimization plans work well with `/execute-plan` and **subagent methodology**.
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+### Performance Optimization with Subagents
+
+```
+Phase 1: Profiling & Measurement
+  → Subagent runs profilers
+  → Identifies bottlenecks
+  → Establishes baselines
+  → Returns: Performance report
+  ↓
+Review: Bottlenecks identified correctly?
+  ↓
+Phase 2: Targeted Optimizations
+  → Fresh subagent optimizes bottleneck 1
+  → Measures improvement
+  → Keeps tests passing
+  → Returns: Optimized code + metrics
+  ↓
+Review: Performance improved? Tests pass?
+  ↓
+Phase 3: More Optimizations
+  → Fresh subagent tackles bottleneck 2
+  → Measures improvement
+  → Returns: Results
+  ↓
+Phase 4: Verification
+  → Subagent runs full benchmark suite
+  → Verifies no regressions
+  → Documents improvements
+  ↓
+Complete! ✅ Measurably faster
+```
+
+### Why Subagents for Performance?
+
+- ✅ **Focused optimization**: One bottleneck at a time
+- ✅ **Measured results**: Each phase includes benchmarks
+- ✅ **Safety**: Tests verify correctness maintained
+- ✅ **Isolated changes**: Easy to revert if optimization backfires
+- ✅ **Data-driven**: Reviews check actual perf improvements
+
+### Critical for Performance Work
+
+When using `/execute-plan` for performance:
+
+1. **Measure BEFORE and AFTER** each phase
+2. **Tests MUST pass** (correctness > speed)
+3. **Document metrics** (load time, memory, etc.)
+4. **One optimization per phase** (easier to debug)
+5. **Profile before optimizing** (no guessing)
+
+### Example
+
+```bash
+# Generate performance plan
+/plan-performance --save=plans/optimize-dashboard.md "speed up dashboard load time"
+
+# Execute with measurements
+/execute-plan plans/optimize-dashboard.md
+# Each phase: profile → optimize → measure → review
+```
+
+---
+
 ## Related Commands
 
 ```bash

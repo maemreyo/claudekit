@@ -314,6 +314,72 @@ Start with Task #1 to ensure test coverage before making changes.
 
 ---
 
+---
+
+## Execution with Subagents
+
+Refactoring plans work excellently with `/execute-plan` and **subagent methodology**.
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+### Refactoring with Subagents
+
+```
+Phase 1: Prepare & Test Coverage
+  → Subagent adds missing tests
+  → Ensures existing behavior captured
+  → Returns: Test suite complete
+  ↓
+Review: Test coverage sufficient?
+  ↓
+Phase 2: Extract & Refactor
+  → Fresh subagent refactors code
+  → Keeps all tests passing
+  → Improves structure
+  → Returns: Refactored code
+  ↓
+Review: Code quality improved?
+  ↓
+Phase 3: Cleanup & Optimize
+  → Fresh subagent cleans up
+  → Removes dead code
+  → Optimizes if needed
+  ↓
+Final Review: All tests still passing?
+  ↓
+Complete! ✅ Better code, same behavior
+```
+
+### Why Subagents for Refactoring?
+
+- ✅ **Safety**: Tests verify behavior preserved
+- ✅ **Focus**: Each phase handled by dedicated subagent
+- ✅ **Quality gates**: Reviews ensure no regressions
+- ✅ **Isolated changes**: Can revert individual phases if needed
+- ✅ **Better outcomes**: Multiple review cycles catch issues
+
+### Critical for Refactoring
+
+When using `/execute-plan` for refactors:
+
+1. **Tests MUST pass** after each phase
+2. **Behavior MUST NOT change** (unless that's the goal)
+3. **Reviews are mandatory** (never skip for refactors)
+4. **Commit after each phase** (easy rollback if needed)
+
+### Example
+
+```bash
+# Generate refactoring plan
+/plan-refactor --save=plans/refactor-auth-service.md "extract auth logic into separate service"
+
+# Execute with safety nets
+/execute-plan plans/refactor-auth-service.md
+# Each phase: test → refactor → test → review → commit
+```
+
+---
+
 ## Related Commands
 
 ```bash

@@ -258,6 +258,65 @@ After clarification, generate a plan that:
 
 ---
 
+---
+
+## Execution After Planning
+
+After interactive planning session, execute the refined plan with `/execute-plan`.
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+### Interactive → Subagent Execution Flow
+
+```
+1. Interactive Planning
+   ┌─────────────────────────┐
+   │ AI asks questions       │
+   │ You provide answers     │
+   │ AI clarifies ambiguity  │
+   │ Refined plan generated  │
+   └─────────────────────────┘
+   ↓
+2. Save Plan
+   /plan-interactive --save=plans/feature.md "description"
+   ↓
+3. Review Plan
+   Read plans/feature.md
+   Verify it matches your intent
+   ↓
+4. Execute with Subagents
+   /execute-plan plans/feature.md
+   ┌─────────────────────────┐
+   │ Fresh subagent per task │
+   │ Code review gates       │
+   │ Quality guaranteed      │
+   └─────────────────────────┘
+   ↓
+5. Complete! ✅
+```
+
+### Why Interactive + Subagents?
+
+- ✅ **Better understanding**: Q&A clarifies requirements
+- ✅ **Refined plan**: More accurate task breakdown
+- ✅ **Quality execution**: Subagents + reviews ensure correctness
+- ✅ **Less rework**: Fewer surprises, better outcomes
+
+### Example
+
+```bash
+# Step 1: Interactive planning
+/plan-interactive "add real-time notifications feature"
+# AI asks: "Which notification channels? Push, Email, SMS?"
+# You answer, AI refines plan
+
+# Step 2: Save and execute
+# (AI auto-saves or you use --save)
+/execute-plan plans/notifications.md
+```
+
+---
+
 ## Related Commands
 
 ```bash

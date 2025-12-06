@@ -248,6 +248,90 @@ git commit -m "feat(auth): add password reset token generation"
 
 ---
 
+---
+
+## Execution with Subagents
+
+This command generates plans optimized for `/execute-plan` with **subagent-driven execution**.
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+### Methodology
+
+**"Fresh subagent per task group + code review between groups = high quality, fast iteration"**
+
+When you execute plans from this command with `/execute-plan`:
+
+1. **Task Grouping**
+   - Related micro-tasks grouped together (3-5 tasks, 15-30 min)
+   - Example: Test + Implement + Enhance + Test + Commit for one component
+
+2. **Fresh Subagent per Group**
+   - Dispatch new subagent for each task group
+   - Subagent reads plan context
+   - Studies referenced files (from Context section)
+   - Implements following your strategy (not copying exact code)
+   - Returns completion summary
+
+3. **Code Review Between Groups**
+   - Separate reviewer subagent dispatched
+   - Reviews only current group's changes
+   - Finds: Critical, Important, or Minor issues
+   - Must fix Critical/Important before proceeding
+
+4. **Quality Gates**
+   - No skipping reviews
+   - No proceeding with critical issues
+   - Sequential execution (no parallel)
+   - Fresh context per group prevents pollution
+
+### Execution Flow
+
+```
+Your Plan (with context + strategy)
+  ↓
+Save to file: /plan-detailed --save=plans/feature.md "description"
+  ↓
+Execute: /execute-plan plans/feature.md
+  ↓
+┌─────── Task Group 1 (Component A)
+│ Subagent reads: Context, Strategy, References
+│ Subagent studies: Similar existing code
+│ Subagent implements: Adapts pattern (not copies)
+│ Subagent tests: Runs tests, commits
+│ Returns: Summary
+└─────── ✅
+  ↓
+┌─────── Review Group 1
+│ Reviewer checks: Tests, patterns, quality
+│ Returns: Issues (if any)
+└─────── ✅
+  ↓
+[Fix if needed]
+  ↓
+┌─────── Task Group 2 (Component B)
+│ Fresh subagent (clean context)
+│ ...same process...
+└─────── ✅
+  ↓
+Continue until all groups complete
+  ↓
+Final comprehensive review
+  ↓
+Done! 🎉
+```
+
+### Benefits
+
+- ✅ **Fresh context**: Each task group starts clean
+- ✅ **Focused implementation**: Subagent only thinks about current feature
+- ✅ **Quality gates**: Reviews catch issues early
+- ✅ **Easy retries**: Can re-run individual groups
+- ✅ **Better code**: AI must study and adapt, not copy
+- ✅ **Consistent style**: Forces following existing patterns
+
+---
+
 ## Related Commands
 
 ```bash

@@ -287,6 +287,61 @@ Start with Task #1 to reproduce the bug.
 
 ---
 
+---
+
+## Execution with Subagents
+
+Bug fix plans can be executed with `/execute-plan` using **subagent methodology**.
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+### Debugging + Subagent Workflow
+
+```
+Bug Investigation Phase
+  → Subagent analyzes code
+  → Identifies root cause
+  → Writes reproduction test
+  → Returns findings
+  ↓
+Review findings
+  ↓
+Fix Implementation Phase
+  → Fresh subagent implements fix
+  → Keeps reproduction test passing
+  → Adds regression tests
+  → Returns fixed code
+  ↓
+Review fix
+  ↓
+Verification Phase
+  → Subagent verifies:
+    - Original bug fixed
+    - No new bugs introduced
+    - All tests pass
+  ↓
+Complete! ✅
+```
+
+### Why Subagents for Bug Fixes?
+
+- ✅ **Focused investigation**: Dedicated subagent for root cause
+- ✅ **Clean fix**: Fresh subagent prevents investigation bias
+- ✅ **Independent verification**: Separate reviewer confirms fix
+- ✅ **Reproducible**: Test-first ensures bug stays fixed
+
+### Execution
+
+```bash
+# Generate bug fix plan
+/plan-bugfix --save=plans/fix-user-auth-bug.md "Users can't login with special characters"
+
+# Execute with subagents
+/execute-plan plans/fix-user-auth-bug.md
+```
+
+---
+
 ## Related Commands
 
 ```bash

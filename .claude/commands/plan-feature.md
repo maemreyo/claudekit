@@ -265,6 +265,58 @@ Run `/execute-plan` or begin with Task #1.
 
 ---
 
+---
+
+## Execution with Subagents
+
+Plans from this command can be executed with `/execute-plan` using **subagent-driven methodology**.
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+### How It Works
+
+1. **Save your plan**: Use `--save=path/to/plan.md` flag
+2. **Execute with subagents**: `/execute-plan path/to/plan.md`
+3. **Fresh subagent per phase**: Each major phase gets dedicated subagent
+4. **Code review gates**: Review after each phase before proceeding
+5. **Quality guaranteed**: Issues caught and fixed immediately
+
+### Execution Flow
+
+```
+Feature Plan (from this command)
+  ↓
+Phase 1: Data Layer
+  → Subagent implements
+  → Reviewer checks
+  → [Fix if needed]
+  ↓
+Phase 2: Business Logic  
+  → Fresh subagent (clean context)
+  → Reviewer checks
+  → [Fix if needed]
+  ↓
+Phase 3: API Layer
+  → Fresh subagent
+  → Reviewer checks
+  ↓
+Phase 4: Integration
+  → Fresh subagent
+  → Final comprehensive review
+  ↓
+Complete! ✅
+```
+
+### Benefits
+
+- ✅ Each phase gets focused attention
+- ✅ Review gates prevent issues from cascading
+- ✅ Failed phases can be retried independently
+- ✅ Fresh context prevents carry-over mistakes
+- ✅ Consistent quality across all phases
+
+---
+
 ## Related Commands
 
 ```bash

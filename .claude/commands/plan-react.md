@@ -159,29 +159,360 @@ Each micro-task MUST include:
 
 **File**: `explicit/path/to/file.tsx`
 
+**Context** (NEW):
+- Existing patterns: Reference `path/to/similar-component.tsx`
+- Tech stack: Uses [library] (already installed)
+- Related files: `path/to/related-file.tsx`
+
 **Acceptance Criteria**:
 - [ ] Specific checklist item 1
 - [ ] Specific checklist item 2
 - [ ] Specific checklist item 3
+- [ ] Follows existing code style in project
+- [ ] Uses established patterns from similar components
 
-**Test** (if applicable):
-```typescript
-// Exact test code
-it('should do something specific', () => {
-  // ...
-});
-```
+**Implementation Strategy** (NOT exact code):
+1. Step-by-step approach
+2. What to reference from existing code
+3. Key patterns to follow
+4. Libraries/components to use
 
-**Implementation** (if applicable):
+**Example Pattern** (reference only, adapt to your project):
 ```typescript
-// Exact or example implementation
-export function Component() {
-  // ...
+// Example showing the APPROACH, not exact code
+// Study existing components and adapt this pattern
+export function Component({ prop }: Props) {
+  // 1. Use existing hooks pattern
+  const { data } = useExistingPattern();
+  
+  // 2. Follow project's component structure
+  return (
+    <ExistingLayout>
+      {/* Adapt this to match project style */}
+    </ExistingLayout>
+  );
 }
 ```
 
-**Expected Result**: ✅ Tests pass / ❌ Tests fail
+**References to Study**:
+- Similar component: `path/to/similar.tsx` (study its pattern)
+- Existing hooks: `path/to/hooks.ts` (reuse if applicable)
+- Style conventions: Check other components in same directory
+
+**Expected Result**: ✅ Tests pass / Component renders correctly
+**Code should**: Match existing project style and patterns
 ```
+
+---
+
+### Key Differences from Old Format
+
+**OLD (Too prescriptive)** ❌:
+```markdown
+**Implementation**:
+```typescript
+// 100 lines of exact code that AI will copy
+export function LoginForm({ onSubmit }: Props) {
+  const { register, handleSubmit } = useForm({
+    resolver: zodResolver(loginSchema)
+  });
+  
+  return (
+    <form onSubmit={handleSubmit(...)}>
+      <label htmlFor="email">Email</label>
+      <input {...register('email')} />
+      {/* 50 more lines... */}
+    </form>
+  );
+}
+```
+```
+
+**Problem**: AI just copies, doesn't think
+
+---
+
+**NEW (Guidance-based)** ✅:
+```markdown
+**Implementation Strategy**:
+1. **Reference existing form**: Check `src/components/auth/RegisterForm.tsx` 
+   - Uses same react-hook-form + zod pattern
+   - Copy validation approach
+   - Match error display style
+
+2. **Reuse existing components**:
+   - Use `<Input>` from `@/components/ui/input` (already styled)
+   - Use `<Button>` from `@/components/ui/button`
+   - Use `<Label>` for accessibility
+
+3. **Form structure**:
+   - Email field with validation (min 3 chars, valid email)
+   - Password field (min 8 chars, show/hide toggle)
+   - Submit button with loading state
+
+4. **Follow project patterns**:
+   - Error messages: Check how RegisterForm displays errors
+   - Loading state: See how other forms handle `isLoading`
+   - Styling: Match Tailwind classes from existing forms
+
+**Example Pattern**:
+```typescript
+// EXAMPLE ONLY - Study RegisterForm.tsx and adapt
+export function LoginForm({ onSubmit, isLoading }: Props) {
+  // Use same validation pattern as RegisterForm
+  const { register, formState: { errors } } = useForm({
+    // ... your validation
+  });
+  
+  return (
+    <form>
+      {/* Follow RegisterForm's input structure */}
+      <div>
+        <Label>Email</Label>
+        <Input {...register('email')} />
+        {errors.email && <ErrorMessage />}
+      </div>
+      {/* ... */}
+    </form>
+  );
+}
+```
+
+**Must check before implementing**:
+- [ ] Read `RegisterForm.tsx` to understand pattern
+- [ ] Verify `Input` component API in Storybook/docs
+- [ ] Test with invalid data to see error states
+```
+
+**Result**: AI must:
+- Read existing code ✅
+- Understand patterns ✅
+- Adapt, not copy ✅
+- Think about edge cases ✅
+
+---
+
+### Example: Complete Task with New Format
+
+```markdown
+#### Phase 2: Build LoginForm Component [20min] 🎨
+
+##### Task 2.1: Write Test - LoginForm Rendering (3 min)
+
+**File**: `src/features/auth/components/__tests__/LoginForm.test.tsx`
+
+**Context**:
+- Existing test patterns: Check `RegisterForm.test.tsx` in same directory
+- Test utilities: `src/test/utils/render.tsx` (wraps with providers)
+- Mock functions: Use `vi.fn()` (Vitest, not Jest)
+
+**Acceptance Criteria**:
+- [ ] Test file created following existing test structure
+- [ ] Uses same test utilities as RegisterForm tests
+- [ ] Tests email and password input rendering
+- [ ] Tests submit button rendering
+
+**Implementation Strategy**:
+1. Copy test setup pattern from `RegisterForm.test.tsx`
+2. Use same `renderWithProviders` helper
+3. Test basic rendering (inputs, button exist)
+4. Follow existing test naming: `should render X when Y`
+
+**Expected**: ❌ LoginForm not found (test fails)
+
+---
+
+##### Task 2.2: Minimal LoginForm Implementation (5 min)
+
+**File**: `src/features/auth/components/LoginForm.tsx`
+
+**Context**:
+- Pattern reference: `RegisterForm.tsx` (same directory)
+- UI components: `@/components/ui` (Input, Button, Label)
+- Form library: react-hook-form (already used in project)
+- Validation: zod (check RegisterForm's schema)
+
+**Acceptance Criteria**:
+- [ ] Component renders email and password inputs
+- [ ] Submit button present
+- [ ] Uses same form components as RegisterForm
+- [ ] Props interface matches project conventions (see RegisterFormProps)
+
+**Implementation Strategy**:
+1. **Study RegisterForm.tsx first** - understand:
+   - How it structures the form
+   - Which UI components it uses
+   - How props are typed
+   - How errors are displayed
+
+2. **Create component following same pattern**:
+   - Same prop interface style (onSubmit, isLoading)
+   - Use same Input/Button components
+   - Match HTML structure (form > div > label + input)
+
+3. **Minimal implementation for now**:
+   - Just render inputs (no validation yet)
+   - Basic onSubmit handler
+   - Match RegisterForm's styling classes
+
+**Example Pattern** (study RegisterForm, don't copy this):
+```typescript
+// This is JUST a pattern reference
+// Read RegisterForm.tsx and adapt to match its style
+interface LoginFormProps {
+  onSubmit: (data: LoginData) => void;
+  isLoading?: boolean;
+}
+
+export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
+  // Check how RegisterForm handles form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // ... get form data and call onSubmit
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Copy the structure from RegisterForm */}
+      {/* Use same Input/Label components */}
+    </form>
+  );
+}
+```
+
+**Must verify**:
+- [ ] LoginForm looks similar to RegisterForm (consistent UX)
+- [ ] Uses same Tailwind classes for spacing
+- [ ] Imports from same locations
+
+**Expected**: ✅ Task 2.1 test passes
+
+---
+
+##### Task 2.3: Add Validation (7 min)
+
+**File**: `src/features/auth/components/LoginForm.tsx`
+
+**Context**:
+- Validation pattern: Check how RegisterForm uses zod + react-hook-form
+- Schema location: `src/features/auth/schemas/` (if exists)
+- Error display: See how RegisterForm shows validation errors
+
+**Implementation Strategy**:
+1. **Create validation schema**:
+   - Study `RegisterForm`'s validation setup
+   - Use zod (same as RegisterForm)
+   - Email: required, valid email format
+   - Password: required, min 8 characters
+
+2. **Integrate with react-hook-form**:
+   - Use `zodResolver` like RegisterForm does
+   - Get `formState: { errors }` from useForm
+   - Display errors same way as RegisterForm
+
+3. **Error display**:
+   - Match RegisterForm's error message styling
+   - Use same error text component/class
+   - Show errors below each input
+
+**Expected**: ✅ Tests pass, form validates correctly
+```
+
+---
+
+### Benefits of This Approach
+
+| Aspect | Old (Exact Code) | New (Guidance) | Winner |
+|--------|------------------|----------------|---------|
+| **AI thinks** | ❌ No (copy-paste) | ✅ Yes (must understand) | ✅ New |
+| **Adapts to project** | ❌ No | ✅ Yes (forced to read existing) | ✅ New |
+| **Code quality** | ⚠️ Generic | ✅ Matches project style | ✅ New |
+| **Learning** | ❌ No | ✅ AI learns patterns | ✅ New |
+| **Flexibility** | ❌ Rigid | ✅ Adapts to changes | ✅ New |
+| **Edge cases** | ⚠️ Only what's in code | ✅ AI considers more | ✅ New |
+
+---
+
+## When to Use Each Approach
+
+### Use EXACT CODE when:
+- ❌ Never! (Too prescriptive)
+
+### Use DETAILED GUIDANCE when:
+- ✅ Complex logic that's hard to describe
+- ✅ Critical algorithms (tax calculation)
+- ✅ Security-sensitive code
+- ✅ BUT: Still as "reference", not exact
+
+### Use LIGHT GUIDANCE when:
+- ✅ Simple CRUD components
+- ✅ UI components (if project has clear patterns)
+- ✅ Standard patterns already established
+
+### Example Spectrum
+
+**Light Guidance**:
+```markdown
+Task: Add delete button to UserCard
+
+**Strategy**:
+- Reference how EditButton is implemented in same component
+- Use trash icon from lucide-react
+- Follow same onClick pattern
+- Add confirmation dialog (see other delete actions)
+```
+
+**Medium Guidance** (RECOMMENDED):
+```markdown
+Task: Add form validation
+
+**Strategy**:
+1. Study RegisterForm.tsx validation pattern
+2. Use zod + react-hook-form (already in project)
+3. Follow same error display approach
+4. Schema: email (required, valid), password (min 8 chars)
+
+**Pattern reference** (adapt, don't copy):
+```typescript
+const schema = z.object({ email, password });
+const { register, formState } = useForm({ resolver });
+```
+```
+
+**Heavy Guidance** (for complex cases):
+```markdown
+Task: Implement Vietnamese tax calculation
+
+**Context**:
+- Tax law reference: 2024 Vietnamese tax brackets
+- Existing: Check if calculateTax() exists in utils/
+
+**Strategy**:
+1. Progressive tax brackets (7 levels in Vietnam)
+2. Deductions: 11M personal + 4.4M per dependent
+3. Calculate per bracket, accumulate
+
+**Reference implementation**:
+```typescript
+// Reference only - adapt to project
+function calculateTax(income: number, dependents: number) {
+  const deduction = 11_000_000 + (dependents * 4_400_000);
+  const taxable = income - deduction;
+  
+  // Apply brackets progressively
+  let tax = 0;
+  // ... bracket logic (implement properly)
+  
+  return tax;
+}
+```
+
+**Must verify**:
+- Deduction amounts are 2024 values
+- Bracket cutoffs are correct
+- Rounding matches Vietnamese standards
+```
+
 
 ### Phase 4: Task Sequencing
 
@@ -1119,6 +1450,282 @@ function useFeatureData(id: string) {
 
 # Execute with test-first approach
 /execute-plan plans/checkout.md
+```
+
+---
+
+---
+
+## Execution with Subagents
+
+Plans from this command are **optimized for `/execute-plan`** with **subagent-driven, component-focused execution**.
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+### React Component Execution Methodology
+
+**"Fresh subagent per component + review between components = consistent React patterns, high quality"**
+
+This command generates plans with:
+- **Context references** to existing React components
+- **Implementation strategies** (not exact code)
+- **Component-driven task groups** (test → implement → enhance per component)
+- **Pattern adaptation** requirements (AI must study, not copy)
+
+### How React Components Execute with Subagents
+
+```
+Your React Plan (from /plan-react)
+  ↓
+Save: /plan-react --output=plans/feature.md "description"
+  ↓
+Execute: /execute-plan plans/feature.md
+  ↓
+┌─────── Component Group 1: LoginForm
+│ Subagent dispatched (fresh context)
+│ 
+│ Task 1: Write Test - LoginForm
+│   - Reads Context: "Check RegisterForm.test.tsx"
+│   - Studies: RegisterForm.test.tsx pattern
+│   - Writes test: Following existing pattern
+│   - Runs test → ❌ Fails (expected)
+│   
+│ Task 2: Minimal Implementation
+│   - Reads Strategy: "Study RegisterForm.tsx"
+│   - Opens RegisterForm.tsx
+│   - Adapts pattern: Same structure, different props
+│   - Implements: Follows project's React patterns
+│   - Runs test → ✅ Passes
+│   
+│ Task 3: Enhance Component
+│   - Adds: React Hook Form integration
+│   - Adds: Zod validation
+│   - Adds: Accessibility attributes
+│   - Keeps tests passing
+│   
+│ Task 4: Additional Tests
+│   - Adds: Interaction tests
+│   - Adds: Validation tests
+│   - Adds: Edge cases
+│   
+│ Task 5: Commit
+│   - git commit -m "feat(auth): add LoginForm"
+│ 
+│ Returns: Component complete, 5 tests passing
+└─────── ✅
+
+  ↓
+
+┌─────── Review Component Group 1
+│ Reviewer subagent dispatched
+│ 
+│ Checks:
+│   ✅ Tests actually test right behavior
+│   ✅ Follows RegisterForm pattern (as required)
+│   ✅ Uses same UI components (shadcn/ui)
+│   ✅ Matches project's code style
+│   ✅ Accessibility present
+│   ✅ Props interface consistent
+│   ✅ No copy-paste (adapted, not copied)
+│ 
+│ Returns: ✅ Approved (or issues to fix)
+└─────── ✅
+
+  ↓
+
+┌─────── Component Group 2: Button
+│ Fresh subagent (clean context)
+│ Same process...
+└─────── ✅
+
+  ↓
+
+Continue for all components...
+  ↓
+Final comprehensive review
+  ↓
+Complete! 🎉
+```
+
+### Why Subagents for React Components?
+
+#### 1. **Pattern Consistency**
+```
+Subagent must:
+- Study referenced component (e.g., RegisterForm)
+- Understand its patterns
+- Adapt to new component
+- Match existing style
+
+Result: All components feel like same codebase
+```
+
+#### 2. **Context References Work**
+```
+Plan says: "Check RegisterForm.tsx"
+  ↓
+Subagent MUST read RegisterForm.tsx
+  ↓
+Subagent learns: Form structure, validation, error display
+  ↓
+Subagent applies to LoginForm
+  ↓
+Consistent patterns across forms ✅
+```
+
+#### 3. **Component-Level Quality Gates**
+```
+Each component:
+  → Implement
+  → Review (catches issues early)
+  → Fix if needed
+  → Proceed to next
+
+Bad component caught immediately, not after 10 components!
+```
+
+#### 4. **Fresh Context Per Component**
+```
+Component A: ✅ Done, context discarded
+  ↓
+Component B: Fresh subagent
+  - No carry-over from Component A
+  - No context pollution
+  - Focused only on Component B
+```
+
+### React-Specific Review Checks
+
+When reviewing React components, subagent checks:
+
+**React Patterns**:
+- ✅ Hooks used correctly (no rules violations)
+- ✅ Props properly typed with TypeScript
+- ✅ State management appropriate (local vs global)
+- ✅ Effects have proper dependencies
+
+**Component Structure**:
+- ✅ Follows project's component pattern
+- ✅ Uses existing UI components (don't reinvent)
+- ✅ Proper component composition
+- ✅ Consistent naming conventions
+
+**Testing**:
+- ✅ Tests use React Testing Library properly
+- ✅ Tests focus on user behavior, not implementation
+- ✅ Accessible queries used (getByRole, etc.)
+- ✅ User interactions tested with userEvent
+
+**Next.js Specifics** (if --nextjs):
+- ✅ Server vs Client component correctly chosen
+- ✅ Metadata exports for pages
+- ✅ Loading/Error states handled
+- ✅ App Router patterns followed
+
+### Execution Flow Example
+
+```bash
+# Generate React plan with context references
+/plan-react --output=plans/user-profile.md "add user profile feature"
+
+# Plan includes:
+# - Context: "Check UserSettings.tsx for pattern"
+# - Strategy: "Study existing form components"
+# - No exact code, just guidance
+
+# Execute with subagents
+/execute-plan plans/user-profile.md
+
+# Execution:
+# Group 1: ProfileForm component (5 micro-tasks)
+#   → Subagent studies UserSettings.tsx
+#   → Adapts pattern to ProfileForm
+#   → Review catches style inconsistencies
+#   → Fix applied
+#   → ✅ Approved
+#
+# Group 2: ProfileDisplay component
+#   → Fresh subagent (no ProfileForm context pollution)
+#   → Studies existing display components
+#   → Implements following pattern
+#   → ✅ Approved
+#
+# Group 3: Profile page integration
+#   → Fresh subagent
+#   → Composes ProfileForm + ProfileDisplay
+#   → ✅ Approved
+#
+# Final review: All components work together
+# Result: Consistent React codebase ✅
+```
+
+### Benefits for React Development
+
+1. **Consistent Component Patterns**
+   - Every component follows project style
+   - No "each component looks different" problem
+   - Enforced through review gates
+
+2. **Proper Pattern Adaptation**
+   - AI must study existing code
+   - Can't just copy-paste example
+   - Learns project's specific patterns
+
+3. **Quality Per Component**
+   - Each component reviewed independently
+   - Issues caught early
+   - No cascading problems
+
+4. **Fresh Context Benefits**
+   - No confusion between components
+   - Each component gets focused attention
+   - Clean slate per component group
+
+5. **React-Specific Reviews**
+   - Hooks rules enforced
+   - Accessibility checked
+   - Next.js patterns verified
+   - Testing best practices ensured
+
+### Execution Tips
+
+**Use Context Section Effectively**:
+```markdown
+# Good ✅
+**Context**: 
+- Pattern reference: `src/components/forms/RegisterForm.tsx`
+- Uses: react-hook-form + zod (check RegisterForm's setup)
+- Error display: See how RegisterForm shows validation errors
+
+# Bad ❌
+**Context**: 
+- Make a form component
+```
+
+**Let Subagent Think**:
+```markdown
+# Good ✅
+**Strategy**:
+1. Study RegisterForm's structure
+2. Copy validation approach
+3. Match error display style
+
+# Bad ❌ (too prescriptive)
+**Implementation**:
+```typescript
+[100 lines of exact code]
+```
+```
+
+**Group Related Tasks**:
+```markdown
+# Good ✅
+Group 1: LoginForm component (test → implement → enhance → test → commit)
+Group 2: LogoutButton component (test → implement → ...)
+
+# Bad ❌
+Task 1: Write all tests
+Task 2: Implement all components
 ```
 
 ---

@@ -28,6 +28,39 @@ This command uses the superpowers execution methodology for quality-gated implem
 
 **"Fresh subagent per task + review between tasks = high quality, fast iteration"**
 
+### Why Fresh Subagents?
+
+- **Prevents context pollution**: Each task starts with clean slate
+- **Focused attention**: Subagent only thinks about current task
+- **Failures don't cascade**: One task's issues won't affect others
+- **Easier to retry**: Can re-run individual tasks independently
+- **Parallel mental models**: Can work on tasks conceptually in parallel
+
+### Why Code Review Between Tasks?
+
+- **Catches issues early**: Review right after implementation
+- **Ensures code matches intent**: Verify against acceptance criteria
+- **Prevents technical debt**: Fix issues before moving on
+- **Creates natural checkpoints**: Safe points to pause/resume
+- **Learning opportunity**: AI learns from review feedback
+
+### Updated for TDD Micro-Tasks
+
+With new TDD micro-task format from `/plan-react`:
+- Subagent per **logical group** (e.g., one component = 5 micro-tasks)
+- Review after **complete feature** (not every 2-min micro-task)
+- Smarter task grouping based on file paths and dependencies
+
+## Methodology
+
+**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
+
+This command uses the superpowers execution methodology for quality-gated implementation.
+
+## Core Pattern
+
+**"Fresh subagent per task + review between tasks = high quality, fast iteration"**
+
 ### Why Fresh Agents?
 
 - Prevents context pollution between tasks
@@ -76,7 +109,272 @@ For each task, identify type:
 
 ---
 
-### Step 3: Execute Task (TDD Cycle)
+### Step 3: Execute Task Group (Using Fresh Subagent)
+
+**Task Grouping Strategy**:
+- Group related micro-tasks (e.g., Test + Implement + Enhance for one component)
+- Typical group: 3-5 micro-tasks, 15-30 minutes total
+- Group by: Same component, same file, or logical feature unit
+
+**For Each Task Group**:
+
+```markdown
+1. **Identify task group** (e.g., Tasks 2.1-2.5: Build LoginForm)
+   
+2. **Dispatch fresh implementation subagent** with:
+   - All tasks in group (2.1, 2.2, 2.3, 2.4, 2.5)
+   - Plan context for this group
+   - References to similar components
+   - Acceptance criteria
+   
+3. **Subagent executes TDD cycle for group**:
+   
+   For "Write Test" task:
+   - Read plan's **Context** section (existing patterns to reference)
+   - Study referenced files (e.g., RegisterForm.test.tsx)
+   - Write test following existing pattern
+   - Run test → expect ❌ fail
+   - Report: Test created and failing as expected
+   
+   For "Implementation" task:
+   - Read plan's **Implementation Strategy**
+   - Study referenced components (e.g., RegisterForm.tsx)
+   - Adapt pattern to current component
+   - Write code (guided by plan, not copied)
+   - Run test → expect ✅ pass
+   - Report: Implementation complete, tests passing
+   
+   For "Enhancement" task:
+   - Read current implementation
+   - Apply enhancements from plan
+   - Keep tests passing
+   - Report: Enhanced, tests still passing
+   
+   For "Additional Tests" task:
+   - Add edge case tests
+   - Add interaction tests
+   - Report: Additional coverage added
+   
+   For "Commit" task:
+   - Stage files
+   - Commit with message from plan
+   - Report: Changes committed
+   
+4. **Subagent returns completion summary**:
+   ```
+   Task Group 2.1-2.5: LoginForm Component - COMPLETE
+   
+   Files created:
+   - src/features/auth/components/LoginForm.tsx
+   - src/features/auth/components/__tests__/LoginForm.test.tsx
+   
+   Tests: 5 passing
+   Commits: 1 ("feat(auth): add LoginForm component")
+   
+   Notes: 
+   - Followed RegisterForm pattern as specified
+   - Used same validation approach
+   - Matched existing error display style
+   ```
+```
+
+**Key Difference from Old Approach**:
+- **Old**: One subagent per task (inefficient for 2-min tasks)
+- **New**: One subagent per task **group** (efficient, maintains context within feature)
+
+---
+
+### Step 4: Code Review (After Task Group)
+
+**After each task group completes**:
+
+```markdown
+1. **Dispatch code-reviewer subagent**
+   
+2. **Review scope**: Only changes from current task group
+   - Files: LoginForm.tsx and LoginForm.test.tsx
+   - Commits: Last commit only
+   
+3. **Reviewer checks**:
+   - ✅ Tests actually test the right behavior
+   - ✅ Implementation follows plan's strategy (not copy-paste)
+   - ✅ Code matches existing patterns (referenced files)
+   - ✅ Acceptance criteria all met
+   - ✅ TypeScript types correct
+   - ✅ Accessibility present (if UI component)
+   - ✅ No obvious bugs or edge cases missed
+   - ✅ Consistent style with project
+   
+4. **Reviewer returns findings**:
+   - 🔴 **Critical**: Must fix before proceeding
+     Example: "LoginForm doesn't validate email format"
+   
+   - 🟡 **Important**: Should fix before proceeding
+     Example: "Missing accessibility labels on inputs"
+   
+   - 🟢 **Minor**: Can fix later (note for cleanup)
+     Example: "Variable could be renamed for clarity"
+```
+
+---
+
+### Step 5: Handle Review Findings
+
+```markdown
+IF Critical or Important issues found:
+  
+  1. **List all issues** to user
+     ```
+     Review found 2 issues in LoginForm:
+     - Critical: Email validation missing
+     - Important: Missing ARIA labels
+     ```
+  
+  2. **Dispatch fix subagent** for each issue
+     - Subagent reads review feedback
+     - Applies fixes
+     - Re-runs tests
+     - Returns: Fixed
+  
+  3. **Re-request code review**
+     - Same reviewer checks fixes
+     - Verifies issues resolved
+  
+  4. **Repeat until clean**
+     - Max 2 fix cycles
+     - If still issues: Pause, ask user
+  
+  5. **Update task group status**: ✅ Complete (after fixes)
+
+IF only Minor issues:
+  
+  1. **Note for later cleanup**
+     - Add to deferred items list
+     - Don't block progress
+  
+  2. **Update task group status**: ✅ Complete
+  
+  3. **Proceed to next group**
+
+IF no issues (review passed):
+  
+  1. **Update task group status**: ✅ Complete
+  2. **Proceed to next group**
+```
+
+---
+
+### Step 6: Progress Tracking & Reporting
+
+Track at two levels:
+
+**Micro-task level** (for detail):
+```markdown
+### Phase 2: Presentational Components [IN PROGRESS]
+
+Task Group 2.1-2.5: LoginForm ✅ COMPLETE (18min)
+├─ Task 2.1: Write Test ✅ (3min)
+├─ Task 2.2: Implement ✅ (5min)
+├─ Task 2.3: Enhance ✅ (5min)
+├─ Task 2.4: Add Tests ✅ (3min)
+└─ Task 2.5: Commit ✅ (1min)
+Review: ✅ Passed (1 minor deferred)
+
+Task Group 2.6-2.10: Button Component ▶️ IN PROGRESS
+├─ Task 2.6: Write Test ✅ (2min)
+├─ Task 2.7: Implement ▶️ CURRENT
+└─ Tasks 2.8-2.10: Pending
+```
+
+**Phase level** (for overview):
+```markdown
+## Execution Progress
+
+✅ Phase 1: Foundation (4 task groups, 45min) - COMPLETE
+🔄 Phase 2: Components (8 task groups, 2h est) - 25% (2/8 groups)
+⏳ Phase 3: Integration (3 task groups, 40min est) - PENDING
+⏳ Phase 4: Polish (2 task groups, 30min est) - PENDING
+
+Overall: 6/17 task groups (35%) | 1h 23min elapsed / 4h est
+Tests: 24 passing, 0 failing
+Commits: 6
+```
+
+---
+
+### Step 7: Final Review & Completion
+
+After all task groups complete:
+
+```markdown
+1. **Dispatch comprehensive review subagent**
+   - Reviews entire implementation
+   - Checks all files together
+   - Verifies integration
+   - Tests cross-component interactions
+
+2. **Verify all success criteria from plan**
+   - Functional requirements ✅
+   - Quality requirements ✅  
+   - Performance requirements ✅
+
+3. **Run full test suite**
+   ```bash
+   npm test -- --coverage
+   ```
+   - All tests passing ✅
+   - Coverage meets target ✅
+
+4. **Generate completion summary**
+
+5. **Suggest next steps**:
+   - Run linter: `npm run lint`
+   - Manual testing checklist
+   - Use `/ship` to create PR
+   - Deploy to staging environment
+```
+
+---
+
+## Critical Rules
+
+### Never Skip Code Reviews
+
+Every task **group** must be reviewed before proceeding. No exceptions.
+
+**Why**: One bad component can break entire feature
+
+### Never Proceed with Critical Issues
+
+Critical issues MUST be fixed:
+```
+implement → review → [if critical] → fix → re-review → proceed
+```
+
+**Loop max 2 times**, then pause for user
+
+### Tasks Run Sequentially (Groups Can Be Conceptual)
+
+```
+WRONG: Run TaskGroup 1, 2, 3 simultaneously
+RIGHT: TaskGroup 1 → Review → TaskGroup 2 → Review → TaskGroup 3 → Review
+```
+
+**Exception**: Independent groups (different features) could run parallel mentally, but execute sequentially
+
+### Always Read Plan Before Implementing
+
+For each task group:
+```
+WRONG: Remember plan from context, start coding
+RIGHT: Read plan section, extract details, check references, then implement
+```
+
+**Subagent must**:
+- Read **Context** section (what to reference)
+- Read **Implementation Strategy** (how to approach)
+- Check referenced files (study existing patterns)
+- Then implement (adapt, not copy)
 
 #### For "Write Test" Tasks
 
