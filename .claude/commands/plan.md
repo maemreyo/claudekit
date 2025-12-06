@@ -6,27 +6,39 @@ Create structured implementation plans with task breakdown, dependencies, and ti
 
 ## Usage
 
-```
-/plan [task description or feature request]
+```bash
+/plan [task description]
 ```
 
 ## Arguments
 
 - `$ARGUMENTS`: Description of the task, feature, or work to plan
 
+## Related Commands
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `/plan-detailed` | TDD micro-tasks (2-5 min each) | Learning, complex tasks, need hand-holding |
+| `/plan-interactive` | AI asks clarifying questions first | Unclear requirements, exploration |
+| `/plan-feature` | Feature development template | New functionality |
+| `/plan-bugfix` | Bug fix template | Debugging and fixing issues |
+| `/plan-refactor` | Refactoring template | Code improvements |
+| `/plan-migration` | Data/system migration template | Database or system migrations |
+| `/plan-performance` | Performance optimization template | Speed improvements |
+
 ---
 
-Create a detailed implementation plan for: **$ARGUMENTS**
-
 ## Workflow
+
+Create a detailed implementation plan for: **$ARGUMENTS**
 
 ### Phase 1: Understanding
 
 1. **Parse Requirements**
    - Identify core functionality needed
-   - List explicit requirements
-   - Note implicit requirements
+   - List explicit and implicit requirements
    - Identify acceptance criteria
+   - Estimate complexity (Simple/Medium/Complex)
 
 2. **Clarify Ambiguities**
    - Ask questions if unclear
@@ -39,257 +51,174 @@ Create a detailed implementation plan for: **$ARGUMENTS**
    - Find related implementations
    - Identify patterns to follow
    - Locate integration points
-   - Note conventions
+   - Check for TODO/FIXME comments related to task
 
 2. **Technical Research** (if needed)
    - Research unfamiliar technologies
-   - Find best practices
-   - Identify potential pitfalls
+   - Check security considerations
+   - Review performance implications
 
 ### Phase 3: Task Breakdown
 
 1. **Decompose Work**
-   - Break into atomic tasks
-   - Each task: 15-60 minutes
-   - Clear completion criteria
+   - Break into atomic tasks (15-60 minutes each)
+   - Clear completion criteria for each task
+   - Add "Definition of Done" per task
 
 2. **Order by Dependencies**
    - What blocks what
-   - Parallel opportunities
-   - Critical path
+   - Identify parallel opportunities
+   - Critical path identification
 
 3. **Add Estimates**
-   - S: <30 min
-   - M: 30-60 min
-   - L: 1-2 hours
-   - XL: 2-4 hours
+   - XS: <15 min (trivial changes)
+   - S: 15-30 min (simple, basic tests)
+   - M: 30-60 min (feature with tests)
+   - L: 1-2 hours (complex logic)
+   - XL: 2-4 hours (major feature, needs research)
+   - Add confidence level (High/Medium/Low)
 
 ### Phase 4: Documentation
 
-1. **Create Plan Document**
-   - Summary
-   - Task list
-   - Files to modify
-   - Risks
+Generate the plan following the output format below.
 
-2. **Track with TodoWrite**
-   - Add all tasks
-   - Set initial status
+---
 
-## Output
-
-### Implementation Plan
+## Output Format
 
 ```markdown
-## Plan: [Feature/Task Name]
+## 🎯 Plan: [Feature/Task Name]
+
+**Estimate**: X-Y hours | **Risk**: [Low/Medium/High] | **Confidence**: [High/Medium/Low]
 
 ### Summary
-[2-3 sentence overview of what will be built]
+[2-3 sentence overview of what will be built and why it matters]
+
+**Impact**: [What problem this solves or value it adds]
 
 ### Scope
 
-**In Scope**
+**In Scope** ✅
 - [What will be done]
 
-**Out of Scope**
+**Out of Scope** ❌
 - [What won't be done]
 
-**Assumptions**
+**Assumptions** 💭
 - [Key assumptions made]
 
 ---
 
 ### Tasks
 
-#### Phase 1: Setup [Total: Xh]
-| # | Task | Size | Depends On |
-|---|------|------|------------|
-| 1 | Create data model | M | - |
-| 2 | Set up database migration | S | 1 |
-| 3 | Add model tests | M | 1 |
+#### Phase 1: Foundation [Total: Xh] 🏗️
+| # | Task | Size | Est | Confidence | Depends On | Parallel? |
+|---|------|------|-----|------------|------------|-----------|
+| 1 | [Task description] | M | 45m | High | - | ✅ |
+| 2 | [Task description] | S | 20m | High | 1 | ❌ |
 
-#### Phase 2: Core Implementation [Total: Xh]
-| # | Task | Size | Depends On |
-|---|------|------|------------|
-| 4 | Implement service layer | L | 1 |
-| 5 | Add business logic | M | 4 |
-| 6 | Write service tests | M | 5 |
+**Definition of Done**:
+- [ ] [Criteria 1]
+- [ ] [Criteria 2]
 
-#### Phase 3: API Layer [Total: Xh]
-| # | Task | Size | Depends On |
-|---|------|------|------------|
-| 7 | Create API endpoints | M | 5 |
-| 8 | Add validation | S | 7 |
-| 9 | Write API tests | M | 8 |
+#### Phase 2: Core Implementation [Total: Xh] ⚙️
+| # | Task | Size | Est | Confidence | Depends On | Parallel? |
+|---|------|------|-----|------------|------------|-----------|
+| 3 | [Task description] | L | 1.5h | Medium | 2 | ❌ |
 
-#### Phase 4: Integration [Total: Xh]
-| # | Task | Size | Depends On |
-|---|------|------|------------|
-| 10 | Integrate with frontend | M | 7 |
-| 11 | End-to-end testing | M | 10 |
-| 12 | Update documentation | S | 11 |
+**Definition of Done**:
+- [ ] [Criteria]
+
+#### Phase 3: Integration & Polish [Total: Xh] ✨
+| # | Task | Size | Est | Confidence | Depends On | Parallel? |
+|---|------|------|-----|------------|------------|-----------|
+| 4 | [Task description] | M | 45m | Medium | 3 | ❌ |
+
+**Definition of Done**:
+- [ ] [Criteria]
 
 ---
 
-### Files to Create/Modify
+### 📁 Files to Create/Modify
 
-**Create**
-- `src/models/feature.py` - Data model
-- `src/services/feature.py` - Business logic
-- `src/api/feature.py` - API endpoints
-- `tests/test_feature.py` - Tests
+**Create** ✨
+- `path/to/new-file.ts` - Description
 
-**Modify**
-- `src/api/__init__.py` - Register routes
-- `docs/api.md` - API documentation
+**Modify** 📝
+- `path/to/existing-file.ts` - Description
 
 ---
 
-### Dependencies
+### ⚠️ Risks & Mitigations
 
-**External**
-- [Package X] - For [purpose]
+| Risk | Impact | Probability | Mitigation |
+|------|--------|-------------|------------|
+| [Risk description] | High | Low | [Mitigation strategy] |
 
-**Internal**
-- Requires [existing feature] to be complete
-
----
-
-### Risks
-
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| [Risk 1] | High | [How to mitigate] |
-| [Risk 2] | Medium | [How to mitigate] |
+**Rollback Plan**:
+1. [Step to rollback if needed]
 
 ---
 
-### Questions for Stakeholders
-1. [Question about requirement]
-2. [Question about edge case]
+### 🧪 Testing Strategy
+
+**Unit Tests** (Target: 80%+ coverage)
+- [What to test]
+
+**Integration Tests**
+- [What to test]
+
+**Manual Testing Checklist**
+- [ ] Happy path works
+- [ ] Error handling works
 
 ---
 
-### Success Criteria
+### ✅ Success Criteria
+
 - [ ] All tasks completed
-- [ ] Tests passing with 80%+ coverage
-- [ ] API documentation updated
-- [ ] Code reviewed and approved
+- [ ] Tests passing with ≥80% coverage
+- [ ] No critical bugs
+
+---
+
+### 🚀 Ready to Execute?
+
+Run `/execute-plan` to start with AI assistance, or `/start-task #1` to begin manually.
 ```
 
-## Plan Templates
+---
 
-### Feature Plan
-For new functionality
+## Estimation Guide
 
-### Bug Fix Plan
-For debugging and fixing issues
+| Size | Time | Characteristics |
+|------|------|-----------------|
+| **XS** | <15min | Config change, trivial fix |
+| **S** | 15-30min | Simple function, basic test |
+| **M** | 30-60min | Feature with tests |
+| **L** | 1-2h | Complex logic, extensive testing |
+| **XL** | 2-4h | Major feature, needs research |
 
-### Refactor Plan
-For code improvements
+**Red Flags** 🚩:
+- Task >4h → Break down further
+- Multiple "and" in description → Multiple tasks
+- "Maybe" or "possibly" → Unknown, add buffer
 
-### Migration Plan
-For data or system migrations
+---
 
-## Detailed Mode (Superpowers Methodology)
+## Pro Tips
 
-Use `--detailed` flag for superpowers-style plans with 2-5 minute tasks:
+1. **Include testing time**: Tests often take 40-50% of development time
+2. **Add buffer for unknowns**: +20-30% for unfamiliar tech
+3. **Commit after each task**: Don't batch changes
+4. **Update plan as you learn**: Plans are living documents
 
-```
-/plan --detailed [task description]
-```
+---
 
-### Detailed Mode Features
-
-**Reference**: `.claude/skills/methodology/writing-plans/SKILL.md`
-
-When `--detailed` is specified:
-- **Bite-sized tasks**: 2-5 minutes each (vs standard 15-60 min)
-- **Exact file paths**: Always include full paths
-- **Complete code samples**: Actual code, not descriptions
-- **TDD steps per task**: Write test → verify fail → implement → verify pass → commit
-- **Expected command outputs**: Specify what success looks like
-
-### Detailed Task Template
-
-```markdown
-## Task [N]: [Task Name]
-
-**Files**:
-- Create: `path/to/new-file.ts`
-- Modify: `path/to/existing-file.ts`
-- Test: `path/to/test-file.test.ts`
-
-**Steps**:
-
-1. Write failing test
-   ```typescript
-   // Exact test code
-   ```
-
-2. Verify test fails
-   ```bash
-   npm test -- --grep "test name"
-   # Expected: 1 failing
-   ```
-
-3. Implement minimally
-   ```typescript
-   // Exact implementation code
-   ```
-
-4. Verify test passes
-   ```bash
-   npm test -- --grep "test name"
-   # Expected: 1 passing
-   ```
-
-5. Commit
-   ```bash
-   git commit -m "feat: add [feature]"
-   ```
-```
-
-### Execution After Planning
-
-Use `/execute-plan [plan-file]` for subagent-driven execution with code review gates.
-
-**Reference**: `.claude/skills/methodology/executing-plans/SKILL.md`
-
-## Flags
-
-| Flag | Description | Example |
-|------|-------------|---------|
-| `--mode=[mode]` | Use specific behavioral mode | `--mode=brainstorm` |
-| `--detailed` | Use superpowers methodology (2-5 min tasks) | `--detailed` |
-| `--depth=[1-5]` | Planning thoroughness level | `--depth=4` |
-| `--format=[fmt]` | Output format (concise/detailed/json) | `--format=detailed` |
-| `--save=[path]` | Save plan to file | `--save=plans/auth.md` |
-| `--checkpoint` | Create checkpoint after planning | `--checkpoint` |
-
-### Flag Usage Examples
+## Related Commands
 
 ```bash
-/plan --detailed "implement user authentication"
-/plan --mode=brainstorm "redesign checkout flow"
-/plan --depth=5 --save=plans/migration.md "database migration"
-/plan --format=json "api endpoint structure"
+/execute-plan        # Execute plan with AI assistance
+/plan-status         # Check current progress
+/start-task #N       # Start specific task
 ```
-
-### Mode Recommendations
-
-| Mode | Best For |
-|------|----------|
-| `default` | Standard planning |
-| `brainstorm` | Exploratory planning, multiple approaches |
-| `deep-research` | Complex features needing investigation |
-| `implementation` | Quick plans for clear tasks |
-
-<!-- CUSTOMIZATION POINT -->
-## Variations
-
-Modify behavior via CLAUDE.md:
-- Task size definitions (standard: 15-60 min, detailed: 2-5 min)
-- Required plan sections
-- Estimation approach
-- Risk assessment criteria
