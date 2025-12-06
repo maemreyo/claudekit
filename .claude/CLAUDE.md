@@ -31,6 +31,16 @@ This is a comprehensive Claude Kit for Claude Code, designed to accelerate devel
 | `/tdd [feature]` | Test-driven development workflow |
 | `/research [topic]` | Technology research |
 
+### Daily Utilities
+
+| Command | Description |
+|---------|-------------|
+| `/smart-fix [error]` | Traces root cause & prescribes fix (Detective Mode) |
+| `/mimic [instruction]` | Replicates patterns from reference feature (Clone Mode) |
+| `/optimize-flow [target]` | Profiles & optimizes performance (Architect Mode) |
+| `/document-this [target]` | Synthesizes business logic documentation (Historian Mode) |
+| `/test-master [target]` | Generates adversarial test coverage (QA Lead Mode) |
+
 ### New Commands
 
 | Command | Description |
@@ -340,9 +350,11 @@ Enable mandatory verification before completion claims:
 
 | Category | Skills |
 |----------|--------|
-| Planning | brainstorming, writing-plans, executing-plans, intelligent-planning, deep-research |
-| Testing | test-driven-development, verification-before-completion, testing-anti-patterns |
+| Planning | brainstorming, writing-plans, executing-plans, intelligent-planning, deep-research, **pattern-analysis** |
+| Testing | test-driven-development, verification-before-completion, testing-anti-patterns, **comprehensive-testing** |
 | Debugging | systematic-debugging, root-cause-tracing, defense-in-depth |
+| Optimization | **performance-optimization** |
+| Documentation | **documentation-synthesis** |
 | Collaboration | dispatching-parallel-agents, requesting-code-review, receiving-code-review, finishing-development-branch |
 
 Skills location: `.claude/skills/methodology/`
