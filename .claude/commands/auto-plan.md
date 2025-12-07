@@ -73,12 +73,18 @@ Execute for: **$ARGUMENTS**
 **Source**: Auto-detect
 {{ endif }}
 
-{{ if --output provided }}
-**Plan will be saved to**: `$OUTPUT_PATH`
-{{ endif }}
+**Auto-Generated Paths** (if not specified):
+- Folder: `docs/[feature-slug]/`
+- Plan: `docs/[feature-slug]/plan.md`
+- Analysis: `docs/[feature-slug]/analysis.md`
 
+**Action**: Verify `docs/[feature-slug]/` folder exists. If not, create it.
+
+{{ if --output provided }}
+**Override Plan Path**: `$OUTPUT_PATH`
+{{ endif }}
 {{ if --analysis provided }}
-**Analysis will be saved to**: `$ANALYSIS_PATH`
+**Override Analysis Path**: `$ANALYSIS_PATH`
 {{ endif }}
 
 ---

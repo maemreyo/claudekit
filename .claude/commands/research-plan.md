@@ -66,7 +66,15 @@ User: /research-plan "OAuth 2.0 with PKCE"
 └────────────┬────────────────────────┘
              │
              ▼
-    Save Plan & Display
+             │
+             ▼
+    ┌─────────────────────────┐
+    │ Save Artifacts          │
+    │ - Write Research Report │
+    │ - Write Design Doc      │
+    │ - Write Executable Plan │
+    │ to `docs/` folders      │
+    └─────────────────────────┘
 ```
 
 ---
@@ -77,7 +85,13 @@ User: /research-plan "OAuth 2.0 with PKCE"
 
 ```markdown
 Research Goals:
-1. **Official Documentation**:
+1. **Internal Context Audit (MUST DO FIRST)**:
+   - **Dependencies**: Read `package.json`. What relevant libraries are already installed? (e.g., don't research state libs if `Zustand` is present).
+   - **Patterns**: Search `src/` for similar features. How is it done currently?
+   - **Config**: Check `.env` for available constraints/secrets.
+   - **Goal**: consistent implementation, reuse existing tools.
+
+2. **Official Documentation**:
    - Search: "OAuth 2.0 PKCE official RFC"
    - Read: OAuth 2.0 specification
    - Key sections: PKCE flow, security
@@ -97,6 +111,20 @@ Research Goals:
    - Token storage best practices
    - Refresh token handling
 
+Execute for: **$ARGUMENTS**
+
+**Auto-Generated Paths** (if not specified):
+- Folder: `docs/[feature-slug]/`
+- Plan: `docs/[feature-slug]/plan.md`
+- Research: `docs/[feature-slug]/research.md`
+- Design: `docs/[feature-slug]/design.md`
+
+**Action**: Verify `docs/[feature-slug]/` folder exists. If not, create it.
+
+{{ if --output provided }}
+**Override Plan Path**: `$OUTPUT_PATH`
+{{ endif }}
+
 Output:
 - Research summary
 - Key findings
@@ -108,6 +136,11 @@ Output:
 **Example Output**:
 ```markdown
 Research Report: OAuth 2.0 with PKCE
+
+Internal Context:
+- ✅ Project uses `axios` (v1.6) -> Will use for HTTP requests.
+- ✅ Existing `AuthContext` found in `src/contexts` -> Will extend this.
+- ⚠️ `NextAuth` is NOT installed -> Will verify if we should add it or build custom.
 
 Key Findings:
 ✅ PKCE: Proof Key for Code Exchange (RFC 7636)
