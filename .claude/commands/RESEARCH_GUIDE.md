@@ -14,7 +14,7 @@ What do you want to do?
 │
 └─ Understand YOUR CODEBASE? (how a feature is implemented)
    │
-   └─ Explore how something works → `/explore-codebase [feature]`
+   └─ Explore how something works → `/how [feature]`
 ```
 
 ---
@@ -25,7 +25,7 @@ What do you want to do?
 |---------|---------|-------|--------|
 | **`/research`** | Research technologies | "React form libraries" | Tech comparison with recommendations |
 | **`/compare`** | Quick tech comparison | "Vitest vs Jest" | Side-by-side table |
-| **`/explore-codebase`** | Analyze your code | "authentication feature" | Code flow, architecture, dependencies |
+| **`/how`** | Analyze your code | "authentication feature" | Code flow, architecture, dependencies |
 
 ---
 
@@ -123,7 +123,7 @@ Use Jest: If migration cost is high
 
 ---
 
-## 🔍 `/explore-codebase` - Analyze Your Code
+## 🔍 `/how` - Analyze Your Code
 
 **Use when**: You want to understand how a feature is implemented in YOUR project
 
@@ -133,7 +133,7 @@ Use Jest: If migration cost is high
 
 ```bash
 # Explore a feature
-/explore-codebase "authentication"
+/how "authentication"
 /explore "user profile"
 
 # Find a component
@@ -207,7 +207,7 @@ const { login } = useAuth();
 
 **Step 1**: Explore existing code
 ```bash
-/explore-codebase "authentication"
+/how "authentication"
 → Shows how it's currently implemented
 → Files, flow, patterns used
 ```
@@ -241,7 +241,7 @@ const { login } = useAuth();
 
 ## 📊 Comparison Table
 
-| Aspect | `/research` | `/compare` | `/explore-codebase` |
+| Aspect | `/research` | `/compare` | `/how` |
 |--------|-------------|------------|---------------------|
 | **Purpose** | Learn NEW tech | Decide between options | Understand EXISTING code |
 | **Input** | Technology name | "A vs B" | Feature in your code |
@@ -391,7 +391,7 @@ const { login } = useAuth();
 
 **Understand my code**:
 ```bash
-/explore-codebase [feature]
+/how [feature]
 ```
 
 **Find a component**:
@@ -417,6 +417,6 @@ const { login } = useAuth();
 |---------|-------------------|
 | `/research` | "Tell me about this technology" |
 | `/compare` | "Which one should I use?" |
-| `/explore-codebase` | "How does this work in our app?" |
+| `/how` | "How does this work in our app?" |
 
 Use the right tool for the right job! 🎯

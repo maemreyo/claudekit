@@ -30,6 +30,7 @@ This is a comprehensive Claude Kit for Claude Code, designed to accelerate devel
 | `/execute-plan [file]` | Subagent-driven plan execution |
 | `/tdd [feature]` | Test-driven development workflow |
 | `/research [topic]` | Technology research |
+| `/how [topic]` | Multi-phase codebase exploration with organized docs |
 
 ### Daily Utilities
 
