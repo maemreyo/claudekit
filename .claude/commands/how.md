@@ -1716,6 +1716,102 @@ Next Steps:
 
 ---
 
+## What to Do After Exploration
+
+After `/how` completes and generates comprehensive documentation, you can:
+
+### 1. Apply Patterns to New Features
+
+Use `/apply` to clone the architecture to a new implementation:
+
+```bash
+# Apply authentication patterns to user profile
+/apply "authentication" --to="user-profile"
+
+# Apply specific validation pattern
+/apply "calculator" --to="converter" --pattern="validation"
+
+# Preview changes first
+/apply "payment" --to="subscription" --preview
+```
+
+**When to use**:
+- Building similar feature with same architecture
+- Replicating proven patterns across codebase
+- Ensuring consistency in implementation
+
+### 2. Extend Existing Features
+
+Use `/extend` to add new capabilities:
+
+```bash
+# Add 2FA to authentication
+/extend "authentication" --with="2FA support"
+
+# Add refund workflow to payments
+/extend "payment" --feature="refund workflow"
+
+# Preview plan first
+/extend "calculator" --with="currency conversion" --preview
+```
+
+### 3. Generate Comprehensive Tests
+
+Use `/test-from` to create tests from business logic:
+
+```bash
+# Generate tests for explored code
+/test-from "calculator" --coverage=90
+
+# Focus on specific areas
+/test-from "auth" --type="integration"
+
+# Preview test plan first
+/test-from "payment" --preview
+```
+
+### 4. Refactor Based on Insights
+
+Use `/refactor-from` to improve code quality:
+
+```bash
+# Extract business logic to utils
+/refactor-from "calculator" --goal="Extract to utils"
+
+# Improve error handling
+/refactor-from "auth" --improve="error-handling"
+
+# Preview refactoring plan
+/refactor-from "payment" --preview
+```
+
+---
+
+## Complete Workflow Example
+
+```bash
+# Step 1: Explore existing code
+/how "authentication"
+→ docs/authentication/phase-1-4.md created
+
+# Step 2: Apply to new feature
+/apply "authentication" --to="user-management"
+→ src/features/user-management/ created with same patterns
+
+# Step 3: Extend with new capability
+/extend "user-management" --with="role permissions"
+→ Adds role-based access control
+
+# Step 4: Generate comprehensive tests
+/test-from "user-management" --coverage=85
+→ Full test suite created
+
+# Step 5: Deploy
+/ship "New user management feature with auth patterns"
+```
+
+---
+
 ## Related Commands
 
 ```bash

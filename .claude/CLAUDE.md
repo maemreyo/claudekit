@@ -31,6 +31,10 @@ This is a comprehensive Claude Kit for Claude Code, designed to accelerate devel
 | `/tdd [feature]` | Test-driven development workflow |
 | `/research [topic]` | Technology research |
 | `/how [topic]` | Multi-phase codebase exploration with organized docs |
+| `/apply [source] --to=[target]` | Apply patterns from explored code to new implementation |
+| `/extend [feature] --with=[capability]` | Extend explored features with new capabilities |
+| `/test-from [feature]` | Generate comprehensive tests from exploration docs |
+| `/refactor-from [feature]` | Refactor code based on exploration insights |
 
 ### Daily Utilities
 
