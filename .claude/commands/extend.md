@@ -50,13 +50,15 @@ Works seamlessly with `/how` exploration output:
 ```bash
 # Step 1: Explore existing feature
 /how "authentication"
-→ docs/authentication/phase-*.md
+→ docs/authentication/phase-1-discovery-structure.md
+→ docs/authentication/phase-2-analysis.md
 
 # Step 2: Extend with new capability
 /extend "authentication" --with="2FA support"
 → Reads docs/authentication/
 → Plans extension respecting existing architecture
 → Implements 2FA while preserving auth patterns
+→ Updates docs/authentication/README.md with extension history
 ```
 
 ---
@@ -110,10 +112,8 @@ Extending: **$FEATURE** with **$CAPABILITY**
    ```
 
 3. **Read exploration documents**
-   - `phase-1-discovery.md` → File locations
-   - `phase-2-structure.md` → Architecture
-   - `phase-3-analysis.md` → Current capabilities, patterns
-   - `phase-4-synthesis.md` → Complete overview
+   - `phase-1-discovery-structure.md` → File locations, architecture, dependencies
+   - `phase-2-analysis.md` → Current capabilities, patterns, business logic
 
 4. **Extract current state**
 
@@ -133,13 +133,15 @@ INPUT:
 SUBTASK 1.1: Read Current Architecture (5 min)
 
 **Steps**:
-1. Read phase-2-structure.md
+1. Read phase-1-discovery-structure.md
 2. Extract:
+   - Current file inventory
    - Current folder structure
    - Component hierarchy
    - State management approach
    - API integration points
    - Testing structure
+   - Dependencies
 
 **Output**: Current architecture summary
 
@@ -148,12 +150,14 @@ SUBTASK 1.1: Read Current Architecture (5 min)
 SUBTASK 1.2: Identify Current Capabilities (5 min)
 
 **Steps**:
-1. Read phase-3-analysis.md
+1. Read phase-2-analysis.md
 2. List:
    - Current features implemented
    - Business logic present
    - API endpoints available
    - Data models defined
+   - Patterns used
+   - Key insights
 
 **Output**: Current capability inventory
 
@@ -658,22 +662,39 @@ Execution uses same workflow as /execute-plan:
 
 **Steps**:
 
-1. **Option A: Re-run /how** (recommended)
+1. **Update README.md** in docs folder
    ```bash
-   /how "$FEATURE"
-   # Regenerates complete docs with new capability
+   # Append to docs/$FEATURE/README.md
    ```
 
-2. **Option B: Manual update**
-   - Update `phase-1-discovery.md` with new files
-   - Update `phase-3-analysis.md` with new capabilities
-   - Update `phase-4-synthesis.md` with extension notes
+2. **Add extension history**:
+   ```markdown
+   ## Extensions
+   
+   This feature has been extended with the following capabilities:
+   
+   ### $CAPABILITY (added on [date])
+   - **Added by**: `/extend` command
+   - **Files created**: {{ count }} new files
+   - **Files modified**: {{ count }} files
+   - **Status**: ✅ Complete
+   
+   **What was added**:
+   - {{ list new components }}
+   - {{ list new hooks }}
+   - {{ list new API endpoints }}
+   
+   **Integration points**:
+   - {{ how it integrates with existing code }}
+   
+   **Backward compatibility**: ✅ Preserved
+   ```
 
-3. **Document extension**
-   - Create `docs/$FEATURE/extensions/` folder  
-   - Add `$capability.md` documenting what was added
+3. **Optional: Create extension log**
+   - Create `docs/$FEATURE/extensions/$capability.md`
+   - Document detailed changes
 
-**Output**: Updated documentation
+**Output**: Documentation updated with extension history
 
 {{ endif }}
 
@@ -686,6 +707,7 @@ Execution uses same workflow as /execute-plan:
 
 Feature: $FEATURE
 Capability Added: "$CAPABILITY"
+Documentation: ✅ Updated in docs/$FEATURE/README.md
 
 ---
 

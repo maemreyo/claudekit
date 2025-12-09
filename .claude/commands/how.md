@@ -42,7 +42,7 @@ Deep codebase exploration using a multi-phase SubAgent approach with per-phase d
 |------|-------------|---------|
 | `--source=path` | Specify source directory to search | `--source=old-app/auth` |
 | `--output=path` | Custom output folder | `--output=docs/auth-analysis` |
-| `--phases=N,N` | Run specific phases only (1-4) | `--phases=1,2` |
+| `--phases=N,N` | Run specific phases only (1-2) | `--phases=1,2` |
 | `--comprehensive` | Generate extra detailed reports | `--comprehensive` |
 | `--skip-review` | Skip review gates between phases | `--skip-review` |
 
@@ -55,24 +55,14 @@ Deep codebase exploration using a multi-phase SubAgent approach with per-phase d
 ### Multi-Phase SubAgent Workflow
 
 ```
-Phase 1: Discovery (Scout SubAgent)
+Phase 1: Discovery & Structure (Scout + Analyzer SubAgent)
     ↓ [Document NOW]
-    docs/<topic>/phase-1-discovery.md
+    docs/<topic>/phase-1-discovery-structure.md
     ↓ [Review Gate]
     
-Phase 2: Structure (Analyzer SubAgent)
+Phase 2: Code Analysis (Code-Reviewer SubAgent)
     ↓ [Document NOW]
-    docs/<topic>/phase-2-structure.md
-    ↓ [Review Gate]
-    
-Phase 3: Analysis (Code-Reviewer SubAgent)
-    ↓ [Document NOW]
-    docs/<topic>/phase-3-analysis.md
-    ↓ [Review Gate]
-    
-Phase 4: Synthesis (Docs-Manager SubAgent)
-    ↓ [Document NOW]
-    docs/<topic>/phase-4-synthesis.md
+    docs/<topic>/phase-2-analysis.md
     ✅ Complete
 ```
 
@@ -95,7 +85,7 @@ Exploring: **$ARGUMENTS**
 {{ if --phases provided }}
 **Phases to run**: $PHASES
 {{ else }}
-**Phases to run**: All (1, 2, 3, 4)
+**Phases to run**: All (1, 2)
 {{ endif }}
 
 ---
@@ -123,22 +113,22 @@ mkdir -p "$OUTPUT_DIR"
 
 ---
 
-### Phase 1: Discovery 🔍
+### Phase 1: Discovery & Structure 🔍🏗️
 
-**SubAgent**: Scout (`.claude/agents/scout.md`)
+**SubAgent**: Scout + Analyzer (`.claude/agents/scout.md`)
 
-**Goal**: Find and inventory all code related to the topic
+**Goal**: Find all code related to the topic AND map architecture, dependencies, and relationships
 
-**Duration**: 15-30 minutes
+**Duration**: 30-45 minutes
 
 ---
 
-**Dispatch Scout SubAgent**:
+**Dispatch Scout + Analyzer SubAgent**:
 
 ```markdown
-Scout SubAgent - Discovery Mission
+Scout + Analyzer SubAgent - Discovery & Structure Mission
 
-GOAL: Find all code related to "$ARGUMENTS"
+GOAL: Find all code related to "$ARGUMENTS" AND analyze its structure
 
 INPUT:
 - Search query: "$ARGUMENTS"
@@ -215,7 +205,93 @@ SUBTASK 1.3: Create File Inventory (5 min)
 
 ---
 
-SUBTASK 1.4: Identify Entry Points (5 min)
+SUBTASK 1.4: Map Component Hierarchy (10 min)
+
+**Steps**:
+1. Read main files identified in previous subtasks
+2. Trace component tree:
+   - Parent → Child relationships
+   - Component composition
+   - Layout structure
+
+3. Create hierarchy diagram:
+   ```
+   Page/Route
+   └── MainContainer
+       ├── HeaderComponent
+       ├── ContentArea
+       │   ├── ItemList
+       │   │   └── ItemCard
+       │   └── FilterPanel
+       └── FooterComponent
+   ```
+
+**Expected**: Complete component hierarchy tree
+
+---
+
+SUBTASK 1.5: Analyze Dependencies (10 min)
+
+**Steps**:
+1. External dependencies:
+   - Check imports from node_modules
+   - Note versions if visible
+   - Identify key libraries
+
+2. Internal dependencies:
+   - Cross-file imports
+   - Shared utilities
+   - Type dependencies
+
+3. Create dependency graph:
+   ```
+   FeatureMain
+     ├→ react, react-hook-form (external)
+     ├→ @/components/ui (internal)
+     ├→ ./types (internal)
+     └→ ./utils (internal)
+   ```
+
+**Expected**: Dependency map (external + internal)
+
+---
+
+SUBTASK 1.6: Identify Architecture Pattern (5-10 min)
+
+**Steps**:
+1. Determine architecture style:
+   - Container/Presentational?
+   - Feature-based?
+   - Layered architecture?
+   - MVC/MVVM?
+
+2. State management approach:
+   - useState/useReducer?
+   - Context API?
+   - Redux/Zustand/Jotai?
+   - React Query/SWR?
+
+3. Data flow pattern:
+   - Unidirectional?
+   - Props down, events up?
+   - Global state?
+
+**Expected**: Architecture pattern description
+
+---
+
+SUBTASK 1.7: Folder Structure Analysis (5 min)
+
+**Steps**:
+1. Map folder organization
+2. Identify conventions:
+   - Co-location?
+   - Feature folders?
+   - Type-based folders?
+
+3. Create structure diagram
+
+**Expected**: Folder structure with conventions noted
 
 **Steps**:
 1. Determine main entry files
@@ -230,7 +306,7 @@ SUBTASK 1.4: Identify Entry Points (5 min)
 OUTPUT: Return findings to main agent in structured format:
 
 ```markdown
-📋 PHASE 1: DISCOVERY REPORT
+📋 PHASE 1: DISCOVERY & STRUCTURE REPORT
 
 Topic: "$ARGUMENTS"
 {{ if --source provided }}Source: $SOURCE_PATH{{ else }}Source: Auto-detected{{ endif }}
@@ -272,244 +348,6 @@ Search Terms Used: [list]
 1. **Main Entry**: `path/to/index.tsx` - Feature initialization
 2. **Route**: `/feature-route` - User access point
 3. **Export**: `src/features/index.ts` - Public API
-
----
-
-## Search Results Summary
-
-- Files by name: X files
-- Files by content: Y files
-- Total unique files: Z files
-- Lines of code: ~N lines
-
----
-
-PHASE 1 COMPLETE ✅
-```
-```
-
-**Return**: Phase 1 report to main agent
-
----
-
-**Main Agent Action: Document Phase 1**
-
-**Immediately write documentation**: `$OUTPUT_DIR/phase-1-discovery.md`
-
-```markdown
-# Phase 1: Discovery - $ARGUMENTS
-
-**Date**: [Current date/time]
-**Search Query**: "$ARGUMENTS"
-{{ if --source provided }}**Source**: $SOURCE_PATH{{ else }}**Source**: Auto-detected{{ endif }}
-
----
-
-## Files Found
-
-### Main Implementation
-- [`main.tsx`](file:///path/to/main.tsx) (250 lines)
-  - Main component implementation
-  
-- [`feature.ts`](file:///path/to/feature.ts) (120 lines)
-  - Core business logic
-
-### Components
-- [`ComponentA.tsx`](file:///path/to/ComponentA.tsx) (80 lines)
-- [`ComponentB.tsx`](file:///path/to/ComponentB.tsx) (60 lines)
-
-### Utilities
-- [`utils.ts`](file:///path/to/utils.ts) (100 lines)
-- [`helpers.ts`](file:///path/to/helpers.ts) (50 lines)
-
-### Types & Interfaces
-- [`types.ts`](file:///path/to/types.ts) (40 lines)
-
-### Tests
-- [`feature.test.ts`](file:///path/to/feature.test.ts) (150 lines)
-  - Coverage: ~X%
-
-### API & Routes
-- [`api/route.ts`](file:///path/to/api/route.ts) (70 lines)
-
-### Configuration
-- [`config.ts`](file:///path/to/config.ts) (30 lines)
-
----
-
-## Entry Points
-
-1. **Main Entry**: [`index.tsx`](file:///path/to/index.tsx)
-   - Feature initialization and setup
-
-2. **User Route**: `/feature-route`
-   - User-facing access point
-
-3. **Public API**: Exported from `src/features/index.ts`
-
----
-
-## Statistics
-
-- **Total Files**: X files
-- **Total Lines**: ~N lines
-- **Test Coverage**: X%
-
----
-
-## Next Phase
-
-→ **Phase 2** will analyze the structure and relationships between these files.
-
-*[phase-2-structure.md](./phase-2-structure.md) (not yet created)*
-```
-
-**File created**: `$OUTPUT_DIR/phase-1-discovery.md` ✅
-
----
-
-{{ if not --skip-review }}
-**Review Gate 1**: Verify Discovery Completeness
-
-```markdown
-Review Phase 1 Results:
-✅ All relevant files found?
-✅ Entry points identified?
-✅ File categories complete?
-✅ No obvious gaps?
-
-{{ if incomplete }}
-  → Re-run Scout SubAgent with refined parameters
-{{ else }}
-  → Proceed to Phase 2 ✅
-{{ endif }}
-```
-{{ else }}
-**Review skipped** - Proceeding to Phase 2
-{{ endif }}
-
----
-
-### Phase 2: Structure Analysis 🏗️
-
-**SubAgent**: Analyzer (Custom SubAgent using analysis skills)
-
-**Goal**: Map architecture, dependencies, and relationships
-
-**Duration**: 20-30 minutes
-
----
-
-**Dispatch Analyzer SubAgent**:
-
-```markdown
-Analyzer SubAgent - Structure Analysis
-
-GOAL: Map the architecture and relationships for "$ARGUMENTS"
-
-INPUT:
-- Phase 1 report (file inventory)
-- Files to analyze: [list from Phase 1]
-
----
-
-SUBTASK 2.1: Map Component Hierarchy (10 min)
-
-**Steps**:
-1. Read main files identified in Phase 1
-2. Trace component tree:
-   - Parent → Child relationships
-   - Component composition
-   - Layout structure
-
-3. Create hierarchy diagram:
-   ```
-   Page/Route
-   └── MainContainer
-       ├── HeaderComponent
-       ├── ContentArea
-       │   ├── ItemList
-       │   │   └── ItemCard
-       │   └── FilterPanel
-       └── FooterComponent
-   ```
-
-**Expected**: Complete component hierarchy tree
-
----
-
-SUBTASK 2.2: Analyze Dependencies (10 min)
-
-**Steps**:
-1. External dependencies:
-   - Check imports from node_modules
-   - Note versions if visible
-   - Identify key libraries
-
-2. Internal dependencies:
-   - Cross-file imports
-   - Shared utilities
-   - Type dependencies
-
-3. Create dependency graph:
-   ```
-   FeatureMain
-     ├→ react, react-hook-form (external)
-     ├→ @/components/ui (internal)
-     ├→ ./types (internal)
-     └→ ./utils (internal)
-   ```
-
-**Expected**: Dependency map (external + internal)
-
----
-
-SUBTASK 2.3: Identify Architecture Pattern (5-10 min)
-
-**Steps**:
-1. Determine architecture style:
-   - Container/Presentational?
-   - Feature-based?
-   - Layered architecture?
-   - MVC/MVVM?
-
-2. State management approach:
-   - useState/useReducer?
-   - Context API?
-   - Redux/Zustand/Jotai?
-   - React Query/SWR?
-
-3. Data flow pattern:
-   - Unidirectional?
-   - Props down, events up?
-   - Global state?
-
-**Expected**: Architecture pattern description
-
----
-
-SUBTASK 2.4: Folder Structure Analysis (5 min)
-
-**Steps**:
-1. Map folder organization
-2. Identify conventions:
-   - Co-location?
-   - Feature folders?
-   - Type-based folders?
-
-3. Create structure diagram
-
-**Expected**: Folder structure with conventions noted
-
----
-
-OUTPUT: Return structure analysis to main agent:
-
-```markdown
-📋 PHASE 2: STRUCTURE ANALYSIS REPORT
-
-Topic: "$ARGUMENTS"
-Based on: phase-1-discovery.md
 
 ---
 
@@ -599,25 +437,83 @@ src/features/[feature]/
 
 **Convention**: Feature-based organization with type-based subfolders
 
----
-
-PHASE 2 COMPLETE ✅
-```
-```
-
-**Return**: Phase 2 report to main agent
+- Files by name: X files
+- Files by content: Y files
+- Total unique files: Z files
+- Lines of code: ~N lines
 
 ---
 
-**Main Agent Action: Document Phase 2**
+PHASE 1 COMPLETE ✅
+```
+```
 
-**Immediately write documentation**: `$OUTPUT_DIR/phase-2-structure.md`
+**Return**: Phase 1 report to main agent
+
+---
+
+**Main Agent Action: Document Phase 1**
+
+**Immediately write documentation**: `$OUTPUT_DIR/phase-1-discovery-structure.md`
 
 ```markdown
-# Phase 2: Structure Analysis - $ARGUMENTS
+# Phase 1: Discovery & Structure - $ARGUMENTS
 
 **Date**: [Current date/time]
-**Based on**: [phase-1-discovery.md](./phase-1-discovery.md)
+**Search Query**: "$ARGUMENTS"
+{{ if --source provided }}**Source**: $SOURCE_PATH{{ else }}**Source**: Auto-detected{{ endif }}
+
+---
+
+## Files Found
+
+### Main Implementation
+- [`main.tsx`](file:///path/to/main.tsx) (250 lines)
+  - Main component implementation
+  
+- [`feature.ts`](file:///path/to/feature.ts) (120 lines)
+  - Core business logic
+
+### Components
+- [`ComponentA.tsx`](file:///path/to/ComponentA.tsx) (80 lines)
+- [`ComponentB.tsx`](file:///path/to/ComponentB.tsx) (60 lines)
+
+### Utilities
+- [`utils.ts`](file:///path/to/utils.ts) (100 lines)
+- [`helpers.ts`](file:///path/to/helpers.ts) (50 lines)
+
+### Types & Interfaces
+- [`types.ts`](file:///path/to/types.ts) (40 lines)
+
+### Tests
+- [`feature.test.ts`](file:///path/to/feature.test.ts) (150 lines)
+  - Coverage: ~X%
+
+### API & Routes
+- [`api/route.ts`](file:///path/to/api/route.ts) (70 lines)
+
+### Configuration
+- [`config.ts`](file:///path/to/config.ts) (30 lines)
+
+---
+
+## Entry Points
+
+1. **Main Entry**: [`index.tsx`](file:///path/to/index.tsx)
+   - Feature initialization and setup
+
+2. **User Route**: `/feature-route`
+   - User-facing access point
+
+3. **Public API**: Exported from `src/features/index.ts`
+
+---
+
+## Statistics
+
+- **Total Files**: X files
+- **Total Lines**: ~N lines
+- **Test Coverage**: X%
 
 ---
 
@@ -770,38 +666,41 @@ src/features/[feature-name]/
 
 ## Next Phase
 
-→ **Phase 3** will deep-dive into the code implementation, business logic, and patterns used.
+→ **Phase 2** will deep-dive into the code implementation, business logic, and patterns used.
 
-*[phase-3-analysis.md](./phase-3-analysis.md) (not yet created)*
+*[phase-2-analysis.md](./phase-2-analysis.md) (not yet created)*
 ```
 
-**File created**: `$OUTPUT_DIR/phase-2-structure.md` ✅
+**File created**: `$OUTPUT_DIR/phase-1-discovery-structure.md` ✅
 
 ---
 
 {{ if not --skip-review }}
-**Review Gate 2**: Verify Structure Analysis
+**Review Gate 1**: Verify Discovery & Structure Completeness
 
 ```markdown
-Review Phase 2 Results:
+Review Phase 1 Results:
+✅ All relevant files found?
+✅ Entry points identified?
+✅ File categories complete?
 ✅ Component hierarchy clear?
 ✅ Dependencies mapped?
 ✅ Architecture pattern identified?
 ✅ Folder structure understood?
 
 {{ if incomplete }}
-  → Re-run Analyzer with additional focus
+  → Re-run Scout + Analyzer SubAgent with refined parameters
 {{ else }}
-  → Proceed to Phase 3 ✅
+  → Proceed to Phase 2 ✅
 {{ endif }}
 ```
 {{ else }}
-**Review skipped** - Proceeding to Phase 3
+**Review skipped** - Proceeding to Phase 2
 {{ endif }}
 
 ---
 
-### Phase 3: Code Analysis 💻
+### Phase 2: Code Analysis 💻
 
 **SubAgent**: Code-Reviewer (`.claude/agents/code-reviewer.md`)
 
@@ -819,13 +718,12 @@ Code-Reviewer SubAgent - Deep Analysis
 GOAL: Analyze implementation details for "$ARGUMENTS"
 
 INPUT:
-- Phase 1 report (file list)
-- Phase 2 report (structure)
+- Phase 1 report (file list + structure)
 - Files to review: [main files from Phase 1]
 
 ---
 
-SUBTASK 3.1: Extract Business Logic (15-20 min)
+SUBTASK 2.1: Extract Business Logic (15-20 min)
 
 **Steps**:
 1. Read main implementation files
@@ -863,7 +761,7 @@ SUBTASK 3.1: Extract Business Logic (15-20 min)
 
 ---
 
-SUBTASK 3.2: Analyze Data Models (10 min)
+SUBTASK 2.2: Analyze Data Models (10 min)
 
 **Steps**:
 1. Read type definitions
@@ -893,7 +791,7 @@ SUBTASK 3.2: Analyze Data Models (10 min)
 
 ---
 
-SUBTASK 3.3: Identify Patterns & Practices (10 min)
+SUBTASK 2.3: Identify Patterns & Practices (10 min)
 
 **Steps**:
 1. Error handling patterns:
@@ -920,7 +818,7 @@ SUBTASK 3.3: Identify Patterns & Practices (10 min)
 
 ---
 
-SUBTASK 3.4: Note Key Insights (5-10 min)
+SUBTASK 2.4: Note Key Insights (5-10 min)
 
 **Steps**:
 1. Interesting implementations
@@ -936,10 +834,10 @@ SUBTASK 3.4: Note Key Insights (5-10 min)
 OUTPUT: Return analysis to main agent:
 
 ```markdown
-📋 PHASE 3: CODE ANALYSIS REPORT
+📋 PHASE 2: CODE ANALYSIS REPORT
 
 Topic: "$ARGUMENTS"
-Based on: phase-1-discovery.md, phase-2-structure.md
+Based on: phase-1-discovery-structure.md
 
 ---
 
@@ -1147,25 +1045,23 @@ const CheckoutModal = lazy(() => import('./CheckoutModal'));
 
 ---
 
-PHASE 3 COMPLETE ✅
+PHASE 2 COMPLETE ✅
 ```
 ```
 
-**Return**: Phase 3 report to main agent
+**Return**: Phase 2 report to main agent
 
 ---
 
-**Main Agent Action: Document Phase 3**
+**Main Agent Action: Document Phase 2**
 
-**Immediately write documentation**: `$OUTPUT_DIR/phase-3-analysis.md`
+**Immediately write documentation**: `$OUTPUT_DIR/phase-2-analysis.md`
 
 ```markdown
-# Phase 3: Code Analysis - $ARGUMENTS
+# Phase 2: Code Analysis - $ARGUMENTS
 
 **Date**: [Current date/time]
-**Based on**: 
-- [phase-1-discovery.md](./phase-1-discovery.md)
-- [phase-2-structure.md](./phase-2-structure.md)
+**Based on**: [phase-1-discovery-structure.md](./phase-1-discovery-structure.md)
 
 ---
 
@@ -1497,22 +1393,15 @@ Found 3 items requiring attention:
 
 ---
 
-## Next Phase
-
-→ **Phase 4** will synthesize all findings into a comprehensive report with actionable recommendations.
-
-*[phase-4-synthesis.md](./phase-4-synthesis.md) (not yet created)*
-```
-
-**File created**: `$OUTPUT_DIR/phase-3-analysis.md` ✅
+**File created**: `$OUTPUT_DIR/phase-2-analysis.md` ✅
 
 ---
 
 {{ if not --skip-review }}
-**Review Gate 3**: Verify Code Analysis
+**Review Gate 2**: Verify Code Analysis
 
 ```markdown
-Review Phase 3 Results:
+Review Phase 2 Results:
 ✅ Business logic documented with line numbers?
 ✅ Data models completely described?
 ✅ Patterns and practices identified?
@@ -1521,159 +1410,12 @@ Review Phase 3 Results:
 {{ if incomplete }}
   → Re-run Code-Reviewer with specific focus areas
 {{ else }}
-  → Proceed to Phase 4 ✅
+  → Analysis Complete ✅
 {{ endif }}
 ```
 {{ else }}
-**Review skipped** - Proceeding to Phase 4
+**Review skipped** - Analysis Complete
 {{ endif }}
-
----
-
-### Phase 4: Synthesis 📋
-
-**SubAgent**: Docs-Manager (`.claude/agents/docs-manager.md`)
-
-**Goal**: Synthesize all phases into comprehensive final report
-
-**Duration**: 15-20 minutes
-
----
-
-**Dispatch Docs-Manager SubAgent**:
-
-```markdown
-Docs-Manager SubAgent - Final Synthesis
-
-GOAL: Create comprehensive final report for "$ARGUMENTS"
-
-INPUT:
-- docs/$TOPIC/phase-1-discovery.md
-- docs/$TOPIC/phase-2-structure.md
-- docs/$TOPIC/phase-3-analysis.md
-
----
-
-SUBTASK 4.1: Read All Phase Documents (5 min)
-
-**Steps**:
-1. Read phase-1-discovery.md
-2. Read phase-2-structure.md
-3. Read phase-3-analysis.md
-4. Extract key points from each
-
-**Expected**: Complete understanding of all findings
-
----
-
-SUBTASK 4.2: Create Executive Summary (5 min)
-
-**Steps**:
-1. Summarize what was explored
-2. High-level architecture overview
-3. Key technologies used
-4. Critical findings
-
-**Expected**: 2-3 paragraph executive summary
-
----
-
-SUBTASK 4.3: Synthesize Detailed Findings (5-10 min)
-
-**Steps**:
-1. Combine findings by category:
-   - Files & Structure
-   - Architecture & Patterns
-   - Business Logic
-   - Data Models
-   - Dependencies
-   - Testing & Security
-   - Issues & Improvements
-
-2. Cross-reference phase documents
-3. Add navigation links
-
-**Expected**: Organized comprehensive report
-
----
-
-SUBTASK 4.4: Create Action Items (5 min)
-
-**Steps**:
-1. Extract all TODO/FIXME items
-2. List improvements identified
-3. Prioritize by impact
-4. Create modification guide
-
-**Expected**: Actionable next steps
-
----
-
-OUTPUT: Return synthesis report to main agent
-
-```markdown
-📋 PHASE 4: FINAL SYNTHESIS
-
-Topic: "$ARGUMENTS"
-Compiled from: All phase documents
-
----
-
-## Executive Summary
-
-[2-3 paragraph overview of the feature/component explored]
-
-## Quick Navigation
-- [Files & Structure](#files--structure)
-- [Architecture](#architecture)
-- [Business Logic](#business-logic)
-- [Data Models](#data-models)
-- [Patterns & Practices](#patterns--practices)
-- [How to Modify](#how-to-modify)
-- [Action Items](#action-items)
-
-## Detailed Findings
-
-[Synthesized content from all phases]
-
-## Action Items
-
-### High Priority
-1. [Item 1]
-2. [Item 2]
-
-### Medium Priority
-[...]
-
-### Nice to Have
-[...]
-
-## How to Modify This Feature
-
-[Step-by-step guidance]
-
-## Related Documentation
-
-- [Phase 1: Discovery](./phase-1-discovery.md)
-- [Phase 2: Structure](./phase-2-structure.md)
-- [Phase 3: Analysis](./phase-3-analysis.md)
-
----
-
-PHASE 4 COMPLETE ✅
-EXPLORATION COMPLETE ✅
-```
-```
-
-**Return**: Final synthesis report
-
----
-
-**Main Agent Action: Document Phase 4**
-
-**Write final comprehensive documentation**: `$OUTPUT_DIR/phase-4-synthesis.md`
-
-Also create: `$OUTPUT_DIR/README.md` (copy or symlink of synthesis for easy discovery)
 
 ---
 
@@ -1686,11 +1428,9 @@ Topic: "$ARGUMENTS"
 Output Folder: $OUTPUT_DIR/
 
 Documentation Created:
-- phase-1-discovery.md (File inventory, search results)
-- phase-2-structure.md (Architecture, dependencies)
-- phase-3-analysis.md (Code deep-dive, business logic)
-- phase-4-synthesis.md (Comprehensive final report)
-- README.md (Quick access to synthesis)
+- phase-1-discovery-structure.md (File inventory, architecture, dependencies)
+- phase-2-analysis.md (Code deep-dive, business logic)
+- README.md (Quick access to overview)
 
 ---
 
@@ -1703,6 +1443,54 @@ Next Steps:
 - Use findings to plan modifications
 - Reference phase docs when making changes
 ```
+
+---
+
+**Create README**: `$OUTPUT_DIR/README.md`
+
+```markdown
+# $ARGUMENTS - Codebase Exploration
+
+**Explored**: [Current date/time]
+
+## Quick Links
+
+- [Phase 1: Discovery & Structure](./phase-1-discovery-structure.md) - Files, architecture, dependencies
+- [Phase 2: Code Analysis](./phase-2-analysis.md) - Business logic, patterns, insights
+
+## Overview
+
+[Brief 2-3 sentence summary of what was explored]
+
+## Key Findings
+
+### Architecture
+- [Key architecture pattern identified]
+
+### Technologies
+- [Main technologies/libraries used]
+
+### Critical Business Logic
+- [Most important business logic identified]
+
+### Recommendations
+- [Top 2-3 recommendations from analysis]
+
+## Next Steps
+
+After reviewing this exploration, you can:
+
+1. **Apply patterns** - Use `/apply "$ARGUMENTS" --to="new-feature"` to replicate architecture
+2. **Extend feature** - Use `/extend "$ARGUMENTS" --with="new-capability"` to add functionality
+3. **Generate tests** - Use `/test-from "$ARGUMENTS"` to create comprehensive tests
+4. **Refactor code** - Use `/refactor-from "$ARGUMENTS"` to improve code quality
+
+---
+
+*Generated by `/how` command*
+```
+
+**File created**: `$OUTPUT_DIR/README.md` ✅
 
 ---
 
@@ -1792,7 +1580,7 @@ Use `/refactor-from` to improve code quality:
 ```bash
 # Step 1: Explore existing code
 /how "authentication"
-→ docs/authentication/phase-1-4.md created
+→ docs/authentication/ created with phase-1-discovery-structure.md and phase-2-analysis.md
 
 # Step 2: Apply to new feature
 /apply "authentication" --to="user-management"
@@ -1831,27 +1619,19 @@ Use `/refactor-from` to improve code quality:
 
 # Output:
 # docs/authentication/
-# ├── phase-1-discovery.md (12 files found)
-# ├── phase-2-structure.md (JWT-based auth architecture)
-# ├── phase-3-analysis.md (Token generation logic, session mgmt)
-# ├── phase-4-synthesis.md (Complete auth system overview)
-# └── README.md
+# ├── phase-1-discovery-structure.md (12 files found, JWT-based architecture)
+# ├── phase-2-analysis.md (Token generation logic, session mgmt)
+# └── README.md (Quick overview)
 ```
 
 ### Example 2: Step-by-Step Exploration
 
 ```bash
-# Run only discovery first
+# Run only discovery & structure first
 /how "checkout flow" --phases=1
 
-# Review results, then continue with structure
+# Review results, then continue with code analysis
 /how "checkout flow" --phases=2
-
-# Then analysis
-/how "checkout flow" --phases=3
-
-# Finally synthesis
-/how "checkout flow" --phases=4
 ```
 
 ### Example 3: Comprehensive Deep Dive
@@ -1866,3 +1646,4 @@ Use `/refactor-from` to improve code quality:
 ---
 
 **Pro Tip**: Each phase writes documentation immediately, so you can review partial results without waiting for the entire exploration to complete!
+

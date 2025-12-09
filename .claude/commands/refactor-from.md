@@ -48,7 +48,7 @@ Leverages insights from exploration:
 ```bash
 # Step 1: Explore and identify issues
 /how "calculator"
-→ docs/calculator/phase-3-analysis.md shows:
+→ docs/calculator/phase-2-analysis.md shows:
   - ⚠️ Files > 200 lines (should split)
   - ⚠️ Duplicated validation logic
   - ⚠️ TODO: Extract to utils
@@ -59,6 +59,7 @@ Leverages insights from exploration:
 → Extracts business logic to utils/
 → Reduces duplication
 → All tests still passing ✅
+→ Updates docs/calculator/README.md with refactoring history
 ```
 
 ---
@@ -98,17 +99,19 @@ Refactoring: **$FEATURE**
    DOCS_PATH="docs/$FEATURE/"
    ```
 
-2. **Extract from phase-3-analysis.md**:
+2. **Extract from phase-2-analysis.md**:
    - Technical debt notes
    - TODO/FIXME comments
    - Areas for improvement
    - Code smells identified
    - Patterns that could be improved
+   - Key insights
 
-3. **Extract from phase-2-structure.md**:
+3. **Extract from phase-1-discovery-structure.md**:
    - Large files to split
    - Coupling issues
    - Dependency problems
+   - File locations
 
 **Output**:
 ```markdown
@@ -520,6 +523,49 @@ Manual testing: ✅ Functionality preserved
 Documentation: ✅ Updated
 
 Refactoring successful!
+```
+
+4. **Update documentation**
+   ```bash
+   # Append to docs/$FEATURE/README.md
+   ```
+
+5. **Add refactoring history**:
+   ```markdown
+   ## Refactorings
+   
+   This feature has been refactored with the following improvements:
+   
+   ### {{ improvement name }} (refactored on [date])
+   - **Refactored by**: `/refactor-from` command
+   - **Focus**: {{ --improve or --goal }}
+   - **Files modified**: {{ count }} files
+   - **Lines removed**: {{ count }} (duplication)
+   - **Lines added**: {{ count }}
+   - **Status**: ✅ Complete
+   
+   **Changes made**:
+   - {{ list refactorings }}
+   
+   **Benefits**:
+   - {{ list improvements }}
+   
+   **Tests**: ✅ All passing
+   ```
+
+**Output**: Documentation updated ✅
+
+---
+
+## Final Completion
+
+```markdown
+✅ REFACTORING COMPLETE
+
+Feature: $FEATURE
+Documentation: ✅ Updated in docs/$FEATURE/README.md
+
+Refactoring successful and tracked!
 ```
 
 ---

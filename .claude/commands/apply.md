@@ -53,12 +53,14 @@ This command is designed to work seamlessly with `/how` output:
 ```bash
 # Step 1: Explore source feature
 /how "authentication"
-→ Creates docs/authentication/phase-*.md
+→ Creates docs/authentication/phase-1-discovery-structure.md
+→ Creates docs/authentication/phase-2-analysis.md
 
 # Step 2: Apply patterns to new feature  
 /apply "authentication" --to="user-management"
 → Reads docs/authentication/
 → Applies patterns to src/features/user-management/
+→ Updates docs/authentication/README.md with application history
 ```
 
 ---
@@ -118,9 +120,8 @@ Execute for: **$SOURCE** → **$TARGET**
    ```
 
 3. **Read documentation files**
-   - `phase-2-structure.md` → Architecture patterns
-   - `phase-3-analysis.md` → Code patterns, business logic
-   - `phase-4-synthesis.md` → Overall approach
+   - `phase-1-discovery-structure.md` → File inventory, architecture patterns, dependencies
+   - `phase-2-analysis.md` → Code patterns, business logic, implementation details
 
 4. **Extract patterns using `pattern-analysis` skill**
 
@@ -141,17 +142,19 @@ INPUT:
 
 ---
 
-SUBTASK 1.1: Read Structure Documentation (5 min)
+SUBTASK 1.1: Read Discovery & Structure Documentation (5 min)
 
 **Steps**:
-1. Read `phase-2-structure.md`
+1. Read `phase-1-discovery-structure.md`
 2. Extract:
+   - File inventory and locations
    - Folder structure convention
    - File naming patterns
    - Component hierarchy
    - Architecture style (Container/Presentational, etc.)
    - State management approach
    - Dependencies used
+   - Integration points
 
 **Output**: Structure pattern summary
 
@@ -160,14 +163,16 @@ SUBTASK 1.1: Read Structure Documentation (5 min)
 SUBTASK 1.2: Read Code Patterns (5-10 min)
 
 **Steps**:
-1. Read `phase-3-analysis.md`
+1. Read `phase-2-analysis.md`
 2. Extract:
+   - Business logic patterns
    - Error handling patterns
    - Validation approach (Zod, Yup, etc.)
    - Form handling (react-hook-form, Formik, etc.)
    - API communication pattern
    - Testing patterns
    - Type definitions style
+   - Key insights and recommendations
 
 **Output**: Code pattern summary
 
@@ -1091,6 +1096,61 @@ Your new feature at `$TO_PATH` now has:
 ---
 
 🎉 Pattern successfully applied! Your new feature follows the same proven patterns as $SOURCE.
+```
+
+---
+
+### Phase 6: Update Source Documentation 📝
+
+**Goal**: Track pattern application in source documentation
+
+**Duration**: 2-3 minutes
+
+---
+
+**Steps**:
+
+1. **Update README.md** in source docs folder
+   - Append application history to `docs/$SOURCE/README.md`
+
+2. **Add application record**:
+
+```markdown
+## Pattern Applications
+
+This pattern has been applied to the following features:
+
+### $TARGET (applied on [date])
+- **Location**: `$TO_PATH`
+- **Applied by**: `/apply` command
+- **Files created**: {{ count }} files
+- **Status**: ✅ Complete
+
+**What was replicated**:
+- ✅ Folder structure
+- ✅ Component hierarchy  
+- ✅ State management patterns
+- ✅ Validation patterns
+- ✅ Error handling
+- ✅ Testing structure
+```
+
+**Output**: Documentation updated ✅
+
+---
+
+## Final Completion
+
+```markdown
+✅ PATTERN APPLICATION COMPLETE
+
+Source: $SOURCE (docs/$SOURCE/)
+Target: $TO_PATH
+Documentation: ✅ Updated
+
+---
+
+🎉 Pattern successfully applied and tracked!
 ```
 
 ---
