@@ -18,17 +18,27 @@ Phân tích và giải thích các thay đổi hiện tại trong thư mục là
 # Basic usage (analyzes current git status and saves by default)
 /how-recent-changes
 
+# Analyze recent commits
+/how-recent-changes --recent=5              # Last 5 commits
+/how-recent-changes --commit=abc123         # Specific commit
+/how-recent-changes --commit=abc123..def456 # Commit range
+
 # Compare with plan file
 /how-recent-changes --plan=plans/feature-x.md
+/how-recent-changes --recent=3 --plan=plans/auth-update.md
 
 # With specific analysis depth
 /how-recent-changes --deep
 
 # Focus on specific files
 /how-recent-changes --files=src/components,src/utils
+/how-recent-changes --recent=5 --files=src/auth
 
 # Skip saving to file
 /how-recent-changes --no-save
+
+# Output in different formats
+/how-recent-changes --format=json
 ```
 
 ---
@@ -43,6 +53,7 @@ Phân tích và giải thích các thay đổi hiện tại trong thư mục là
 
 **Steps**:
 
+{{ if not --recent and not --commit }}
 1.  **Check Git Status**
     ```bash
     git status
@@ -62,6 +73,63 @@ Phân tích và giải thích các thay đổi hiện tại trong thư mục là
     - List of files with staged changes
     - List of files with unstaged changes
     - List of untracked files
+{{ endif }}
+
+{{ if --recent }}
+1.  **Get Recent Commits**
+    ```bash
+    git log --oneline -$RECENT
+    ```
+
+2.  **Get Changed Files in Recent Commits**
+    ```bash
+    git diff --name-only HEAD~$RECENT..HEAD
+    ```
+
+3.  **Get Detailed Changes**
+    ```bash
+    git diff HEAD~$RECENT..HEAD
+    ```
+
+4.  **Commit Analysis**:
+    - Extract commit messages and categorize changes
+    - Identify authors and timestamps
+    - Note breaking changes or critical updates
+{{ endif }}
+
+{{ if --commit and not --commit contains '..' }}
+1.  **Get Specific Commit Details**
+    ```bash
+    git show --stat $COMMIT
+    ```
+
+2.  **Get Files Changed**
+    ```bash
+    git show --name-only --format="" $COMMIT
+    ```
+
+3.  **Get Diff for Commit**
+    ```bash
+    git show $COMMIT
+    ```
+{{ endif }}
+
+{{ if --commit and --commit contains '..' }}
+1.  **Get Commits in Range**
+    ```bash
+    git log --oneline $COMMIT
+    ```
+
+2.  **Get Changed Files in Range**
+    ```bash
+    git diff --name-only $COMMIT
+    ```
+
+3.  **Get Detailed Changes**
+    ```bash
+    git diff $COMMIT
+    ```
+{{ endif }}
 
 ---
 
@@ -78,10 +146,23 @@ Phân tích và giải thích các thay đổi hiện tại trong thư mục là
 **Analysis Tasks**:
 
 1.  **Plan Comparison (if --plan flag provided)**:
-    - Read the plan file specified
-    - Compare actual changes with planned tasks
-    - Identify missing implementations or extra work
-    - Report completion percentage
+    - Read the plan file specified using [`ReadMcpResourceTool`](https://docs.anthropic.com)
+    - Extract tasks and requirements from plan
+    - Parse plan structure:
+      - Tasks/Checklists
+      - Implementation requirements
+      - File changes expected
+      - Acceptance criteria
+    - Compare actual changes with planned items:
+      - ✅ Completed tasks (matching changes found)
+      - ⏳ In-progress tasks (partial changes found)
+      - ❌ Missing tasks (no changes found)
+      - ➕ Extra work (changes not in plan)
+    - Calculate metrics:
+      - Completion percentage: `(Completed tasks / Total tasks) * 100`
+      - Task breakdown by priority
+      - File coverage percentage
+    - Generate detailed comparison report
 
 2.  **Infer Intent**:
     - Look at the combination of changes.
@@ -123,75 +204,158 @@ Phân tích và giải thích các thay đổi hiện tại trong thư mục là
 ## 🎯 Tóm Tắt
 [Tóm tắt cấp cao về mục tiêu của các thay đổi này, ví dụ: "Refactor luồng Authentication và sửa lỗi chính tả trong Dashboard."]
 
+{{ if --recent or --commit }}
+---
+
+## 📜 Lịch Sử Commit
+{{ if --recent }}
+### **$RECENT Commits Gần Nhất**
+{{ for each commit in commits }}
+- **Commit**: `commit_hash` - `commit_message` (author, date)
+  - Files: [list of changed files]
+  - Type: [feature|fix|refactor|docs|chore]
+{{ endfor }}
+{{ endif }}
+
+{{ if --commit and not --commit contains '..' }}
+### **Commit Chi Tiết**
+- **Hash**: `commit_hash`
+- **Message**: `commit_message`
+- **Author**: `author_name` <author@email>
+- **Date**: `commit_date`
+- **Files changed**: [count] files
+{{ endif }}
+
+{{ if --commit and --commit contains '..' }}
+### **Commit Range: $COMMIT**
+- **Total commits**: [count]
+- **Date range**: [start_date] to [end_date]
+- **Contributors**: [list of authors]
+{{ endif }}
+{{ endif }}
+
 ---
 
 ## 📋 So Sánh Với Plan (nếu có)
 *(Khi sử dụng --plan flag)*
 
 ### **Tiến Độ Hoàn Thành**
-- **Tasks đã hoàn thành**: [số lượng]/[tổng số]
+- **Tasks đã hoàn thành**: [số lượng]/[tổng số] ✅
+- **Tasks đang thực hiện**: [số lượng]/[tổng số] ⏳
+- **Tasks chưa bắt đầu**: [số lượng]/[tổng số] ❌
 - **Completion rate**: [X]%
-- **Tasks còn lại**: [danh sách]
+- **Công việc thừa**: [số lượng] items ➕
+
+### **Phân Tích Chi Tiết**
+{{ for each task in plan_tasks }}
+- **[task_name]**:
+  - Status: [✅ hoàn thành | ⏳ đang làm | ❌ chưa làm]
+  - Evidence: [files/thay đổi chứng minh]
+  - Notes: [ghi chú bổ sung]
+{{ endfor }}
 
 ### **Phân Tích Deviation**
 - **Thừa**: [các thay đổi không có trong plan]
+  - Impact: [đánh giá tác động]
 - **Thiếu**: [các tasks trong plan chưa implement]
-- **Khác biệt**: [phân tích sự khác biệt]
+  - Priority: [mức độ ưu tiên]
+- **Khác biệt**: [phân tích sự khác biệt so với plan]
 
 ---
 
-## 🟢 Thay Đổi Đã Staged (Sẵn Sàng Commit)
+## 🟢 Thay Đổi Đã Thực Hiện
+{{ if not --recent and not --commit }}
+### **Thay Đổi Đã Staged (Sẵn Sàng Commit)**
 *(Các thay đổi đã được thêm vào index)*
+{{ endif }}
 
-### **[Tên File]**
+{{ if --recent or --commit }}
+### **Các File Đã Thay Đổi**
+{{ endif }}
+
+{{ for each file in changed_files }}
+#### **[file_path]**
 - **Thay đổi**: [Mô tả ngắn gọn về thay đổi]
+- **Loại thay đổi**: [feature|fix|refactor|docs|test|chore]
 - **Tác động**: [Tại sao thay đổi này quan trọng]
-
-*(Lặp lại cho các file khác)*
+{{ if not --recent and not --commit }}
+- **Trạng thái**: [staged|unstaged|untracked]
+{{ endif }}
+{{ if lines_added or lines_removed }}
+- **Lines**: +lines_added/-lines_removed
+{{ endif }}
+{{ endfor }}
 
 ---
 
-## 🟡 Thay Đổi Chưa Staged (Đang Phát Triển)
-*(Các thay đổi trong thư mục làm việc chưa được staged)*
+## 📊 Thống Kê
+{{ if --recent or --commit }}
+- **Commit range**: [commit_count] commits
+{{ endif }}
+- **Total files changed**: [số lượng]
+- **Lines added**: [số lượng]
+- **Lines removed**: [số lượng]
+{{ if file_categories }}
+- **Phân loại thay đổi**:
+  - Features: [count]
+  - Fixes: [count]
+  - Refactoring: [count]
+  - Documentation: [count]
+  - Tests: [count]
+  - Configuration: [count]
+{{ endif }}
+- **Complexity score**: [low/medium/high]
 
-### **[Tên File]**
-- **Thay đổi**: [Mô tả ngắn gọn]
-- **Trạng thái**: [ví dụ: Đang debug, Chưa hoàn thành, Đàn chỉnh]
+{{ if --plan }}
+- **Plan completion**: [X]%
+- **Tasks completed**: [completed]/[total]
+{{ endif }}
 
 ---
 
 ## 🔍 Phân Tích Sâu
 *(Nếu liên quan, khám phá các thay đổi phức tạp cụ thể)*
 
+{{ for complex_change in complex_changes }}
 - **Thay đổi Logic trong `[Component]`**:
   - Giải thích sự thay đổi logic
-  - Hiển thị code trước/sau nếu hữu ích
+  - Code trước/sau nếu hữu ích
+  - Tác động đến system
+
+{{ endfor }}
 
 - **Phân Tích Pattern**:
   - Các pattern được áp dụng: [từ pattern-analysis]
   - Tính nhất quán với codebase: [đánh giá]
+  - Best practices được tuân thủ/vi phạm
 
 ---
 
 ## ⚠️ Quan Sát & Gợi Ý
-- **[Quan sát]**: ví dụ: "Bạn có cả staged và unstaged changes trong `api.ts`. Điều này có thể dẫn đến commit không hoàn chỉnh."
-- **[Gợi ý]**: ví dụ: "Cân nhắc chạy tests cho validator mới."
-- **[Dọn dẹp]**: "Tìm thấy `console.log` trong `utils.ts`."
+{{ for observation in observations }}
+- **[Quan sát]**: [nội dung quan sát]
+  - Severity: [high|medium|low]
+  - Action: [hành động đề xuất]
+{{ endfor }}
 
----
-
-## 📊 Thống Kê
-- **Total files changed**: [số lượng]
-- **Lines added**: [số lượng]
-- **Lines removed**: [số lượng]
-- **Complexity score**: [low/medium/high]
+- **[Gợi ý]**: [recommendations]
+- **[Dọn dẹp]**: [cleanup items]
+- **[Security]**: [security concerns]
+- **[Performance]**: [performance considerations]
 
 ---
 
 ## 🔄 Hành Động Đề Xuất
-1. [Hành động cụ thể 1]
-2. [Hành động cụ thể 2]
-3. [Hành động cụ thể 3]
+1. [Hành động cụ thể 1 với priority]
+2. [Hành động cụ thể 2 với priority]
+3. [Hành động cụ thể 3 với priority]
+
+{{ if --plan and completion_rate < 100 }}
+## 🎯 Next Steps cho Plan
+- Tasks cần hoàn thành: [list]
+- Estimated effort: [time estimate]
+- Dependencies: [list]
+{{ endif }}
 ```
 
 ---
@@ -238,6 +402,9 @@ This command provides an immediate report in the chat and saves by default to `.
 | Flag | Description | Example |
 |------|-------------|---------|
 | `--plan=[path]` | Compare changes with plan file | `/how-recent-changes --plan=plans/feature-x.md` |
+| `--recent=N` | Analyze last N commits | `/how-recent-changes --recent=5` |
+| `--commit=ID` | Analyze specific commit | `/how-recent-changes --commit=abc123` |
+| `--commit=RANGE` | Analyze commit range | `/how-recent-changes --commit=abc123..def456` |
 | `--deep` | Deep analysis with pattern recognition | `/how-recent-changes --deep` |
 | `--files=[paths]` | Focus on specific files/directories | `/how-recent-changes --files=src/components,src/utils` |
 | `--no-save` | Skip saving to file | `/how-recent-changes --no-save` |

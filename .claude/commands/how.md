@@ -19,8 +19,20 @@ Deep codebase exploration using a multi-phase SubAgent approach with per-phase d
 # Basic usage
 /how "authentication"
 
+# With recent commits analysis
+/how "payment flow" --recent=5
+
+# With specific commit
+/how "checkout" --commit=abc123
+
+# With commit range
+/how "user management" --commit=abc123..def456
+
 # With source path
 /how "payment flow" --source=old-app/payments
+
+# Compare recent changes with plan
+/how "authentication" --recent=3 --plan=plans/auth-update.md
 
 # Custom output
 /how "checkout" --output=docs/custom-analysis
@@ -45,6 +57,10 @@ Deep codebase exploration using a multi-phase SubAgent approach with per-phase d
 | `--phases=N,N` | Run specific phases only (1-2) | `--phases=1,2` |
 | `--comprehensive` | Generate extra detailed reports | `--comprehensive` |
 | `--skip-review` | Skip review gates between phases | `--skip-review` |
+| `--recent=N` | Analyze changes from last N commits | `--recent=5` |
+| `--commit=ID` | Analyze specific commit | `--commit=abc123` |
+| `--commit=RANGE` | Analyze commit range | `--commit=abc123..def456` |
+| `--plan=path` | Compare changes with plan file | `--plan=plans/feature.md` |
 
 ---
 
@@ -88,8 +104,70 @@ Exploring: **$ARGUMENTS**
 **Phases to run**: All (1, 2)
 {{ endif }}
 
+{{ if --recent or --commit provided }}
+**Git Analysis**:
+{{ if --recent provided }}
+- Last $RECENT commits
+{{ endif }}
+{{ if --commit provided }}
+{{ if --commit contains '..' }}
+- Commit range: $COMMIT
+{{ else }}
+- Specific commit: $COMMIT
+{{ endif }}
+{{ endif }}
+{{ if --plan provided }}
+- Plan comparison: $PLAN
+{{ endif }}
+{{ endif }}
+
 ---
 
+{{ if --recent or --commit provided }}
+### Pre-Phase 0: Change Analysis 🔍
+
+**Goal**: Identify and analyze recent changes before exploration.
+
+**Agent**: git-manager + researcher
+
+**Steps**:
+
+1. **Git Analysis** (git-manager):
+   {{ if --recent provided }}
+   - Run `git log --oneline -$RECENT` to get recent commit messages
+   - Run `git diff --name-only HEAD~$RECENT..HEAD` to identify changed files
+   {{ endif }}
+   {{ if --commit provided }}
+   {{ if --commit contains '..' }}
+   - Run `git log --oneline $COMMIT` to get commit messages in range
+   - Run `git diff --name-only $COMMIT` to identify changed files
+   {{ else }}
+   - Run `git show --name-only --format="" $COMMIT` for single commit
+   {{ endif }}
+   {{ endif }}
+
+2. **Impact Assessment** (researcher):
+   - Categorize changes: Business Logic, UI/UX, API, Configuration, Tests
+   - Identify critical paths affected by changes
+   - Detect breaking changes or risky modifications
+   {{ if --plan provided }}
+   - Read plan file and compare with actual changes
+   - Calculate completion percentage
+   {{ endif }}
+
+3. **Change Prioritization**:
+   ```
+   Priority 1: Business Logic & API changes
+   Priority 2: Database schema & security changes
+   Priority 3: UI/UX changes
+   Priority 4: Configuration & utility changes
+   ```
+
+**Output**: Change analysis report saved to `$OUTPUT_DIR/recent-changes-analysis.md`
+
+---
+
+{{ endif }}
 ### Setup: Prepare Output Folder
 
 **Action**: Create output directory structure
@@ -136,6 +214,9 @@ INPUT:
 - Search scope: $SOURCE_PATH
 {{ else }}
 - Search scope: Entire workspace
+{{ endif }}
+{{ if --recent or --commit provided }}
+- Focus: Files changed in recent commits (see recent-changes-analysis.md)
 {{ endif }}
 {{ if --comprehensive }}
 - Mode: Comprehensive (deep search)
@@ -1428,6 +1509,9 @@ Topic: "$ARGUMENTS"
 Output Folder: $OUTPUT_DIR/
 
 Documentation Created:
+{{ if --recent or --commit provided }}
+- recent-changes-analysis.md (Git change analysis and impact assessment)
+{{ endif }}
 - phase-1-discovery-structure.md (File inventory, architecture, dependencies)
 - phase-2-analysis.md (Code deep-dive, business logic)
 - README.md (Quick access to overview)
@@ -1437,11 +1521,18 @@ Documentation Created:
 Quick Access:
 📂 Open folder: $OUTPUT_DIR/
 📄 Read overview: $OUTPUT_DIR/README.md
+{{ if --recent or --commit provided }}
+📄 View changes: $OUTPUT_DIR/recent-changes-analysis.md
+{{ endif }}
 
 Next Steps:
 - Review documentation for complete understanding
 - Use findings to plan modifications
 - Reference phase docs when making changes
+{{ if --recent and --plan provided }}
+- Compare actual changes with planned changes
+- Address any deviations from the plan
+{{ endif }}
 ```
 
 ---
