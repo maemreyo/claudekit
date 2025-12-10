@@ -47,9 +47,10 @@ This is a comprehensive Claude Kit for Claude Code, designed to accelerate devel
 | `/test-master [target]` | Generates adversarial test coverage (QA Lead Mode) |
 
 ### New Commands
-
+ 
 | Command | Description |
 |---------|-------------|
+| `/how-recent-changes` | Analyze git changes with plan comparison |
 | `/mode [name]` | Switch behavioral mode |
 | `/index` | Generate project structure index |
 | `/load [component]` | Load project context |
