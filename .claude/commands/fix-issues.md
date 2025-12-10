@@ -31,6 +31,9 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 # Multiple types
 /fix-issues --type=tests,bugs,security
 
+# Direct fix request (Ad-hoc)
+/fix-issues "fix lỗi ở src/components/Header.tsx: button bị lệch"
+
 # From specific analysis file
 /fix-issues --from=.claude/artifacts/recent-changes-2024-01-15.md
 
@@ -72,16 +75,22 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 
 1. **Load Source Data**
    ```bash
-   # If --from specified, read that file
-   # Otherwise, find latest analysis artifact
+   # If direct string argument provided (e.g., /fix-issues "fix error..."):
+   # Use it as the issue description and skip file loading
+   
+   # Else if --from specified, read that file
+   
+   # Else, find latest analysis artifact
    ls -t .claude/artifacts/recent-changes-*.md | head -1
    ```
 
-2. **Extract Issues from Analysis**
-   - Parse "⚠️ Quan Sát & Gợi Ý" section
-   - Parse "🔄 Hành Động Đề Xuất" section
-   - Parse "Risk Assessment" notes
-   - Parse comparison với plan (missing items)
+2. **Extract Issues**
+   - If direct argument: Parse the user's request as a generic 'bug' or 'task' issue.
+   - If from analysis:
+     - Parse "⚠️ Quan Sát & Gợi Ý" section
+     - Parse "🔄 Hành Động Đề Xuất" section
+     - Parse "Risk Assessment" notes
+     - Parse comparison với plan (missing items)
 
 3. **Classify Issues** (using pattern-analysis)
    
@@ -136,11 +145,10 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    - Filter by `--files` if specified
    - Filter by `--max-fixes` limit
 
-6. **Prioritization** (using sequential-thinking)
-   - Sort by: severity → dependencies → effort
-   - Critical security issues first
-   - Blocking bugs before enhancements
-   - Quick wins (low effort, high impact)
+6. **Prioritization & Grouping** (using sequential-thinking)
+   - **Related Issues**: Identify issues that modify the same files or logical components.
+   - **Subtask Creation**: Group related issues into a single **Subtask** to be handled together.
+   - Priority Sort: Critical security → Blocking bugs → High impact → Quick wins.
 
 ---
 
@@ -181,11 +189,11 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    - Complexity: [low|medium|high]
    ```
 
-2. **Dependency Resolution**
-   - Build dependency graph
-   - Identify cycles (flag as manual intervention needed)
-   - Calculate critical path
-   - Group independent issues for parallel execution
+2. **Subtask & Dependency Resolution**
+   - **Group Related Issues**: Ensure issues related to each other (e.g., fix bug + add test for same component) are in the same execution block (Subtask).
+   - Build dependency graph between Subtasks.
+   - Identify cycles (flag as manual intervention needed).
+   - Calculate critical path.
 
 3. **Risk Assessment**
    - High-risk fixes → Interactive mode mandatory
@@ -258,7 +266,7 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 - Skip high-risk changes
 {{ endif }}
 
-**For Each Issue**:
+**For Each Subtask (Group of Related Issues)**:
 
 1. **Pre-Fix Validation**
    ```bash
