@@ -1,0 +1,1047 @@
+        /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/comparison.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/credit-cards.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/credit-limit-tiers.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/csv-headers.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/detail.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/fee-types.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/interest-types.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/listing.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/main.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/pdf-headers.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/results.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/search.json
+          /Users/trung.ngo/Documents/projects/dop-fe/messages/vi/features/credit-cards/view-mode.json
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardActiveFilters.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardFilterPanel.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardFilterSidebar.tsx
+  ⎿    ⎿  Found 40 files                                                                                                                  
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardSkeleton.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/hooks/features/credit-card/use-credit-cards-url-sync.ts
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardCatalog.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/hooks/features/credit-card/useCreditCardsPageState.ts
+          /Users/trung.ngo/Documents/projects/dop-fe/src/hooks/features/credit-card/useDebounce.ts
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/index.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCard.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardCatalog.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardComparison.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardDetails.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardGrid.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardSkeleton.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardsPageControls.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardsPageHeader.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardsPageHero.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardsPageResults.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/CreditCardsThemeProvider.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/FilterPanel.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/Pagination.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/SearchBar.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/components/features/credit-card/SortDropdown.tsx.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/hooks/features/credit-card/index.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/hooks/features/credit-card/use-credit-cards-url-sync.ts.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/hooks/features/credit-card/useCreditCardsNavbarTheme.ts.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/hooks/features/credit-card/useCreditCardsPageState.ts.html
+          /Users/trung.ngo/Documents/projects/dop-fe/coverage/dop-fe/src/hooks/features/credit-card/useDebounce.ts.html
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCard.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardGrid.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageHeader.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageResults.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/FilterPanel.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/Pagination.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/SearchBar.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/SortDropdown.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardComparison.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardDetails.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsThemeProvider.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/hooks/features/credit-card/useCreditCardsNavbarTheme.ts
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageHero.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageControls.tsx
+  ⎿  Search(pattern: "credit.?card|CreditCard", head_limit: 50)
+
+  ⎿    ⎿  Found 50 files                                                                  
+          docs/user-onboarding/phase-2-analysis.md
+          src/components/user-onboarding/constants/field-types.ts
+          src/components/features/credit-card/CreditCardsPageControls.tsx
+          src/components/features/credit-card/CreditCardsPageHero.tsx
+          src/hooks/features/credit-card/useCreditCardsNavbarTheme.ts
+          src/components/features/credit-card/CreditCardsThemeProvider.tsx
+          src/configs/navbar-config.ts
+          src/components/features/insurance/InsuranceDetails.tsx
+          src/lib/i18n/split-loader.ts
+          src/components/features/credit-card/CreditCardDetails.tsx
+          src/components/features/credit-card/CreditCardComparison.tsx
+          src/components/features/credit-cards/detail/components/tabs/ReviewsTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/RequirementsTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/FeesTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/FeaturesTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/BenefitsTab.tsx
+          src/components/features/credit-cards/detail/components/ServiceCard.tsx
+          src/components/features/credit-cards/detail/components/ProductSidebar.tsx
+          src/components/features/credit-cards/detail/components/ProductOverviewCard.tsx
+          src/components/features/credit-cards/detail/components/ProductHeader.tsx
+          src/components/features/credit-cards/detail/components/PaymentMethodCard.tsx
+          src/components/features/credit-cards/detail/CreditCardDetails.tsx
+          src/components/features/credit-cards/compare/components/ComparisonHeader.tsx
+          src/components/features/credit-cards/compare/components/ComparisonEmptyState.tsx
+          src/components/features/credit-cards/compare/components/ComparisonContent.tsx
+          src/components/features/credit-cards/compare/CreditCardComparisonSnackbar.tsx
+          src/components/features/credit-cards/compare/CreditCardComparisonPanel.tsx
+          src/components/features/credit-cards/EmptyState.tsx
+          src/components/features/credit-cards/CreditCardSortDropdown.tsx
+          src/components/features/credit-cards/CreditCardSearchBar.tsx
+          src/components/features/credit-cards/CreditCardResultsHeader.tsx
+          src/components/features/credit-cards/CreditCardPagination.tsx
+          src/components/features/credit-cards/CreditCardPageControls.tsx
+          src/components/features/credit-cards/CreditCardPageContent.tsx
+          src/components/features/credit-cards/CreditCardFilterSidebar.tsx
+          src/components/features/credit-cards/CreditCardFilterPanel.tsx
+          src/components/features/credit-cards/CreditCardActiveFilters.tsx
+          src/components/features/credit-card/SortDropdown.tsx
+          src/components/features/credit-card/SearchBar.tsx
+          src/components/features/credit-card/Pagination.tsx
+          src/components/features/credit-card/FilterPanel.tsx
+          src/components/features/credit-card/CreditCardsPageResults.tsx
+          src/components/features/credit-card/CreditCardsPageHeader.tsx
+          src/components/features/credit-card/CreditCardGrid.tsx
+          src/components/features/credit-card/CreditCard.tsx
+          scripts/simple-migration.js
+          scripts/migrate-translations.js
+          scripts/extract-credit-card-keys.js
+          scripts/README.md
+          messages/vi/features/credit-cards/listing.json
+  ⎿  Read(src/types/credit-card.ts)
+
+  ⎿  Read(src/store/use-credit-cards-store.ts)
+
+  ⎿  Read(src/lib/api/endpoints/credit-cards.ts)
+
+  ⎿  Read 545 lines
+
+  ⎿  Read 869 lines
+
+  ⎿  Read 960 lines
+
+  ⎿  Read(src/data/credit-cards.ts · lines 1-100)
+
+  ⎿  Read(src/app/[locale]/credit-cards/page.tsx)
+
+  ⎿  Read 100 lines
+
+  ⎿  Read 206 lines
+
+  ⎿  Search(pattern: "stripe|payment|paypal|plaid|braintree|adyen", glob: "package.json", output_mode: "content")
+
+  ⎿  Read(package.json · lines 50-149)
+
+  ⎿  Read 100 lines
+
+  ⎿    ⎿  Found 0 lines
+
+  ⎿  Search(pattern: "applyLink|apply.*link|redirect|affiliate", glob: "**/*.{ts,tsx,js,jsx}", head_limit: 20)
+
+  ⎿  Read(src/constants/credit-cards.ts)
+
+  ⎿  Read 663 lines
+
+  ⎿    ⎿  Found 20 files                                                            
+          src/components/user-onboarding/hooks/use-form-creation.ts
+          src/components/renderer/MultiStepFormRenderer.tsx
+          public/mockServiceWorker.js
+          src/components/features/insurance/detail/components/ProductSidebar.tsx
+          src/components/features/credit-cards/compare/CreditCardComparisonPanel.tsx
+          src/app/[locale]/credit-cards/compare/page.tsx
+          src/lib/utils/auth-guards.ts
+          src/constants/credit-cards.ts
+          src/data/insurance-products.ts
+          src/types/insurance.ts
+          src/lib/api/endpoints/insurance.ts
+          src/lib/api/endpoints/credit-cards.ts
+          src/types/credit-card.ts
+          src/components/features/insurance/InsuranceComparisonPanel.tsx
+          src/lib/auth/auth-context.tsx
+          src/constants/insurance.ts
+          src/data/credit-cards.ts
+          src/lib/api/client.ts
+          src/middleware.ts
+          src/lib/auth/secure-tokens.ts
+  ⎿  Search(pattern: "**/components/features/credit-card/*.tsx")
+
+  ⎿  Search(pattern: "**/components/features/credit-cards/**/*.tsx")
+
+  ⎿    ⎿  Found 15 files                                                                                             
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardSkeleton.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardCatalog.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCard.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardGrid.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageHeader.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageResults.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/FilterPanel.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/Pagination.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/SearchBar.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/SortDropdown.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardComparison.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardDetails.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsThemeProvider.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageHero.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-card/CreditCardsPageControls.tsx
+  ⎿    ⎿  Found 32 files                                                                                                             
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/compare/components/ComparisonLoading.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/components/FilterShimmer.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/components/LazyImage.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/LoadingState.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/components/VirtualizedCardGrid.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardSearchBar.test.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardActiveFilters.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardFilterPanel.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardFilterSidebar.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardPageContent.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardPageControls.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardPagination.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardResultsHeader.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardSearchBar.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/CreditCardSortDropdown.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/EmptyState.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/compare/CreditCardComparisonPanel.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/compare/CreditCardComparisonSnackbar.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/compare/components/ComparisonContent.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/compare/components/ComparisonEmptyState.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/compare/components/ComparisonHeader.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/CreditCardDetails.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/PaymentMethodCard.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/ProductHeader.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/ProductOverviewCard.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/ProductSidebar.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/ServiceCard.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/tabs/BenefitsTab.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/tabs/FeaturesTab.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/tabs/FeesTab.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/tabs/RequirementsTab.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/detail/components/tabs/ReviewsTab.tsx
+  ⎿  Search(pattern: "**/app/**/credit-cards/compare/**/*.tsx")
+
+  ⎿  Search(pattern: "**/app/**/credit-cards/[slug]/**/*.tsx")
+
+  ⎿    ⎿  Found 1 file                                                                             
+          /Users/trung.ngo/Documents/projects/dop-fe/src/app/[locale]/credit-cards/compare/page.tsx
+  ⎿    ⎿  Found 0 files
+
+  ⎿  Search(pattern: "**/app/**/credit-cards/**/page.tsx")
+
+  ⎿  Search(pattern: "dynamic.*route|\\[.*\\]", glob: "**/app/**/*.tsx")
+
+  ⎿    ⎿  Found 1 file                                              
+          src/app/[locale]/admin/(protected)/flows/[flowId]/page.tsx
+  ⎿    ⎿  Found 3 files                                                                            
+          /Users/trung.ngo/Documents/projects/dop-fe/src/app/[locale]/credit-cards/[slug]/page.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/app/[locale]/credit-cards/page.tsx
+          /Users/trung.ngo/Documents/projects/dop-fe/src/app/[locale]/credit-cards/compare/page.tsx
+  ⎿  Response:
+       Now I have a comprehensive understanding of the credit card functionality. Let me prepare the Discovery Report according to the methodology.
+
+       Phase 1: Discovery Report - Credit Card Functionality
+
+       1. File Inventory
+
+       Core Implementation Files:
+
+       - Types & Interfaces
+         - /src/types/credit-card.ts - Comprehensive TypeScript interfaces for credit cards
+         - /src/constants/credit-cards.ts - All constants, configurations, and mappings
+       - Data Layer
+         - /src/data/credit-cards.ts - Mock data for Vietnamese credit cards
+         - /src/data/mock-credit-cards.ts - Additional mock data
+         - /src/store/use-credit-cards-store.ts - Zustand state management store
+       - API Layer
+         - /src/lib/api/endpoints/credit-cards.ts - API endpoints (currently using mock data)
+       - State Management Hooks
+         - /src/hooks/features/credit-card/use-credit-cards-url-sync.ts - URL synchronization
+         - /src/hooks/features/credit-card/useCreditCardsPageState.ts - Page state management
+         - /src/hooks/features/credit-card/useCreditCardsNavbarTheme.ts - Theme management
+         - /src/hooks/features/credit-card/useDebounce.ts - Debouncing utility
+
+       UI Components:
+
+       - Main Components (/src/components/features/credit-card/)
+         - CreditCard.tsx - Individual card component
+         - CreditCardGrid.tsx - Grid layout for cards
+         - CreditCardsPageHero.tsx - Page hero section
+         - CreditCardsPageControls.tsx - Search, sort, and view controls
+         - CreditCardsPageResults.tsx - Results display
+         - CreditCardComparison.tsx - Comparison component
+         - CreditCardDetails.tsx - Card detail view
+       - Filter & Search Components (/src/components/features/credit-cards/)
+         - CreditCardFilterPanel.tsx - Advanced filtering
+         - CreditCardSearchBar.tsx - Search functionality
+         - CreditCardSortDropdown.tsx - Sorting options
+         - CreditCardPagination.tsx - Pagination controls
+       - Detail View Components (/src/components/features/credit-cards/detail/)
+         - CreditCardDetails.tsx - Main detail view
+         - components/ProductHeader.tsx - Card header with image
+         - components/ProductOverviewCard.tsx - Quick overview
+         - components/tabs/ - Tabbed content (Benefits, Features, Fees, Requirements, Reviews)
+       - Comparison Components (/src/components/features/credit-cards/compare/)
+         - CreditCardComparisonPanel.tsx - Main comparison interface
+         - CreditCardComparisonSnackbar.tsx - Comparison notifications
+         - components/ComparisonContent.tsx - Comparison table
+
+       Page Routes:
+
+       - /src/app/[locale]/credit-cards/page.tsx - Main listing page
+       - /src/app/[locale]/credit-cards/[slug]/page.tsx - Dynamic detail page
+       - /src/app/[locale]/credit-cards/compare/page.tsx - Comparison page
+
+       Internationalization:
+
+       - /messages/en/features/credit-cards/ - English translations
+       - /messages/vi/features/credit-cards/ - Vietnamese translations
+
+       2. Architecture
+
+       graph TB
+           subgraph "Presentation Layer"
+               A[Credit Cards Page] --> B[Search & Filters]
+               A --> C[Card Grid/List]
+               A --> D[Comparison Panel]
+               E[Card Detail Page] --> F[Product Header]
+               E --> G[Detail Tabs]
+               H[Comparison Page] --> I[Comparison Table]
+           end
+
+           subgraph "State Management"
+               J[Zustand Store] --> K[Filters State]
+               J --> L[Comparison State]
+               J --> M[UI State]
+           end
+
+           subgraph "Business Logic"
+               N[Credit Cards API] --> O[Search & Filter Logic]
+               N --> P[Sorting Logic]
+               N --> Q[Comparison Logic]
+           end
+
+           subgraph "Data Layer"
+               R[Mock Data] --> S[Vietnamese Credit Cards]
+               R --> T[Constants & Configs]
+           end
+
+           A --> J
+           B --> N
+           C --> N
+           D --> N
+           E --> N
+           H --> N
+           N --> R
+
+       Architecture Pattern:
+       - Component-Based Architecture with feature organization
+       - Centralized State Management using Zustand
+       - Separation of Concerns between UI, state, and data
+       - Hook-Based Logic for reusable functionality
+
+       3. Dependencies
+
+       Internal Dependencies:
+
+       - Store Management: Zustand with persist middleware
+       - UI Framework: React with Next.js 15
+       - Styling: Tailwind CSS with custom components
+       - Internationalization: next-intl
+       - Icons: Lucide React
+       - Forms: React Hook Form
+       - Validation: Zod schemas
+
+       External Libraries:
+
+       - No Payment Processors: No Stripe, PayPal, or other payment gateways found
+       - No Authentication Libraries: Using custom auth implementation
+       - Analytics: Vercel Analytics for tracking
+       - Testing: Vitest with React Testing Library
+       - Mock Service Worker: For API mocking
+
+       4. External Context
+
+       Key Features Identified:
+
+       1. Comprehensive Credit Card Comparison
+         - Side-by-side comparison of up to 3 cards
+         - Detailed comparison criteria (fees, rates, limits, etc.)
+       2. Advanced Filtering System
+         - Multiple filter categories (card type, issuer, fees, rewards)
+         - Province-based availability filtering
+         - Income requirement filtering
+       3. Search & Discovery
+         - Full-text search across card features
+         - Multiple sorting options
+         - Pagination with virtualization support
+       4. Vietnamese Market Specific
+         - Support for Vietnamese banks (Vietcombank, Techcombank, etc.)
+         - Province-based availability
+         - Localized currency and formatting
+
+       Security Considerations:
+
+       - No actual payment processing implemented
+       - Mock data usage with no real sensitive information
+       - URL state synchronization for shareable filtered views
+       - Affiliate link tracking with unique IDs
+
+       Missing Implementations:
+
+       - Real API integration (currently using mock data)
+       - Authentication for user accounts
+       - Actual card application processing
+       - Payment gateway integration
+       - Real-time rate fetching from banks
+
+       Summary
+
+       The credit card functionality is a comprehensive comparison platform for Vietnamese credit cards. It features a well-structured architecture with clear separation of
+       concerns, extensive filtering capabilities, and a user-friendly interface. The system currently operates with mock data and does not integrate with any actual payment
+       processors or banking APIs, making it safe for demonstration and development purposes.
+  ⎿  Done (23 tool uses · 66.0k tokens · 57s)
+
+⏺ Now I'll document the Phase 1 findings:                                                                                                                 12:12 PM  glm-4.6
+
+⏺ Write(/Users/trung.ngo/Documents/projects/dop-fe/docs/credit-card/phase-1-discovery-structure.md)
+  ⎿  Wrote 162 lines to /Users/trung.ngo/Documents/projects/dop-fe/docs/credit-card/phase-1-discovery-structure.md                                                          
+     # Phase 1: Discovery & Structure - Credit Card Functionality
+
+     ## 1. **File Inventory**
+
+     ### Core Implementation Files:
+
+     #### Types & Interfaces
+     - **`/src/types/credit-card.ts`** - Comprehensive TypeScript interfaces for credit cards
+     - **`/src/constants/credit-cards.ts`** - All constants, configurations, and mappings
+
+     #### Data Layer
+     - **`/src/data/credit-cards.ts`** - Mock data for Vietnamese credit cards
+     - **`/src/data/mock-credit-cards.ts`** - Additional mock data
+     - **`/src/store/use-credit-cards-store.ts`** - Zustand state management store
+
+     #### API Layer
+     - **`/src/lib/api/endpoints/credit-cards.ts`** - API endpoints (currently using mock data)
+
+     #### State Management Hooks
+     - **`/src/hooks/features/credit-card/use-credit-cards-url-sync.ts`** - URL synchronization
+     - **`/src/hooks/features/credit-card/useCreditCardsPageState.ts`** - Page state management
+     - **`/src/hooks/features/credit-card/useCreditCardsNavbarTheme.ts`** - Theme management
+     - **`/src/hooks/features/credit-card/useDebounce.ts`** - Debouncing utility
+
+     ### UI Components:
+
+     #### Main Components (`/src/components/features/credit-card/`)
+     - **`CreditCard.tsx`** - Individual card component
+     - **`CreditCardGrid.tsx`** - Grid layout for cards
+     - **`CreditCardsPageHero.tsx`** - Page hero section
+     - **`CreditCardsPageControls.tsx`** - Search, sort, and view controls
+     - **`CreditCardsPageResults.tsx`** - Results display
+     - **`CreditCardComparison.tsx`** - Comparison component
+     - **`CreditCardDetails.tsx`** - Card detail view
+
+     #### Filter & Search Components (`/src/components/features/credit-cards/`)
+     - **`CreditCardFilterPanel.tsx`** - Advanced filtering
+     - **`CreditCardSearchBar.tsx`** - Search functionality
+     - **`CreditCardSortDropdown.tsx`** - Sorting options
+     - **`CreditCardPagination.tsx`** - Pagination controls
+
+     #### Detail View Components (`/src/components/features/credit-cards/detail/`)
+     - **`CreditCardDetails.tsx`** - Main detail view
+     - **`components/ProductHeader.tsx`** - Card header with image
+     - **`components/ProductOverviewCard.tsx`** - Quick overview
+     - **`components/tabs/`** - Tabbed content (Benefits, Features, Fees, Requirements, Reviews)
+
+     #### Comparison Components (`/src/components/features/credit-cards/compare/`)
+     - **`CreditCardComparisonPanel.tsx`** - Main comparison interface
+     - **`CreditCardComparisonSnackbar.tsx`** - Comparison notifications
+     - **`components/ComparisonContent.tsx`** - Comparison table
+
+     ### Page Routes:
+     - **`/src/app/[locale]/credit-cards/page.tsx`** - Main listing page
+     - **`/src/app/[locale]/credit-cards/[slug]/page.tsx`** - Dynamic detail page
+     - **`/src/app/[locale]/credit-cards/compare/page.tsx`** - Comparison page
+
+     ### Internationalization:
+     - **`/messages/en/features/credit-cards/`** - English translations
+     - **`/messages/vi/features/credit-cards/`** - Vietnamese translations
+
+     ## 2. **Architecture**
+
+     ```mermaid
+     graph TB
+         subgraph "Presentation Layer"
+             A[Credit Cards Page] --> B[Search & Filters]
+             A --> C[Card Grid/List]
+             A --> D[Comparison Panel]
+             E[Card Detail Page] --> F[Product Header]
+             E --> G[Detail Tabs]
+             H[Comparison Page] --> I[Comparison Table]
+         end
+
+         subgraph "State Management"
+             J[Zustand Store] --> K[Filters State]
+             J --> L[Comparison State]
+             J --> M[UI State]
+         end
+
+         subgraph "Business Logic"
+             N[Credit Cards API] --> O[Search & Filter Logic]
+             N --> P[Sorting Logic]
+             N --> Q[Comparison Logic]
+         end
+
+         subgraph "Data Layer"
+             R[Mock Data] --> S[Vietnamese Credit Cards]
+             R --> T[Constants & Configs]
+         end
+
+         A --> J
+         B --> N
+         C --> N
+         D --> N
+         E --> N
+         H --> N
+         N --> R
+     ```
+
+     ### Architecture Pattern Characteristics:
+     - **Component-Based Architecture** with feature organization
+     - **Centralized State Management** using Zustand
+     - **Separation of Concerns** between UI, state, and data
+     - **Hook-Based Logic** for reusable functionality
+
+     ## 3. **Dependencies**
+
+     ### Internal Dependencies:
+     - **Store Management**: Zustand with persist middleware
+     - **UI Framework**: React with Next.js 15
+     - **Styling**: Tailwind CSS with custom components
+     - **Internationalization**: next-intl
+     - **Icons**: Lucide React
+     - **Forms**: React Hook Form
+     - **Validation**: Zod schemas
+
+     ### External Libraries:
+     - **No Payment Processors**: No Stripe, PayPal, or other payment gateways found
+     - **No Authentication Libraries**: Using custom auth implementation
+     - **Analytics**: Vercel Analytics for tracking
+     - **Testing**: Vitest with React Testing Library
+     - **Mock Service Worker**: For API mocking
+
+     ## 4. **External Context**
+
+     ### Key Features Identified:
+     1. **Comprehensive Credit Card Comparison**
+        - Side-by-side comparison of up to 3 cards
+        - Detailed comparison criteria (fees, rates, limits, etc.)
+
+     2. **Advanced Filtering System**
+        - Multiple filter categories (card type, issuer, fees, rewards)
+        - Province-based availability filtering
+        - Income requirement filtering
+
+     3. **Search & Discovery**
+        - Full-text search across card features
+        - Multiple sorting options
+        - Pagination with virtualization support
+
+     4. **Vietnamese Market Specific**
+        - Support for Vietnamese banks (Vietcombank, Techcombank, etc.)
+        - Province-based availability
+        - Localized currency and formatting
+
+     ### Security Considerations:
+     - No actual payment processing implemented
+     - Mock data usage with no real sensitive information
+     - URL state synchronization for shareable filtered views
+     - Affiliate link tracking with unique IDs
+
+     ### Missing Implementations:
+     - Real API integration (currently using mock data)
+     - Authentication for user accounts
+     - Actual card application processing
+     - Payment gateway integration
+     - Real-time rate fetching from banks
+
+     ## Summary
+
+     The credit card functionality is a comprehensive comparison platform for Vietnamese credit cards. It features a well-structured architecture with clear separation of
+     concerns, extensive filtering capabilities, and a user-friendly interface. The system currently operates with mock data and does not integrate with any actual payment
+     processors or banking APIs, making it safe for demonstration and development purposes.
+
+⏺ Now I'll launch the Code-Reviewer agent for Phase 2 deep analysis:                                                                                      12:13 PM  glm-4.6
+
+  code-reviewer(Phase 2 Analysis: Credit Card)
+  ⎿  Prompt:
+       You must first READ the methodology file at `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep
+       Analysis' protocol defined in that file as your operating procedure. Use the checklists and reporting templates exactly as described there.
+
+       Input from Phase 1:
+       - Found comprehensive credit card comparison platform
+       - Key files identified in /src/components/features/credit-card/ and related directories
+       - Uses Zustand for state management
+       - Currently operates with mock data, no real payment processing
+       - Vietnamese market focus with province-based filtering
+
+       Your mission:
+       1. Analyze business logic implementation
+       2. Review data models and validation
+       3. Check security considerations
+       4. Identify patterns and best practices
+       5. Document potential improvements
+
+       Focus on:
+       - State management patterns in Zustand store
+       - Filter and search implementation
+       - Comparison logic
+       - Data validation with Zod
+       - Component reusability patterns
+
+       Report your findings using the exact structure defined in the "OUTPUT: Analysis Report" section of the methodology file.
+
+     > You must first READ the methodology file at `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep 
+     Read(.claude/skills/codebase-exploration/SKILL.md)
+     Read 266 lines
+     Search(pattern: "src/components/features/credit-card/**/*.ts")
+       ⎿  Found 0 files
+     Search(pattern: "credit-card|creditCard")
+       ⎿  docs/credit-card/phase-1-discovery-structure.md
+     Read(src/store/use-credit-cards-store.ts)
+     Read 960 lines
+     Read(src/types/credit-card.ts)
+     Read 545 lines
+     Read(src/components/features/credit-cards/hooks/useCreditCardFilters.ts)
+     Read 352 lines
+     Search(pattern: "zod|Zod", path: "/Users/trung.ngo/Documents/projects/dop-fe/src")
+       ⎿  src/hooks/form/use-form-validation.ts
+     Search(pattern: "credit.*card.*zod|zod.*credit.*card", path: "/Users/trung.ngo/Documents/projects/dop-fe/src", output_mode: "content")
+       ⎿  Found 0 lines
+     Read(src/components/features/credit-cards/compare/hooks/useComparisonData.ts)
+     Read 280 lines
+     Read(src/utils/csrf-protection.ts)
+     Read 274 lines
+     Read(src/utils/secure-storage.ts)
+     Read 238 lines
+     Read(src/components/features/credit-cards/hooks/useCreditCardFilters.test.ts)
+     Read 142 lines
+     Read(src/constants/credit-cards.ts)
+     Read 663 lines
+  ⎿  Prompt:                                                                                                                                                                  
+       You must first READ the methodology file at .claude/skills/codebase-exploration/SKILL.md to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep
+       Analysis' protocol defined in that file as your operating procedure. Use the checklists and reporting templates exactly as described there.
+
+       Input from Phase 1:
+       - Found comprehensive credit card comparison platform
+       - Key files identified in /src/components/features/credit-card/ and related directories
+       - Uses Zustand for state management
+       - Currently operates with mock data, no real payment processing
+       - Vietnamese market focus with province-based filtering
+
+       Your mission:
+       1. Analyze business logic implementation
+       2. Review data models and validation
+       3. Check security considerations
+       4. Identify patterns and best practices
+       5. Document potential improvements
+
+       Focus on:
+       - State management patterns in Zustand store
+       - Filter and search implementation
+       - Comparison logic
+       - Data validation with Zod
+       - Component reusability patterns
+
+       Report your findings using the exact structure defined in the "OUTPUT: Analysis Report" section of the methodology file.
+  ⎿  > You must first READ the methodology file at `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep 
+     Analysis' protocol defined in that file as your operating procedure. Use the checklists and reporting templates exactly as described there.
+
+     Input from Phase 1:
+     - Found comprehensive credit card comparison platform
+     - Key files identified in /src/components/features/credit-card/ and related directories
+     - Uses Zustand for state management
+     - Currently operates with mock data, no real payment processing
+     - Vietnamese market focus with province-based filtering
+
+     Your mission:
+     1. Analyze business logic implementation
+     2. Review data models and validation
+     3. Check security considerations
+     4. Identify patterns and best practices
+     5. Document potential improvements
+
+     Focus on:
+     - State management patterns in Zustand store
+     - Filter and search implementation
+     - Comparison logic
+     - Data validation with Zod
+     - Component reusability patterns
+
+     Report your findings using the exact structure defined in the "OUTPUT: Analysis Report" section of the methodology file. 
+  ⎿  Read(.claude/skills/codebase-exploration/SKILL.md)
+
+  ⎿  Read 266 lines
+
+  ⎿  Search(pattern: "src/components/features/credit-card/**/*.ts")
+
+  ⎿    ⎿  Found 0 files
+
+  ⎿  Search(pattern: "credit-card|creditCard")
+
+  ⎿    ⎿  Found 99 files                                                                  
+          docs/credit-card/phase-1-discovery-structure.md
+          docs/user-onboarding/phase-2-analysis.md
+          src/components/user-onboarding/constants/field-types.ts
+          src/components/features/credit-card/CreditCardsPageControls.tsx
+          src/components/features/credit-card/CreditCardsPageHero.tsx
+          src/hooks/features/credit-card/useCreditCardsNavbarTheme.ts
+          src/components/features/credit-card/CreditCardsThemeProvider.tsx
+          src/configs/navbar-config.ts
+          src/components/features/insurance/InsuranceDetails.tsx
+          src/lib/i18n/split-loader.ts
+          src/components/features/credit-card/CreditCardDetails.tsx
+          src/components/features/credit-card/CreditCardComparison.tsx
+          src/components/features/credit-cards/detail/components/tabs/ReviewsTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/RequirementsTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/FeesTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/FeaturesTab.tsx
+          src/components/features/credit-cards/detail/components/tabs/BenefitsTab.tsx
+          src/components/features/credit-cards/detail/components/ServiceCard.tsx
+          src/components/features/credit-cards/detail/components/ProductSidebar.tsx
+          src/components/features/credit-cards/detail/components/ProductOverviewCard.tsx
+          src/components/features/credit-cards/detail/components/ProductHeader.tsx
+          src/components/features/credit-cards/detail/components/PaymentMethodCard.tsx
+          src/components/features/credit-cards/detail/CreditCardDetails.tsx
+          src/components/features/credit-cards/compare/components/ComparisonHeader.tsx
+          src/components/features/credit-cards/compare/components/ComparisonEmptyState.tsx
+          src/components/features/credit-cards/compare/components/ComparisonContent.tsx
+          src/components/features/credit-cards/compare/CreditCardComparisonSnackbar.tsx
+          src/components/features/credit-cards/compare/CreditCardComparisonPanel.tsx
+          src/components/features/credit-cards/EmptyState.tsx
+          src/components/features/credit-cards/CreditCardSortDropdown.tsx
+          src/components/features/credit-cards/CreditCardSearchBar.tsx
+          src/components/features/credit-cards/CreditCardResultsHeader.tsx
+          src/components/features/credit-cards/CreditCardPagination.tsx
+          src/components/features/credit-cards/CreditCardPageControls.tsx
+          src/components/features/credit-cards/CreditCardPageContent.tsx
+          src/components/features/credit-cards/CreditCardFilterSidebar.tsx
+          src/components/features/credit-cards/CreditCardFilterPanel.tsx
+          src/components/features/credit-cards/CreditCardActiveFilters.tsx
+          src/components/features/credit-card/SortDropdown.tsx
+          src/components/features/credit-card/SearchBar.tsx
+          src/components/features/credit-card/Pagination.tsx
+          src/components/features/credit-card/FilterPanel.tsx
+          src/components/features/credit-card/CreditCardsPageResults.tsx
+          src/components/features/credit-card/CreditCardsPageHeader.tsx
+          src/components/features/credit-card/CreditCardGrid.tsx
+          src/components/features/credit-card/CreditCard.tsx
+          scripts/simple-migration.js
+          scripts/migrate-translations.js
+          scripts/extract-credit-card-keys.js
+          scripts/analyze-translations.js
+          scripts/README.md
+          messages/vi/features/credit-cards/main.json
+          messages/vi/features/credit-cards/listing.json
+          messages/vi/features/credit-cards/detail.json
+          messages/vi/features/credit-cards/credit-cards.json
+          messages/en/features/credit-cards/main.json
+          messages/en/features/credit-cards/listing.json
+          messages/en/features/credit-cards/detail.json
+          messages/en/features/credit-cards/credit-cards.json
+          messages/vi.json.bak
+          src/app/[locale]/credit-cards/compare/page.tsx
+          messages/en.json.bak
+          src/lib/tracking/privacy.ts
+          src/components/features/credit-cards/hooks/useCreditCardFilters.test.ts
+          src/components/features/credit-cards/CreditCardSearchBar.test.tsx
+          src/lib/security/security-tests.ts
+          src/lib/security/integrated-security.ts
+          src/lib/utils/auth-guards.ts
+          src/constants/credit-cards.ts
+          src/data/mock-credit-cards.ts
+          src/components/financial-tools/FinancialComparison.tsx
+          src/components/features/credit-cards/hooks/useCreditCardFilters.ts
+          src/components/features/credit-cards/components/VirtualizedCardGrid.tsx
+          src/lib/api/endpoints/credit-cards.ts
+          src/components/financial-tools/LoanCalculator.tsx
+          src/types/credit-card.ts
+          src/components/features/credit-cards/hooks/index.ts
+          src/app/[locale]/admin/(protected)/page.tsx
+          src/components/features/credit-cards/index.ts
+          src/components/features/credit-cards/detail/index.ts
+          src/store/use-credit-cards-store.ts
+          src/components/features/credit-cards/compare/index.ts
+          src/components/features/credit-cards/compare/hooks/useComparisonData.ts
+          src/app/[locale]/credit-cards/page.tsx
+          src/types/forms/loan-form.ts
+          src/app/[locale]/credit-cards/[slug]/page.tsx
+          src/components/features/insurance/detail/components/tabs/PaymentTab.tsx
+          src/hooks/features/credit-card/useCreditCardsPageState.ts
+          src/configs/insurance-navbar-config.ts
+          src/components/features/credit-card/CreditCardCatalog.tsx
+          src/hooks/features/credit-card/use-credit-cards-url-sync.ts
+          src/data/credit-cards.ts
+          src/components/features/credit-card/CreditCardSkeleton.tsx
+          src/lib/financial-data/vietnamese-financial-data.ts
+          src/hooks/use-auth-guards.ts
+          src/components/organisms/homepage/onboarding-card.stories.tsx
+          src/components/organisms/homepage/features.tsx
+          src/configs/homepage-config.ts
+          src/configs/footer-config.ts
+  ⎿  Read(src/store/use-credit-cards-store.ts)
+
+  ⎿  Read 960 lines
+
+  ⎿  Read(src/types/credit-card.ts)
+
+  ⎿  Read 545 lines
+
+  ⎿  Read(src/components/features/credit-cards/hooks/useCreditCardFilters.ts)
+
+  ⎿  Read 352 lines
+
+  ⎿  Search(pattern: "zod|Zod", path: "/Users/trung.ngo/Documents/projects/dop-fe/src")
+
+  ⎿    ⎿  Found 5 files                                    
+          src/hooks/form/use-form-validation.ts
+          src/hooks/form/use-form-validation.test.ts
+          src/components/renderer/types/data-driven-ui.d.ts
+          src/components/renderer/builders/zod-generator.ts
+          src/components/ui/form.stories.tsx
+  ⎿  Search(pattern: "credit.*card.*zod|zod.*credit.*card", path: "/Users/trung.ngo/Documents/projects/dop-fe/src", output_mode: "content")
+
+  ⎿    ⎿  Found 0 lines
+
+  ⎿  Read(src/components/features/credit-cards/compare/hooks/useComparisonData.ts)
+
+  ⎿  Read 280 lines
+
+  ⎿  Read(src/utils/csrf-protection.ts)
+
+  ⎿  Read 274 lines
+
+  ⎿  Read(src/utils/secure-storage.ts)
+
+  ⎿  Read 238 lines
+
+  ⎿  Read(src/components/features/credit-cards/hooks/useCreditCardFilters.test.ts)
+
+  ⎿  Read 142 lines
+
+  ⎿  Read(src/constants/credit-cards.ts)
+
+  ⎿  Read 663 lines
+
+  ⎿  Response:
+       Now I'll compile my findings into a comprehensive Phase 2 Deep Analysis report:
+
+       Phase 2: Deep Analysis Report
+
+       Business Logic
+
+       1. State Management with Zustand
+
+       Location: /Users/trung.ngo/Documents/projects/dop-fe/src/store/use-credit-cards-store.ts
+
+       The credit card platform uses Zustand for state management with the following key patterns:
+
+       - Immer middleware: Used for immutable state updates, preventing accidental mutations
+       - Persistence: Selected state is persisted to localStorage using Zustand's persist middleware
+       - DevTools: Integrated for debugging support
+       - Selector-based hooks: Multiple specialized hooks (useFilteredCreditCards, useCreditCardComparison, etc.) that use useShallow to prevent unnecessary re-renders
+
+       Critical Business Rules:
+       - Maximum 3 cards can be compared simultaneously
+       - Pagination resets to page 1 when filters or search changes
+       - Active filter count is calculated and tracked for UI feedback
+       - Comparison state validates selected cards exist before adding
+
+       2. Filter Implementation Logic
+
+       Location: /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/hooks/useCreditCardFilters.ts
+
+       The filtering system provides:
+       - Array filters: Multi-select for categories, networks, issuers, etc.
+       - Range filters: For annual fees, income requirements, age limits
+       - Boolean filters: For features like welcome offers, insurance, etc.
+       - Active filter tracking: Real-time count and display of active filters
+
+       Key Algorithm:
+       // Filter application in store (lines 192-364)
+       const applyFilters = (cards: CreditCard[], filters: CreditCardFilters, searchQuery: string): CreditCard[] => {
+         return cards.filter((card) => {
+           // Multiple filter checks with early returns for performance
+           if (!passesAllFilters(card, filters)) return false;
+           if (!matchesSearchQuery(card, searchQuery)) return false;
+           return true;
+         });
+       };
+
+       3. Comparison Logic
+
+       Location: /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/compare/hooks/useComparisonData.ts
+
+       The comparison feature implements:
+       - Weighted scoring system: Customizable weights for different card attributes
+       - Normalization: Min-max normalization for fair comparison across different metrics
+       - Best value identification: Highlights cards with optimal values for each metric
+
+       Scoring Algorithm:
+       // Normalized scoring (lines 184-216)
+       const feeScore = ((maxFee - card.annualFee) / (maxFee - minFee)) * 100;
+       score += feeScore * weights.annualFee;
+
+       Data Models & Validation
+
+       1. Comprehensive Type Definitions
+
+       Location: /Users/trung.ngo/Documents/projects/dop-fe/src/types/credit-card.ts
+
+       The CreditCard interface is extensive with:
+       - Financial details: Annual fees, interest rates, credit limits
+       - Requirements: Income, age, employment types, provinces
+       - Features: Rewards programs, insurance, digital features
+       - Metadata: Ratings, review counts, SEO fields
+
+       Strengths:
+       - Comprehensive coverage of all credit card attributes
+       - Optional fields marked clearly for backward compatibility
+       - Well-documented with JSDoc comments
+
+       Concerns:
+       - No runtime validation (Zod schemas missing)
+       - Some fields have any type (e.g., welcomeOffers, specialPromotions)
+       - Large interface could be split into smaller, focused interfaces
+
+       2. Filter Interface
+
+       The CreditCardFilters interface provides:
+       - Strong typing for all filter options
+       - Range filters with min/max properties
+       - Array filters for multi-select options
+       - Boolean flags for feature-based filtering
+
+       Security & Safety
+
+       1. CSRF Protection
+
+       Location: /Users/trung.ngo/Documents/projects/dop-fe/src/utils/csrf-protection.ts
+
+       Implemented:
+       - Token generation with expiration
+       - Request validation middleware
+       - Automatic token refresh on failure
+       - React hook for component integration
+
+       Strengths:
+       - Comprehensive CSRF protection for state-changing requests
+       - Proper token expiration handling
+       - Secure token storage
+
+       Concerns:
+       - CSRF tokens stored in regular sessionStorage (not encrypted)
+
+       2. Secure Storage
+
+       Location: /Users/trung.ngo/Documents/projects/dop-fe/src/utils/secure-storage.ts
+
+       Security Measures:
+       - AES encryption for sensitive data
+       - Fallback mechanisms for encryption failures
+       - Separate storage utilities for different data types
+       - HTTPS context validation
+
+       Critical Issues:
+       - Hardcoded fallback encryption key: "fallback-key-change-in-production" should never be used in production
+       - No key rotation: Encryption key is static
+       - CryptoJS dependency: Using crypto-js for client-side encryption (less secure than Web Crypto API)
+
+       3. Input Validation
+
+       Missing:
+       - No Zod or similar runtime validation for credit card data
+       - No input sanitization for search queries
+       - No rate limiting for API requests
+
+       Performance Patterns
+
+       1. Memoization
+
+       - useMemo extensively used for expensive calculations
+       - Selector-based state access with shallow comparison
+       - Pre-calculated normalization values in comparison
+
+       2. Virtualization
+
+       Virtualized card grid implementation exists but needs verification of actual usage.
+
+       3. Debouncing
+
+       Constants define debounce times for search (300ms) and filters (500ms), but actual implementation needs verification.
+
+       Testing Coverage
+
+       1. Unit Tests
+
+       Location: /Users/trung.ngo/Documents/projects/dop-fe/src/components/features/credit-cards/hooks/useCreditCardFilters.test.ts
+
+       Coverage:
+       - Filter initialization
+       - Filter updates and clearing
+       - Boolean and array filter toggling
+       - Callback invocation
+       - Range filter updates
+
+       Strengths:
+       - Comprehensive test coverage for filter hook
+       - Good use of act() for state updates
+       - Mocked dependencies properly
+
+       Missing Tests:
+       - No tests for Zustand store
+       - No tests for comparison logic
+       - No integration tests
+
+       Key Insights
+
+       Good Patterns
+
+       1. State Management: Excellent use of Zustand with proper middleware and selector hooks
+       2. Type Safety: Comprehensive TypeScript interfaces with clear documentation
+       3. Component Architecture: Good separation of concerns with specialized hooks
+       4. Internationalization: Full Vietnamese market support with localized content
+
+       Technical Debt
+
+       1. Missing Runtime Validation: No Zod schemas for data validation
+       2. Security Concerns: Hardcoded encryption key, no key rotation
+       3. Large Interfaces: CreditCard interface too broad, should be split
+       4. Incomplete Testing: Missing tests for critical business logic
+
+       Recommendations
+
+       1. Immediate (Critical):
+         - Replace hardcoded encryption key with environment variable
+         - Implement Zod validation schemas for all external data
+         - Add rate limiting for API endpoints
+       2. Short Term (Important):
+         - Split large CreditCard interface into smaller composable interfaces
+         - Add comprehensive test coverage for store and comparison logic
+         - Implement Web Crypto API for client-side encryption
+       3. Long Term (Suggestions):
+         - Consider implementing optimistic updates for better UX
+         - Add analytics tracking for user behavior
+         - Implement server-side filtering for large datasets
+
+       Security Checklist Status
+
+       - CSRF protection implemented
+       - Sensitive data encryption
+       - HTTPS context validation
+       - Runtime data validation (Zod)
+       - Input sanitization
+       - Rate limiting
+       - Secure key management
+       - Dependency security audit
+
+       This analysis reveals a well-structured application with good architectural patterns, but some critical security issues that need immediate attention, particularly
+       around encryption key management and data validation.
+  ⎿  Done (13 tool uses · 58.7k tokens · 1m 11s)

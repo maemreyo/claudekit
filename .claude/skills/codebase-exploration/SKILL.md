@@ -33,16 +33,16 @@ This skill includes a Python search utility for rapid codebase analysis:
 
 ```bash
 # Search for files matching pattern
-python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "auth.*service"
+python3 .claude/skills/codebase-exploration/scripts/search.py "auth.*service"
 
 # Analyze architecture
-python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "" --type architecture
+python3 .claude/skills/codebase-exploration/scripts/search.py "" --type architecture
 
 # Find dependencies for specific framework
-python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "" --type dependencies --framework react
+python3 .claude/skills/codebase-exploration/scripts/search.py "" --type dependencies --framework react
 
 # Search for specific code patterns
-python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "useState.*useEffect" --type patterns
+python3 .claude/skills/codebase-exploration/scripts/search.py "useState.*useEffect" --type patterns
 ```
 
 ## Quick Analysis Workflow
@@ -51,13 +51,13 @@ When you need rapid insights about the codebase:
 
 ```bash
 # 1. Get overview
-python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "" --type architecture
+python3 .claude/skills/codebase-exploration/scripts/search.py "" --type architecture
 
 # 2. Find files for feature
-python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "feature-name" --type files
+python3 .claude/skills/codebase-exploration/scripts/search.py "feature-name" --type files
 
 # 3. Analyze patterns
-python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "TODO|FIXME|XXX" --type patterns
+python3 .claude/skills/codebase-exploration/scripts/search.py "TODO|FIXME|XXX" --type patterns
 ```
 
 ## Phase 1: Discovery & Structure

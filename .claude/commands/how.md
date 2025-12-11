@@ -67,7 +67,7 @@ Deep codebase exploration using a multi-phase SubAgent approach with per-phase d
 ## Core Methodology
 
 **Reference**: `.claude/skills/methodology/intelligent-planning/SKILL.md`
-**Exploration Skill**: `.claude/skills/methodology/codebase-exploration/SKILL.md`
+**Exploration Skill**: `.claude/skills/codebase-exploration/SKILL.md`
 
 ### Multi-Phase SubAgent Workflow
 
@@ -196,7 +196,7 @@ mkdir -p "$OUTPUT_DIR"
 
 **Primary Agent**: Scout (`.claude/agents/scout.md`)
 **Secondary Agent**: Scout External (`.claude/agents/scout-external.md`)
-**Methodology Reference**: `.claude/skills/methodology/codebase-exploration/SKILL.md`
+**Methodology Reference**: `.claude/skills/codebase-exploration/SKILL.md`
 
 **Goal**: Find all code related to the topic AND map architecture, dependencies, and external context.
 
@@ -207,11 +207,11 @@ mkdir -p "$OUTPUT_DIR"
 **Execution Steps**:
 
 1. **Initialize Methodology**:
-   - **Action**: Read `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 1 methodology.
+   - **Action**: Read `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 1 methodology.
    - **Context**: Use the finding strategies defined in the "Phase 1: Discovery & Structure" section.
 
 2. **Dispatch Scout Agent**:
-   - **Instruction**: "You must first READ the methodology file at `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 1 methodology. Then, ADOPT the 'Phase 1: Discovery & Structure' protocol defined in that file as your operating procedure for this task. Execute the search strategies exactly as described there."
+   - **Instruction**: "You must first READ the methodology file at `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 1 methodology. Then, ADOPT the 'Phase 1: Discovery & Structure' protocol defined in that file as your operating procedure for this task. Execute the search strategies exactly as described there."
    - **Context**:
      - Argument: "$ARGUMENTS"
      - Source: {{ if --source }}$SOURCE_PATH{{ else }}Auto-detected{{ endif }}
@@ -250,7 +250,7 @@ Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
 
 **Primary Agent**: Code-Reviewer (`.claude/agents/code-reviewer.md`)
 **Secondary Agents**: Security Auditor, Database Admin
-**Methodology Reference**: `.claude/skills/methodology/codebase-exploration/SKILL.md`
+**Methodology Reference**: `.claude/skills/codebase-exploration/SKILL.md`
 
 **Goal**: Deep-dive into implementation details, business logic, safety, and patterns.
 
@@ -261,11 +261,11 @@ Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
 **Execution Steps**:
 
 1. **Initialize Methodology**:
-   - **Action**: Read `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 2 analysis protocols.
+   - **Action**: Read `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 2 analysis protocols.
    - **Context**: Focus on the "Phase 2: Deep Analysis" section and its checklists.
 
 2. **Dispatch Code-Reviewer Agent**:
-   - **Instruction**: "You must first READ the methodology file at `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep Analysis' protocol defined in that file as your operating procedure. Use the checklists and reporting templates exactly as described."
+   - **Instruction**: "You must first READ the methodology file at `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep Analysis' protocol defined in that file as your operating procedure. Use the checklists and reporting templates exactly as described."
    - **Context**:
      - Input: Phase 1 findings
      - Target: Deep analysis of business logic and safety
