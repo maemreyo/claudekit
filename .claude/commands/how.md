@@ -211,8 +211,8 @@ mkdir -p "$OUTPUT_DIR"
    - **Context**: Use the finding strategies defined in the "Phase 1: Discovery & Structure" section.
 
 2. **Dispatch Scout Agent**:
-   - Use the **Mission Prompt Template** from the skill file.
-   - Fill in:
+   - **Instruction**: "You must first READ the methodology file at `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 1 methodology. Then, ADOPT the 'Phase 1: Discovery & Structure' protocol defined in that file as your operating procedure for this task. Execute the search strategies exactly as described there."
+   - **Context**:
      - Argument: "$ARGUMENTS"
      - Source: {{ if --source }}$SOURCE_PATH{{ else }}Auto-detected{{ endif }}
      - Mode: {{ if --comprehensive }}Comprehensive{{ else }}Standard{{ endif }}
@@ -265,8 +265,10 @@ Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
    - **Context**: Focus on the "Phase 2: Deep Analysis" section and its checklists.
 
 2. **Dispatch Code-Reviewer Agent**:
-   - Use the **Mission Prompt Template** from the skill file.
-   - Feed in the findings from Phase 1.
+   - **Instruction**: "You must first READ the methodology file at `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep Analysis' protocol defined in that file as your operating procedure. Use the checklists and reporting templates exactly as described."
+   - **Context**:
+     - Input: Phase 1 findings
+     - Target: Deep analysis of business logic and safety
 
 3. **Specialized Checks** (Delegation):
    - **Security Check**: Use `security-auditor` if sensitive logic (auth, payments, PII) is identified.
