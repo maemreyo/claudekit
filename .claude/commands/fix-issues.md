@@ -78,24 +78,62 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    - The researcher agent will use pattern-analysis and sequential-thinking skills automatically
    - No manual skill loading required
 
-2. **Load Source Data**
+2. **Load Source Data & Discovery Context**
    ```bash
-   # If direct string argument provided (e.g., /fix-issues "fix error..."):
-   # Use it as the issue description and skip file loading
-   
-   # Else if --from specified, read that file
-   
-   # Else, find latest analysis artifact
-   ls -t .claude/artifacts/recent-changes-*.md | head -1
+   # IMPORTANT: Always check for Phase 1 discovery from /how command first!
+
+   # Step 1: Look for Phase 1 discovery documents
+   DISCOVERY_FILES=$(find docs/ -name "phase-1-discovery-structure.md" 2>/dev/null)
+   if [ ! -z "$DISCOVERY_FILES" ]; then
+     echo "Found discovery documents:"
+     echo "$DISCOVERY_FILES"
+     # Use the most recent discovery
+     DISCOVERY_FILE=$(echo "$DISCOVERY_FILES" | head -1)
+   fi
+
+   # Step 2: If direct string argument provided (e.g., /fix-issues "fix error..."):
+   # Use it as the issue description but still load discovery context if available
+
+   # Step 3: Else if --from specified, read that file
+
+   # Step 4: Else, find latest analysis artifact
+   if [ -z "$SOURCE_DATA" ]; then
+     SOURCE_DATA=$(ls -t .claude/artifacts/recent-changes-*.md 2>/dev/null | head -1)
+   fi
+
+   # CRITICAL: If no discovery found and issues are from codebase:
+   # Recommend running /how first to understand the context
+   if [ -z "$DISCOVERY_FILE" ] && [ -z "$--from" ] && [ -z "$ARGUMENTS" ]; then
+     echo "WARNING: No discovery context found. Consider running '/how [feature]' first."
+     echo "This will help identify all related files and architecture."
+   fi
    ```
 
 3. **Extract Issues**
-   - If direct argument: Parse the user's request as a generic 'bug' or 'task' issue.
-   - If from analysis:
-     - Parse "⚠️ Quan Sát & Gợi Ý" section
-     - Parse "🔄 Hành Động Đề Xuất" section
-     - Parse "Risk Assessment" notes
-     - Parse comparison với plan (missing items)
+
+   **IMPORTANT: Always cross-reference with discovery context!**
+
+   - **Step 3.1: Extract from Source**
+     - If direct argument: Parse the user's request as a generic 'bug' or 'task' issue.
+     - If from analysis:
+       - Parse "⚠️ Quan Sát & Gợi Ý" section
+       - Parse "🔄 Hành Động Đề Xuất" section
+       - Parse "Risk Assessment" notes
+       - Parse comparison với plan (missing items)
+
+   - **Step 3.2: Cross-Reference with Discovery File**
+     - If discovery file exists:
+       - Check File Inventory section for all related files
+       - Verify issues affect files discovered in Phase 1
+       - Add missing files that weren't in the original issue list
+       - Update severity based on architecture understanding
+
+   - **Step 3.3: Enrich Issue Context**
+     - For each issue, add:
+       - `discovery_files`: List of all related files from Phase 1
+       - `architecture_context`: How the issue fits into the system
+       - `dependencies`: List of dependencies that might be affected
+       - `ripple_effects`: Potential impact on other components
 
 4. **Classify Issues** (using pattern-analysis)
    
@@ -119,26 +157,52 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 5. **Build Issue Registry**
    ```json
    {
+     "discovery_context": {
+       "discovery_file": "docs/authentication/phase-1-discovery-structure.md",
+       "file_inventory": [
+         "src/auth/login.js",
+         "src/auth/models.js",
+         "src/auth/middleware.js",
+         "src/auth/services.js",
+         "src/utils/errors.js"
+       ],
+       "architecture": "Authentication system with JWT tokens",
+       "last_updated": "2024-01-15T10:30:00Z"
+     },
      "issues": [
        {
          "id": "ISS-001",
          "type": "tests",
          "severity": "high",
          "title": "Missing tests for authentication logic",
-         "files": ["src/auth/login.js"],
+         "primary_files": ["src/auth/login.js"],
+         "discovery_files": [
+           "src/auth/login.js",
+           "src/auth/models.js",
+           "src/auth/middleware.js"
+         ],
          "description": "New login flow has no test coverage",
-         "estimated_effort": "30m",
-         "dependencies": []
+         "architecture_context": "Part of authentication microservice",
+         "dependencies": ["src/auth/models.js", "src/auth/middleware.js"],
+         "ripple_effects": ["Affects all protected routes", "Registration flow shares models"],
+         "estimated_effort": "30m"
        },
        {
          "id": "ISS-002",
          "type": "security",
          "severity": "critical",
          "title": "SQL injection vulnerability in search",
-         "files": ["src/api/search.js"],
+         "primary_files": ["src/api/search.js"],
+         "discovery_files": [
+           "src/api/search.js",
+           "src/models/Search.js",
+           "src/db/queries.js"
+         ],
          "description": "User input not sanitized in SQL query",
-         "estimated_effort": "15m",
-         "dependencies": []
+         "architecture_context": "Search API endpoint used by dashboard and public search",
+         "dependencies": ["src/models/Search.js", "src/db/connection.js"],
+         "ripple_effects": ["All search endpoints vulnerable", "Potential data breach"],
+         "estimated_effort": "15m"
        }
      ]
    }
@@ -282,29 +346,97 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 
 **For Each Subtask (Group of Related Issues)**:
 
-1. **Pre-Fix Validation**
+1. **Load Context & Discovery Information (CRITICAL)**
+
+   **Step 1.1: Read Phase 1 Discovery Results**
+   ```bash
+   # Check if Phase 1 discovery exists from /how command
+   # Look for discovery documentation in docs/
+   FIND_DIRS="docs/*/phase-1-discovery-structure.md"
+
+   for dir in $FIND_DIRS; do
+     if [ -f "$dir" ]; then
+       echo "Found Phase 1 discovery: $dir"
+       DISCOVERY_FILE="$dir"
+       break
+     fi
+   done
+
+   # Also check for recent exploration artifacts
+   if [ -z "$DISCOVERY_FILE" ]; then
+     LATEST_DISCOVERY=$(find .claude/artifacts/ -name "*discovery*" -type f -newermt "1 day ago" 2>/dev/null | head -1)
+     if [ ! -z "$LATEST_DISCOVERY" ]; then
+       DISCOVERY_FILE="$LATEST_DISCOVERY"
+     fi
+   fi
+   ```
+
+   **Step 1.2: Agent Must Read Context Before Fixing**
+
+   For each agent dispatch, include this mandatory instruction:
+   ```markdown
+   ## CRITICAL: Read Discovery Context First
+
+   Before attempting any fixes, you MUST:
+
+   1. **Read the Phase 1 Discovery Document**:
+      - File: [DISCOVERY_FILE_PATH]
+      - Extract ALL files listed in the File Inventory
+      - Understand the complete architecture and dependencies
+
+   2. **Review All Related Files**:
+      - For each file mentioned in the issue, read it completely
+      - Check imports, dependencies, and related components
+      - Look for similar patterns elsewhere in the codebase
+
+   3. **Understand the Full Context**:
+      - How does this component fit into the overall system?
+      - What are the data flows and interactions?
+      - Are there edge cases or special conditions not immediately obvious?
+
+   4. **Document Your Understanding**:
+      - List all files you've reviewed
+      - Summarize the current implementation
+      - Identify potential ripple effects of your changes
+
+   DO NOT proceed with fixes until you have completed this context review!
+   ```
+
+2. **Pre-Fix Validation**
    ```bash
    # Create checkpoint
    git add -A
    git stash push -m "Before fix: [ISS-XXX]"
-   
+
    # Run existing tests (if any)
    npm test || pytest || cargo test
    ```
 
-2. **Execute Fix**
+3. **Execute Fix**
    
    **Example: Missing Tests**
    ```markdown
    Agent: tester
    Task: Write tests for src/auth/login.js
 
-   Requirements:
-   - Test success case
-   - Test failure cases (wrong password, non-existent user)
-   - Test edge cases (empty input, SQL injection attempts)
-   - The tester agent will automatically trigger comprehensive-testing skill
-   - Achieve >80% coverage
+   Context Requirements:
+   1. Read Phase 1 discovery document to understand:
+      - Complete authentication flow
+      - All related files (models, services, middleware)
+      - Dependencies and data flow
+
+   2. Review existing implementation:
+      - src/auth/login.js (main file)
+      - src/auth/models.js (user model)
+      - src/auth/middleware.js (auth middleware)
+      - src/auth/services.js (auth services)
+
+   3. Write comprehensive tests:
+      - Test success case
+      - Test failure cases (wrong password, non-existent user)
+      - Test edge cases (empty input, SQL injection attempts)
+      - The tester agent will automatically trigger comprehensive-testing skill
+      - Achieve >80% coverage
    ```
 
    **Example: Security Vulnerability**
@@ -312,12 +444,24 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    Agent: security-auditor
    Task: Fix SQL injection in src/api/search.js
 
-   Requirements:
-   - Use parameterized queries
-   - Validate and sanitize all user input
-   - Add input length limits
-   - The security-auditor will apply defense-in-depth and OWASP patterns
-   - Follow OWASP guidelines
+   Context Requirements:
+   1. Read Phase 1 discovery to understand:
+      - Complete search API architecture
+      - Database models and relationships
+      - All endpoints that use the vulnerable pattern
+
+   2. Review all affected files:
+      - src/api/search.js (main vulnerable file)
+      - src/models/Search.js (data model)
+      - src/db/queries.js (shared query utilities)
+      - Check for similar patterns in other API endpoints
+
+   3. Implement security fixes:
+      - Use parameterized queries
+      - Validate and sanitize all user input
+      - Add input length limits
+      - The security-auditor will apply defense-in-depth and OWASP patterns
+      - Fix similar patterns across the codebase
    ```
 
    **Example: Performance Issue**
@@ -325,12 +469,24 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    Agent: backend-architect
    Task: Fix N+1 query in dashboard
 
-   Requirements:
-   - Use eager loading / JOIN
-   - Add database index if needed
-   - Benchmark before/after
-   - Ensure <100ms response time
-   - Apply performance optimization patterns
+   Context Requirements:
+   1. Read Phase 1 discovery to understand:
+      - Complete dashboard data flow
+      - Database schema and relationships
+      - Frontend components consuming the API
+
+   2. Review entire data flow:
+      - src/api/dashboard.js (API endpoint)
+      - src/models/Report.js (data model)
+      - migrations/2024-*.sql (schema definitions)
+      - src/components/Dashboard.tsx (frontend consumer)
+
+   3. Optimize performance:
+      - Use eager loading / JOIN
+      - Add database index if needed
+      - Benchmark before/after
+      - Ensure <100ms response time
+      - Apply performance optimization patterns
    ```
 
    **Example: Bug Fix**
@@ -338,11 +494,25 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    Agent: debugger
    Task: Fix runtime error in user authentication
 
-   Requirements:
-   - The debugger will automatically trigger root-cause-tracing skill
-   - Apply systematic-debugging methodology
-   - Implement proper error-handling patterns
-   - Add regression tests
+   Context Requirements:
+   1. Read Phase 1 discovery to understand:
+      - Complete authentication system architecture
+      - Error handling patterns used throughout
+      - Integration with other systems
+
+   2. Trace the full authentication flow:
+      - src/auth/login.js (where error occurs)
+      - src/auth/middleware.js (auth checks)
+      - src/auth/services.js (business logic)
+      - src/utils/errors.js (error handling utilities)
+      - Check similar auth flows (register, logout, reset password)
+
+   3. Implement robust fix:
+      - The debugger will automatically trigger root-cause-tracing skill
+      - Apply systematic-debugging methodology
+      - Implement proper error-handling patterns
+      - Add regression tests
+      - Fix similar issues throughout the auth system
    ```
 
 3. **Post-Fix Validation**
@@ -629,12 +799,38 @@ All agents have automatic skill triggers based on task types:
 
 ## Best Practices
 
-1. **Always run in --interactive for production code**
+1. **ALWAYS read Phase 1 discovery before fixing**
+   - Never fix issues in isolation
+   - Understand the complete architecture and all related files
+   - Check for similar patterns elsewhere in the codebase
+
 2. **Use --plan-only first** to review strategy
-3. **Run tests after each fix** to catch regressions
-4. **Create checkpoints** before risky changes
-5. **Group related fixes** in same commit
-6. **Document failed fixes** for manual review
+   - Review which files will be affected
+   - Understand the complete context before execution
+
+3. **Always run in --interactive for production code**
+   - Manual approval for potentially breaking changes
+   - Review proposed fixes with full context
+
+4. **Run tests after each fix** to catch regressions
+   - Ensure no existing functionality is broken
+   - Add regression tests for fixed issues
+
+5. **Create checkpoints** before risky changes
+   - Git stash before each fix attempt
+   - Easy rollback if something goes wrong
+
+6. **Group related fixes** in same commit
+   - Fix all instances of the same pattern
+   - Keep commits focused and logical
+
+7. **Document all context reviewed**
+   - List all files examined before fixing
+   - Note architecture decisions and dependencies
+
+8. **When no discovery exists, run /how first**
+   - Comprehensive understanding prevents incomplete fixes
+   - Identifies all affected components upfront
 
 ---
 
