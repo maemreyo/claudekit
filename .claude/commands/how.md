@@ -206,9 +206,9 @@ mkdir -p "$OUTPUT_DIR"
 
 **Execution Steps**:
 
-1. **Read Methodology**:
-   - Open `.claude/skills/methodology/codebase-exploration/SKILL.md`
-   - Locate **Phase 1: Discovery & Structure** section.
+1. **Initialize Methodology**:
+   - **Action**: Read `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 1 methodology.
+   - **Context**: Use the finding strategies defined in the "Phase 1: Discovery & Structure" section.
 
 2. **Dispatch Scout Agent**:
    - Use the **Mission Prompt Template** from the skill file.
@@ -260,9 +260,9 @@ Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
 
 **Execution Steps**:
 
-1. **Read Methodology**:
-   - Open `.claude/skills/methodology/codebase-exploration/SKILL.md`
-   - Locate **Phase 2: Deep Analysis** section.
+1. **Initialize Methodology**:
+   - **Action**: Read `.claude/skills/methodology/codebase-exploration/SKILL.md` to load the Phase 2 analysis protocols.
+   - **Context**: Focus on the "Phase 2: Deep Analysis" section and its checklists.
 
 2. **Dispatch Code-Reviewer Agent**:
    - Use the **Mission Prompt Template** from the skill file.
