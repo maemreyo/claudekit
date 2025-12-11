@@ -73,7 +73,15 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 
 **Steps**:
 
-1. **Load Source Data**
+1. **Active Skill Loading (MANDATORY)**
+   > **CRITICAL**: You are required to read the following skill definition files immediately to "install" these methodologies into your context.
+   
+   - [ ] Read `.claude/skills/methodology/pattern-analysis/SKILL.md`
+   - [ ] Read `.claude/skills/methodology/sequential-thinking/SKILL.md`
+   
+   *Do not proceed until you have confirmed these skills are loaded.*
+
+2. **Load Source Data**
    ```bash
    # If direct string argument provided (e.g., /fix-issues "fix error..."):
    # Use it as the issue description and skip file loading
@@ -84,7 +92,7 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    ls -t .claude/artifacts/recent-changes-*.md | head -1
    ```
 
-2. **Extract Issues**
+3. **Extract Issues**
    - If direct argument: Parse the user's request as a generic 'bug' or 'task' issue.
    - If from analysis:
      - Parse "⚠️ Quan Sát & Gợi Ý" section
@@ -92,7 +100,7 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
      - Parse "Risk Assessment" notes
      - Parse comparison với plan (missing items)
 
-3. **Classify Issues** (using pattern-analysis)
+4. **Classify Issues** (using pattern-analysis)
    
    **Issue Types**:
    - `bugs` - Logic errors, runtime issues, edge cases
@@ -111,7 +119,7 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    - `medium` - Minor bugs, tech debt, missing tests
    - `low` - Code style, documentation, minor improvements
 
-4. **Build Issue Registry**
+5. **Build Issue Registry**
    ```json
    {
      "issues": [
@@ -139,13 +147,13 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    }
    ```
 
-5. **Apply Filters**
+6. **Apply Filters**
    - Filter by `--type` if specified
    - Filter by `--severity` if specified
    - Filter by `--files` if specified
    - Filter by `--max-fixes` limit
 
-6. **Prioritization & Grouping** (using sequential-thinking)
+7. **Prioritization & Grouping** (using sequential-thinking)
    - **Related Issues**: Identify issues that modify the same files or logical components.
    - **Subtask Creation**: Group related issues into a single **Subtask** to be handled together.
    - Priority Sort: Critical security → Blocking bugs → High impact → Quick wins.
