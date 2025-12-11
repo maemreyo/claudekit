@@ -45,9 +45,10 @@ This is a comprehensive Claude Kit for Claude Code, designed to accelerate devel
 | `/optimize-flow [target]` | Profiles & optimizes performance (Architect Mode) |
 | `/document-this [target]` | Synthesizes business logic documentation (Historian Mode) |
 | `/test-master [target]` | Generates adversarial test coverage (QA Lead Mode) |
+| `/fix-issues [type]` | Intelligent issue resolution with agent coordination |
 
-### New Commands
- 
+### Project Management Commands
+
 | Command | Description |
 |---------|-------------|
 | `/how-recent-changes` | Analyze git changes with plan comparison |
@@ -160,29 +161,36 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - Code review approved
 - No merge conflicts
 
-## Agent Behavior Overrides
+## Agent & Skills System
 
-<!-- CUSTOMIZATION POINT: Override default agent behaviors -->
+This project uses an intelligent agent system with automatic skill integration to handle various development tasks.
 
-### Planner Agent
-- Break tasks into chunks of 15-60 minutes
-- Always identify testing requirements
-- Flag external dependencies
+### Key Features
+- **Automatic Skill Triggering**: Agents automatically detect when to use specialized skills
+- **Multi-Agent Coordination**: Complex tasks are coordinated between specialized agents
+- **Hierarchical Organization**: Clear separation between commands, agents, and skills
 
-### Code-Reviewer Agent
-- Enforce strict typing
-- Security-first reviews
-- Check for test coverage
+### System Structure
+- **Commands** (`.claude/commands/`): User-facing entry points for workflows
+- **Agents** (`.claude/agents/`): Specialized AI agents for different tasks
+- **Skills** (`.claude/skills/`): Specialized capabilities and methodologies
 
-### Tester Agent
-- Prefer pytest for Python, vitest for TypeScript
-- Generate edge case tests
-- Include error scenario tests
+### Common Workflows
 
-### Debugger Agent
-- Check logs first
-- Reproduce before fixing
-- Add regression tests
+#### Code Exploration & Analysis
+- `/how [topic]` → Scout Agent → codebase-exploration skill
+- Automatically coordinates multiple agents for comprehensive analysis
+
+#### Issue Resolution
+- `/fix-issues` → Dynamic agent selection based on issue type
+- Bugs → Debugger Agent (systematic-debugging, root-cause-tracing)
+- Tests → Tester Agent (comprehensive-testing, verification)
+- Security → Security Auditor Agent (defense-in-depth, OWASP)
+
+#### Development Support
+- Each agent has automatic skill triggers based on task requirements
+- No manual skill configuration needed
+- Skills are loaded dynamically based on context
 
 ## Behavioral Modes
 
@@ -352,18 +360,19 @@ For strict TDD enforcement (no production code without failing test):
 Enable mandatory verification before completion claims:
 - Reference: `.claude/skills/methodology/verification-before-completion/SKILL.md`
 
-### Available Methodology Skills
+### Methodology Skills
 
-| Category | Skills |
-|----------|--------|
-| Planning | brainstorming, writing-plans, executing-plans, intelligent-planning, deep-research, **pattern-analysis** |
-| Testing | test-driven-development, verification-before-completion, testing-anti-patterns, **comprehensive-testing** |
-| Debugging | systematic-debugging, root-cause-tracing, defense-in-depth |
-| Optimization | **performance-optimization** |
-| Documentation | **documentation-synthesis** |
-| Collaboration | dispatching-parallel-agents, requesting-code-review, receiving-code-review, finishing-development-branch |
+Available skills are organized by category and automatically triggered by agents:
+- **Planning**: intelligent-planning, pattern-analysis, sequential-thinking
+- **Testing**: comprehensive-testing, test-driven-development, verification-before-completion
+- **Debugging**: systematic-debugging, root-cause-tracing, error-handling-patterns
+- **Optimization**: performance-optimization
+- **Documentation**: documentation-synthesis
+- **Security**: defense-in-depth, OWASP patterns
 
-Skills location: `.claude/skills/methodology/`
+All skills are located in: `.claude/skills/methodology/`
+
+Each agent automatically triggers the appropriate skills based on task context - no manual configuration required.
 
 ### Sequential Thinking
 
@@ -419,6 +428,13 @@ pnpm deploy:production
 - Database: PostgreSQL / MongoDB
 - Cache: Redis (optional)
 - Storage: S3 / Cloudflare R2
+
+### Agent System
+- Specialized agents for different development tasks
+- Automatic skill integration based on context
+- Multi-agent coordination for complex workflows
+- See `.claude/agents/` for agent definitions
+- See `.claude/skills/` for available skills
 
 ## Documentation Standards
 

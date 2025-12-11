@@ -73,13 +73,10 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 
 **Steps**:
 
-1. **Active Skill Loading (MANDATORY)**
-   > **CRITICAL**: You are required to read the following skill definition files immediately to "install" these methodologies into your context.
-   
-   - [ ] Read `.claude/skills/methodology/pattern-analysis/SKILL.md`
-   - [ ] Read `.claude/skills/methodology/sequential-thinking/SKILL.md`
-   
-   *Do not proceed until you have confirmed these skills are loaded.*
+1. **Agent Skill Integration**
+   - Note: Agents now have automatic skill triggers based on task types
+   - The researcher agent will use pattern-analysis and sequential-thinking skills automatically
+   - No manual skill loading required
 
 2. **Load Source Data**
    ```bash
@@ -164,9 +161,10 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 
 **Agent**: [`architect`](.claude/agents/architect.md)
 
-**Skills**:
-- [`system-design`](.claude/skills/methodology/system-design/SKILL.md) - Design solutions
-- [`sequential-thinking`](.claude/skills/methodology/sequential-thinking/SKILL.md) - Plan execution order
+**Skills**: Auto-triggered by agent based on task
+- system-design - For designing solutions
+- sequential-thinking - For planning execution order
+- intelligent-planning - For creating structured plans
 
 **Goal**: Tạo execution plan chi tiết cho từng issue.
 
@@ -242,15 +240,23 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 **Dynamic Agent Selection**: Depends on issue type
 
 **Agent Mapping**:
-- `bugs`, `security`, `performance` → [`coder`](.claude/agents/coder.md)
-- `tests` → [`tester`](.claude/agents/tester.md)
-- `docs` → [`docs-manager`](.claude/agents/docs-manager.md)
-- `quality`, `debt` → [`coder`](.claude/agents/coder.md)
+- `bugs`, `logic errors`, `runtime issues` → [`debugger`](.claude/agents/debugger.md)
+- `tests`, `missing test coverage` → [`tester`](.claude/agents/tester.md)
+- `security vulnerabilities`, `auth issues` → [`security-auditor`](.claude/agents/security-auditor.md)
+- `performance issues`, `optimization` → [`backend-architect`](.claude/agents/backend-architect.md) or [`frontend-developer`](.claude/agents/frontend-developer.md)
+- `frontend bugs`, `UI issues` → [`frontend-developer`](.claude/agents/frontend-developer.md) or [`web-dev`](.claude/agents/web-dev.md)
+- `backend bugs`, `API issues` → [`backend-architect`](.claude/agents/backend-architect.md)
+- `docs`, `documentation gaps` → [`docs-manager`](.claude/agents/docs-manager.md)
+- `code quality`, `linting` → [`code-reviewer`](.claude/agents/code-reviewer.md)
+- `database issues` → [`database-admin`](.claude/agents/database-admin.md)
+- `dependencies`, `outdated packages` → [`vulnerability-scanner`](.claude/agents/vulnerability-scanner.md)
 
-**Skills Required**:
-- [`debugging`](.claude/skills/development/debugging/SKILL.md) - For bug fixes
-- [`testing`](.claude/skills/development/testing/SKILL.md) - For test writing
-- [`security-review`](.claude/skills/development/security-review/SKILL.md) - For security fixes
+**Skills Automatically Triggered by Agents**:
+- **debugger**: systematic-debugging, root-cause-tracing, error-handling-patterns
+- **tester**: comprehensive-testing, test-driven-development, verification-before-completion
+- **security-auditor**: defense-in-depth, owasp security patterns
+- **frontend-developer**: UI/UX patterns, performance optimization
+- **backend-architect**: API design patterns, architecture optimization
 
 **Execution Flow**:
 
@@ -292,36 +298,51 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
    ```markdown
    Agent: tester
    Task: Write tests for src/auth/login.js
-   
+
    Requirements:
    - Test success case
    - Test failure cases (wrong password, non-existent user)
    - Test edge cases (empty input, SQL injection attempts)
+   - The tester agent will automatically trigger comprehensive-testing skill
    - Achieve >80% coverage
    ```
 
    **Example: Security Vulnerability**
    ```markdown
-   Agent: coder
+   Agent: security-auditor
    Task: Fix SQL injection in src/api/search.js
-   
+
    Requirements:
    - Use parameterized queries
    - Validate and sanitize all user input
    - Add input length limits
+   - The security-auditor will apply defense-in-depth and OWASP patterns
    - Follow OWASP guidelines
    ```
 
    **Example: Performance Issue**
    ```markdown
-   Agent: coder
+   Agent: backend-architect
    Task: Fix N+1 query in dashboard
-   
+
    Requirements:
    - Use eager loading / JOIN
    - Add database index if needed
    - Benchmark before/after
    - Ensure <100ms response time
+   - Apply performance optimization patterns
+   ```
+
+   **Example: Bug Fix**
+   ```markdown
+   Agent: debugger
+   Task: Fix runtime error in user authentication
+
+   Requirements:
+   - The debugger will automatically trigger root-cause-tracing skill
+   - Apply systematic-debugging methodology
+   - Implement proper error-handling patterns
+   - Add regression tests
    ```
 
 3. **Post-Fix Validation**
@@ -583,21 +604,26 @@ Tự động phát hiện, phân loại và giải quyết các vấn đề đư
 
 ### Agent Collaboration
 
-1. **researcher** → Discovery & triage
-2. **architect** → Planning & strategy
-3. **coder** → Bug fixes, refactoring, performance
-4. **tester** → Test writing, validation
-5. **docs-manager** → Documentation updates
-6. **git-manager** → Commit organization
+1. **researcher** → Discovery & triage (auto-triggers: pattern-analysis, sequential-thinking)
+2. **architect** → Planning & strategy (auto-triggers: intelligent-planning, system-design)
+3. **debugger** → Bug fixes, root cause analysis (auto-triggers: systematic-debugging, root-cause-tracing)
+4. **tester** → Test writing, validation (auto-triggers: comprehensive-testing, verification-before-completion)
+5. **security-auditor** → Security fixes (auto-triggers: defense-in-depth, OWASP patterns)
+6. **frontend-developer** → Frontend bugs, UI issues (auto-triggers: performance-optimization)
+7. **backend-architect** → Backend bugs, API issues (auto-triggers: API design patterns)
+8. **code-reviewer** → Code quality improvements
+9. **docs-manager** → Documentation updates
+10. **git-manager** → Commit organization
 
-### Skill Application
+### Automatic Skill Integration
 
-1. **pattern-analysis** → Classify issues, detect patterns
-2. **sequential-thinking** → Prioritize, plan execution order
-3. **system-design** → Design solutions for complex issues
-4. **debugging** → Root cause analysis
-5. **testing** → Test creation and validation
-6. **security-review** → Security fix validation
+All agents have automatic skill triggers based on task types:
+- **Debugging tasks** → systematic-debugging, root-cause-tracing
+- **Testing tasks** → comprehensive-testing, test-driven-development
+- **Security tasks** → defense-in-depth, OWASP security patterns
+- **Planning tasks** → intelligent-planning, sequential-thinking
+- **Performance tasks** → performance-optimization
+- **Analysis tasks** → pattern-analysis, impact-analysis
 
 ---
 
