@@ -315,4 +315,32 @@ After `/how` completes:
 
 ---
 
-**Pro Tip**: The `/how` command now leverages the **codebase-exploration** skill to ensure consistent, deep analysis every time.
+**Pro Tip**: The `/how` command leverages these skills for consistent analysis:
+- **codebase-exploration**: Core methodology and agent coordination
+- **exploration-documentation**: Documentation generation patterns
+- **exploration-examples**: Real-world examples and workflows
+
+## Examples
+
+For detailed examples, see: `.claude/skills/methodology/exploration-examples/SKILL.md`
+
+Quick examples:
+```bash
+# Explore authentication feature
+/how "authentication"
+
+# Analyze recent changes
+/how "cart" --recent=5
+
+# Deep dive with external research
+/how "stripe integration" --comprehensive --include-external
+
+# Explore specific directory
+/how "user profile" --source=src/features/users
+```
+
+## Related Skills
+
+- **codebase-exploration**: Multi-phase agent methodology
+- **pattern-analysis**: Extract patterns for `/apply` command
+- **documentation-synthesis**: Create comprehensive docs

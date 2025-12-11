@@ -1,11 +1,64 @@
 ---
-name: codebase-exploration
-description: Methodology and detailed prompts for deep codebase exploration (Discovery, Analysis, External Research)
+name: Codebase Exploration
+description: This methodology should be used when conducting deep codebase exploration through multi-phase analysis, coordinating multiple agents to comprehensively map code structure, dependencies, and implementation details. Used by `/how` command and other exploration workflows.
+version: 1.0.0
 ---
 
 # Codebase Exploration Methodology
 
-This skill defines the standardized procedures and prompts for the `/how` command phases.
+## Overview
+
+Multi-agent methodology for comprehensive codebase exploration through coordinated phases. Each phase specializes in different aspects of analysis with immediate documentation to prevent context loss.
+
+**Key concepts:**
+- Phase-based exploration (Discovery → Analysis → Documentation)
+- Agent coordination with clear handoffs
+- Immediate documentation after each phase
+- Parallel execution when safe and beneficial
+- Quality gates between phases
+
+## When to Use
+
+- Understanding how a feature works in existing codebase
+- Onboarding to new project or domain
+- Investigating complex systems before making changes
+- Documenting legacy code
+- Planning migrations or refactors
+- Security audits of critical features
+- Finding specific patterns or code smells
+
+## Search Integration
+
+This skill includes a Python search utility for rapid codebase analysis:
+
+```bash
+# Search for files matching pattern
+python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "auth.*service"
+
+# Analyze architecture
+python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "" --type architecture
+
+# Find dependencies for specific framework
+python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "" --type dependencies --framework react
+
+# Search for specific code patterns
+python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "useState.*useEffect" --type patterns
+```
+
+## Quick Analysis Workflow
+
+When you need rapid insights about the codebase:
+
+```bash
+# 1. Get overview
+python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "" --type architecture
+
+# 2. Find files for feature
+python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "feature-name" --type files
+
+# 3. Analyze patterns
+python3 .claude/skills/methodology/codebase-exploration/scripts/search.py "TODO|FIXME|XXX" --type patterns
+```
 
 ## Phase 1: Discovery & Structure
 
@@ -168,3 +221,45 @@ Generate a report structured as:
 - **Security**: Security findings
 - **Data Models**: Interface/Schema definitions
 - **Insights**: Good/Bad/Ugly
+
+## Integration with Commands
+
+This skill is used by:
+- `/how [feature]` - Main exploration command
+- `/auto-plan [feature]` - Exploration before planning
+- `/apply [source]` - Pattern extraction for cloning
+- `/refactor-from [feature]` - Analysis before refactoring
+
+## Additional Resources
+
+### Reference Files
+
+For detailed implementation guidance:
+
+- **`references/agent-coordination.md`** - Complete agent coordination patterns
+- **`examples/exploration-workflows.md`** - Real-world examples and workflows
+
+### Scripts Directory
+
+The `scripts/` directory contains Python utilities for codebase analysis:
+
+#### search.py
+Search and analyze codebase with multiple modes:
+- `--type files` - Find files by name/path
+- `--type architecture` - Analyze codebase structure
+- `--type dependencies` - Extract import dependencies
+- `--type patterns` - Search for specific code patterns
+
+#### core.py
+Core utilities including:
+- File categorization logic
+- Architecture detection
+- Dependency analysis
+- Report generation
+
+### Related Skills
+
+- **`exploration-documentation`** - Generate comprehensive documentation from findings
+- **`exploration-examples`** - Practical examples and troubleshooting
+- **`pattern-analysis`** - Extract patterns for use with `/apply`
+- **`documentation-synthesis`** - Create knowledge base from exploration
