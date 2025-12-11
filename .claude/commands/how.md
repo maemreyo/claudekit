@@ -206,12 +206,8 @@ mkdir -p "$OUTPUT_DIR"
 
 **Execution Steps**:
 
-1. **Initialize Methodology**:
-   - **Action**: Read `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 1 methodology.
-   - **Context**: Use the finding strategies defined in the "Phase 1: Discovery & Structure" section.
-
-2. **Dispatch Scout Agent**:
-   - **Instruction**: "You must first READ the methodology file at `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 1 methodology. Then, ADOPT the 'Phase 1: Discovery & Structure' protocol defined in that file as your operating procedure for this task. Execute the search strategies exactly as described there."
+1. **Dispatch Scout Agent**:
+   - **Instruction**: "Find all code related to '$ARGUMENTS' and analyze its structure, architecture, and dependencies. The scout agent will automatically trigger the codebase-exploration skill for comprehensive analysis."
    - **Context**:
      - Argument: "$ARGUMENTS"
      - Source: {{ if --source }}$SOURCE_PATH{{ else }}Auto-detected{{ endif }}
@@ -223,7 +219,7 @@ mkdir -p "$OUTPUT_DIR"
    - **Integration**: Start this in parallel if possible, or immediately after file inventory.
 
 4. **Report Generation**:
-   - SubAgent returns findings in the structure defined in the **OUTPUT: Discovery Report** section of the skill.
+   - SubAgent returns findings with comprehensive discovery report including file inventory, architecture mapping, and dependency analysis.
 
 ---
 
@@ -231,7 +227,7 @@ mkdir -p "$OUTPUT_DIR"
 
 **Immediately write documentation**: `$OUTPUT_DIR/phase-1-discovery-structure.md`
 
-Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
+The scout agent will provide the report structure following the codebase-exploration methodology.
 
 ---
 
@@ -260,12 +256,8 @@ Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
 
 **Execution Steps**:
 
-1. **Initialize Methodology**:
-   - **Action**: Read `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 2 analysis protocols.
-   - **Context**: Focus on the "Phase 2: Deep Analysis" section and its checklists.
-
-2. **Dispatch Code-Reviewer Agent**:
-   - **Instruction**: "You must first READ the methodology file at `.claude/skills/codebase-exploration/SKILL.md` to load the Phase 2 methodology. Then, ADOPT the 'Phase 2: Deep Analysis' protocol defined in that file as your operating procedure. Use the checklists and reporting templates exactly as described."
+1. **Dispatch Code-Reviewer Agent**:
+   - **Instruction**: "Perform deep analysis of the code identified in Phase 1. Focus on business logic, implementation details, security considerations, and data patterns. The scout agent will have already triggered the codebase-exploration skill which coordinates the multi-agent analysis workflow."
    - **Context**:
      - Input: Phase 1 findings
      - Target: Deep analysis of business logic and safety
@@ -277,7 +269,7 @@ Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
      - *Task*: detailed schema review.
 
 4. **Report Generation**:
-   - SubAgent returns findings using the **OUTPUT: Analysis Report** structure from the skill.
+   - SubAgent returns findings with detailed analysis of business logic, security considerations, data models, and implementation patterns.
 
 ---
 
@@ -285,7 +277,7 @@ Content must follow the **Phase 1 Report Structure** defined in the SKILL file.
 
 **Immediately write documentation**: `$OUTPUT_DIR/phase-2-analysis.md`
 
-Content must follow the **Phase 2 Report Structure** defined in the SKILL file.
+The code reviewer will provide the analysis report following the codebase-exploration methodology.
 
 ---
 
