@@ -659,6 +659,67 @@ FOR EACH planned task:
 
 ---
 
+DEPENDENCY ANALYSIS:
+
+FOR EACH task, identify and add dependencies:
+
+1. **Analyze task relationships**:
+   - Sequential file operations: CREATE then MODIFY -> dependency
+   - Same file modifications: Later tasks depend on earlier
+   - Build on previous output: Explicit dependency needed
+   - Phase relationships: Phase B depends on Phase A completion
+
+2. **Common dependency patterns**:
+   
+   **Pattern 1: File creation chain**
+   ```markdown
+   - [ ] A.1: Create base types
+     - **File**: `types.ts`
+     - **Action**: CREATE
+   
+   - [ ] A.2: Create utilities  
+     - **File**: `utils.ts`
+     - **Action**: CREATE
+     - **Depends on**: A.1  # Uses types from A.1
+   ```
+   
+   **Pattern 2: Subtask dependencies**
+   ```markdown
+   - [ ] B.1: Implement feature [Summary]
+     - [ ] B.1.a: Install deps
+       - **Action**: MODIFY package.json
+     
+     - [ ] B.1.b: Create code
+       - **Action**: CREATE
+       - **Depends on**: B.1.a  # Needs deps installed
+   ```
+   
+   **Pattern 3: Cross-phase dependencies**
+   ```markdown
+   - [ ] B.1: Migrate architecture
+     - **Depends on**: A.3  # Needs security fixes complete
+   ```
+
+3. **Automatic dependency detection**:
+   {{ if task modifies file that was created in previous task }}
+   - Add **Depends on**: {previous task ID}
+   {{ endif }}
+   
+   {{ if task in Phase B and Phase A has tasks }}
+   - Add **Depends on**: Last task of Phase A
+   {{ endif }}
+   
+   {{ if subtask uses output from sibling subtask }}
+   - Add **Depends on**: {sibling task ID}
+   {{ endif }}
+
+4. **Validation rules**:
+   - Circular dependencies: NOT allowed (error)
+   - Forward references: NOT allowed (A.2 can't depend on A.3)
+   - Missing dependencies: WARN planner to add
+
+---
+
 CRITICAL OUTPUT FORMAT REQUIREMENTS:
 
 **Task Format** (MANDATORY for cook.md compatibility):
@@ -667,7 +728,11 @@ CRITICAL OUTPUT FORMAT REQUIREMENTS:
   - **File**: `{path/to/file.ext}` (comma-separated if multiple)
   - **Action**: {CREATE | MODIFY | DELETE | EXECUTE}
   - **Verify**: {exact npm/shell command}
+  - **Expected**: {concrete success criteria}
   - **Depends on**: {Task IDs, optional}
+  - **Issues**: (optional, for complex tasks)
+    {Problem description} -> {Solution}
+    {Another issue} -> {Fix}
 ```
 
 **Subtask Format** (when task > 4h or --tdd):
@@ -676,11 +741,15 @@ CRITICAL OUTPUT FORMAT REQUIREMENTS:
   - [ ] A.1.a: Subtask One [Estimate]
     - **File**: `{path}`
     - **Action**: {type}
-    - **Verify**: {command}
+    - **Verify**: {command}`
+    - **Expected**: {result}
+    - **Depends on**: A.1.a (if applicable)
   - [ ] A.1.b: Subtask Two [Estimate]
     - **File**: `{path}`
     - **Action**: {type}
     - **Verify**: {command}
+    - **Expected**: {result}
+    - **Depends on**: A.1.a
 ```
 
 **Action Type Rules**:
@@ -695,6 +764,33 @@ CRITICAL OUTPUT FORMAT REQUIREMENTS:
 3. If no test exists, use: `npm run type-check` or `npm run build`
 4. For phase completion: `npm test -- --coverage`
 
+**Expected Output Rules** (NEW - MANDATORY):
+1. MUST include concrete success criteria
+2. Use measurable metrics: test counts, coverage %, time limits
+3. Format examples:
+   - `15/15 tests pass, coverage >95%`
+   - `0 TypeScript errors, build successful`
+   - `Bundle size <500KB, <16ms execution`
+   - `All security tests pass, 0 vulnerabilities`
+
+**Dependency Rules**:
+1. MUST include if task uses output from previous task
+2. Format: Single ID `A.1` or multiple `A.1, A.2, B.3`
+3. For subtasks: `A.1.a` references sibling subtask
+4. cook.md will validate dependencies before execution
+
+**Common Issues Field** (OPTIONAL but recommended for complex tasks):
+1. Use for tasks with known failure modes
+2. Format: `{Problem} -> {Solution}` (one per line)
+3. Keep concise, actionable
+4. Examples:
+   ```markdown
+   - **Issues**:
+     DOMPurify install fails -> npm install --legacy-peer-deps
+     TypeScript errors -> Add @types/dompurify to devDependencies
+     Build size increase -> Enable tree-shaking in build config
+   ```
+
 **Subtask Rules**:
 1. Use when:
    - Task estimate > 4 hours
@@ -702,12 +798,52 @@ CRITICAL OUTPUT FORMAT REQUIREMENTS:
    - Task has distinct implementation phases
 2. Format: Parent ID + lowercase letter (A.1.a, A.1.b, A.1.c)
 3. Indent with 2 spaces
-4. Each subtask needs full metadata (File, Action, Verify)
+4. Each subtask needs full metadata (File, Action, Verify, Expected)
 
-**Dependency Rules**:
-- Reference by task ID: `A.1`, `B.2`
-- Multiple: `A.1, A.2`
-- cook.md will validate these before execution
+---
+
+**ASCII-FIRST FORMATTING GUIDELINES**:
+
+Use ASCII symbols instead of Unicode for better compatibility and token efficiency:
+
+| Instead of | Use | Meaning |
+|------------|-----|---------|
+| ✓ ✅ | [x] | Completed/Success |
+| ❌ | [X] | Error/Failed |
+| 🔴 | [!] | Critical/MUST |
+| 🟡 | [~] | Important/SHOULD |
+| 🟢 | [?] | Optional/COULD |
+| ⚠️ | [!] | Warning |
+| → | -> | Arrow/Flow |
+| ↓ | \| v | Vertical chain |
+
+**Diagram Guidelines**:
+- Use ASCII art for dependency chains
+- Tree structures: `+--` for branches, `|` for trunk
+- Flow: `->` for horizontal, `|` and `v` for vertical
+- Boxes: Use `+---+` or `===` for headers
+
+**Example ASCII Diagram**:
+```
+PHASE DEPENDENCY CHAIN:
+
+  [A] Security (12h)
+   |--- BLOCKS: All other phases
+   v
+  [B] Architecture (18h)
+   |--- REQUIRES: A complete
+   v
+  [C] Performance (8h)
+   |
+   v
+  [D] Features  --|
+  [E] Testing   --|--> Can run parallel
+   |            --|
+   v
+  [F] Docs (3h)
+   
+CRITICAL PATH: A -> B -> C -> F
+```
 
 ---
 
@@ -779,21 +915,26 @@ npm run build
   - **File**: `src/components/Component.tsx`
   - **Action**: CREATE
   - **Verify**: `npm run type-check src/components/Component.tsx`
+  - **Expected**: 0 TypeScript errors, file created successfully
   
   - [ ] A.1.a: Write test skeleton [5m]
     - **File**: `src/components/__tests__/Component.test.tsx`
     - **Action**: CREATE
     - **Verify**: `npm test Component -- --watch=false`
+    - **Expected**: Test file runs, 0/1 tests pass (expected TDD red)
   
   - [ ] A.1.b: Implement component to pass test [10m]
     - **File**: `src/components/Component.tsx`
     - **Action**: MODIFY
     - **Verify**: `npm test Component -- --watch=false --coverage`
+    - **Expected**: 1/1 tests pass, coverage >80%
+    - **Depends on**: A.1.a
 
 - [ ] A.2: Add component props validation [10m]
   - **File**: `src/components/Component.tsx`
   - **Action**: MODIFY
   - **Verify**: `npm test Component`
+  - **Expected**: All prop validation tests pass
   - **Depends on**: A.1
   
   - [ ] A.2.a: Write prop types test [5m]
@@ -811,12 +952,17 @@ npm run build
   - **File**: `src/types/theme.ts`
   - **Action**: CREATE
   - **Verify**: `npm run type-check src/types/`
+  - **Expected**: 0 TypeScript errors, all exports available
 
 - [ ] A.2: Set up configuration [45m]
   - **File**: `src/config/theme.ts`
   - **Action**: CREATE
   - **Verify**: `npm test theme-config`
+  - **Expected**: 8/8 tests pass, no runtime errors
   - **Depends on**: A.1
+  - **Issues**:
+    Import errors -> Check tsconfig paths
+    Type mismatches -> Ensure A.1 exports correct types
 {{ endif }}
 
 ### Phase B: Core Implementation
