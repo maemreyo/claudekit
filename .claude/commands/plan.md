@@ -31,7 +31,7 @@ Generate comprehensive implementation plans by intelligently combining current-s
   --guide=temp/theme-system/extensions/multi-theme-guide.md
 
 # TDD micro-tasks (2-5 min)
-/plan "authentication" --detailed
+/plan "authentication" --tdd
 
 # With custom output
 /plan "feature" --current=docs/feature/ --output=plans/feature.md --summary
@@ -52,7 +52,7 @@ Generate comprehensive implementation plans by intelligently combining current-s
 | `--guide=path` | Path to implementation guide - Optional | `--guide=extensions/multi-theme.md` |
 | `--output=path` | Save detailed plan to file | `--output=plans/feature.md` |
 | `--summary` | Generate concise summary (via Docs-Manager) | `--summary` |
-| `--detailed` | Use TDD micro-tasks (2-5 min) | `--detailed` |
+| `--tdd` | Use TDD micro-tasks (2-5 min) | `--tdd` |
 | `--auto-explore` | Auto-explore codebase if no current state | `--auto-explore` |
 | `--type=TYPE` | Type hint: react/api/utility/component | `--type=react` |
 | `--skip-review` | Skip review gates (faster, less safe) | `--skip-review` |
@@ -61,10 +61,8 @@ Generate comprehensive implementation plans by intelligently combining current-s
 
 ## Core Philosophy
 
-### Why V3 is Better
-
 1. **Flexible Inputs**: No longer requires both --current and --guide
-2. **TDD Support**: --detailed flag for 2-5 min micro-tasks
+2. **TDD Support**: --tdd flag for 2-5 min micro-tasks
 3. **Strategy Selection**: Intelligent choice of planning approach
 4. **Requirements-Driven**: MUST/SHOULD/COULD categorization
 5. **Fresh Context**: Each phase gets a clean subagent
@@ -88,7 +86,7 @@ Planning: **$ARGUMENTS**
 **Implementation guide**: `$GUIDE_PATH`
 {{ endif }}
 
-{{ if --detailed }}
+{{ if --tdd }}
 **Task size**: TDD micro-tasks (2-5 minutes)
 {{ else }}
 **Task size**: Standard tasks (15-60 minutes)
@@ -416,7 +414,7 @@ GOAL: Choose optimal planning approach
 
 INPUT:
 - Requirements: [from Phase 3]
-- Flags: {{ if --detailed }}TDD requested{{ endif }}
+- Flags: {{ if --tdd }}TDD requested{{ endif }}
 - Complexity: [assess from requirements]
 
 ---
@@ -428,7 +426,7 @@ STRATEGY OPTIONS:
    - Best for: Experienced teams, straightforward features
    - Skill: `intelligent-planning` (standard mode)
 
-2. **TDD Micro-Planning** (--detailed flag)
+2. **TDD Micro-Planning** (--tdd flag)
    - Task size: 2-5 minutes
    - Best for: Complex features, learning, high quality
    - Skill: `writing-plans` (superpowers methodology)
@@ -444,7 +442,7 @@ STRATEGY OPTIONS:
 
 DECISION:
 
-{{ if --detailed }}
+{{ if --tdd }}
 SELECTED: TDD Micro-Planning
 - 2-5 minute tasks
 - Complete code samples
@@ -485,7 +483,7 @@ INPUT:
 
 ---
 
-{{ if --detailed }}
+{{ if --tdd }}
 METHODOLOGY: writing-plans skill (TDD micro-tasks)
 
 TASK STRUCTURE:
@@ -531,7 +529,7 @@ PLAN STRUCTURE:
 
 ### Phase A: Foundation (Est: X hours)
 **Tasks**:
-{{ if --detailed }}
+{{ if --tdd }}
 - A.1: [2m] Write test for [component]
 - A.2: [3m] Implement [component] to pass test
 - A.3: [2m] Verify test passes, commit
@@ -634,7 +632,7 @@ TASKS:
 ## Timeline
 - **Estimated effort**: X-Y hours
 - **Phases**: [count]
-{{ if --detailed }}
+{{ if --tdd }}
 - **Task granularity**: TDD micro-tasks (2-5 min)
 {{ else }}
 - **Task granularity**: Standard (15-60 min)
@@ -695,7 +693,7 @@ OUTPUT: Concise summary
 - 🟡 SHOULD have: {{ count }}
 - 🟢 COULD have: {{ count }}
 
-{{ if --detailed }}
+{{ if --tdd }}
 ## Task Granularity
 ✓ TDD micro-tasks (2-5 min)
 - Test → Implement → Verify → Commit pattern
@@ -731,7 +729,7 @@ Save executive summary to: `plans/[slug]-summary.md`
 2. **Phase 2**: `documentation-synthesis` (if --guide)
 3. **Phase 3**: `pattern-analysis` (requirements extraction)
 4. **Phase 5**: 
-   - `writing-plans` (if --detailed)
+   - `writing-plans` (if --tdd)
    - `intelligent-planning` (if --auto-explore or standard)
 
 ### Fresh Context Benefits
@@ -752,7 +750,7 @@ Save executive summary to: `plans/[slug]-summary.md`
 /plan "multi-theme system" \
   --current=temp/theme-system/ \
   --guide=temp/theme-system/extensions/multi-theme-guide.md \
-  --detailed \
+  --tdd \
   --summary
 ```
 
@@ -761,7 +759,7 @@ Save executive summary to: `plans/[slug]-summary.md`
 2. Phase 1: Scout loads current theme system docs
 3. Phase 2: Researcher analyzes multi-theme guide
 4. Phase 3: Analyst creates MUST/SHOULD/COULD requirements
-5. Phase 4: Selects TDD Micro-Planning (--detailed)
+5. Phase 4: Selects TDD Micro-Planning (--tdd)
 6. Phase 5: Planner creates 2-5 min tasks with TDD workflow
 7. Phase 6: Docs-Manager writes executive summary
 
@@ -783,7 +781,7 @@ Save executive summary to: `plans/[slug]-summary.md`
 ### Example 3: Greenfield (Guide Only)
 
 ```bash
-/plan "authentication v2" --guide=docs/auth-v2-spec.md --detailed
+/plan "authentication v2" --guide=docs/auth-v2-spec.md --tdd
 ```
 
 **What happens**:
@@ -815,7 +813,7 @@ Save executive summary to: `plans/[slug]-summary.md`
 
 - [ ] Works with any combination of --current / --guide
 - [ ] Handles auto-explore when no docs
-- [ ] Supports TDD micro-tasks (--detailed)
+- [ ] Supports TDD micro-tasks (--tdd)
 - [ ] Categorizes requirements (MUST/SHOULD/COULD)
 - [ ] Fresh context per phase
 - [ ] Clear agent names (Scout, Researcher, Planner, Docs-Manager)
@@ -844,7 +842,7 @@ Save executive summary to: `plans/[slug]-summary.md`
    - Include code examples
    - Reference patterns
 
-3. **Use --detailed for complex/critical features**:
+3. **Use --tdd for complex/critical features**:
    - Better quality
    - Easier debugging
    - Immediate feedback
