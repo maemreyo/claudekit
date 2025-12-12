@@ -884,7 +884,42 @@ Once plan is approved:
 /task-execute {{ output path }} --task=A.1
 ```
 
-OUTPUT: Complete implementation plan
+---
+
+**CRITICAL: WRITE PLAN TO FILE**
+
+BEFORE showing output, Planner agent MUST:
+
+1. **Determine output file**:
+   ```
+   {{ if --output }}
+   FILE_PATH = $OUTPUT_PATH
+   {{ else }}
+   FILE_PATH = ./implementation-plan.md (current directory)
+   {{ endif }}
+   ```
+
+2. **Write complete plan to file**:
+   ```
+   WRITE_FILE(FILE_PATH, complete_plan_markdown)
+   ```
+
+3. **Verify file written**:
+   ```
+   if FILE_EXISTS(FILE_PATH):
+     ✅ Success: Plan written
+   else:
+     ❌ ERROR: File write failed
+     STOP - Do not proceed to OUTPUT
+   ```
+
+4. **Only after file is written**: Proceed to OUTPUT summary
+
+**This is NOT optional. Plan file MUST exist before showing summary.**
+
+---
+
+OUTPUT: Plan file path + summary
 ```
 
 ---
@@ -1018,17 +1053,131 @@ OUTPUT: Concise summary
 {{ endif }}
 2. Execute: `/execute-plan {{ --output or 'inline' }}`
 3. Track progress with TodoWrite
-```
+### Save to File (MANDATORY)
 
-### Save to File
+**CRITICAL**: Implementation plan MUST be written to file.
 
 {{ if --output }}
-Save complete plan to: `$OUTPUT_PATH`
+**Primary output**: `$OUTPUT_PATH`
+{{ else }}
+**Default output**: `implementation-plan.md` (in current directory)
 {{ endif }}
 
-{{ if --summary }}
-Save executive summary to: `plans/[slug]-summary.md`
+**File requirements**:
+1. MUST write complete plan to file
+2. MUST use cook-compatible format
+3. MUST include all sections (Executive Summary → Verification Checklist)
+4. File MUST be created before showing summary
+
+**Write sequence**:
+```bash
+# Step 1: Determine output path
+OUTPUT_FILE={{ if --output }}$OUTPUT_PATH{{ else }}./implementation-plan.md{{ endif }}
+
+# Step 2: Write complete plan
+write_file($OUTPUT_FILE, complete_plan_content)
+
+# Step 3: Verify file created
+if file_exists($OUTPUT_FILE):
+  ✅ Plan written to: $OUTPUT_FILE
+else:
+  ❌ ERROR: Failed to write plan file
+  STOP execution
+```
+
+---
+
+### Display in Chat (Summary Only)
+
+After plan file is written, show summary:
+
+```markdown
+✅ PLAN GENERATED: $ARGUMENTS
+
+## Plan File
+📝 **Written to**: {{ if --output }}$OUTPUT_PATH{{ else }}implementation-plan.md{{ endif }}
+- Size: {{ file size }}
+- Tasks: {{ count }}
+- Phases: {{ count }}
+
+## Quick Overview
+- **Mode**: {{ mode detected in Phase 0 }}
+- **Estimate**: X-Y hours
+- **Risk**: Low/Medium/High
+
+{{ if --current }}
+## Current State
+✓ Analyzed from: $CURRENT_PATH
 {{ endif }}
+
+{{ if --guide }}
+## Implementation Guide
+✓ Integrated from: $GUIDE_PATH
+{{ endif}}
+
+## Requirements
+- 🔴 MUST have: {{ count }}
+- 🟡 SHOULD have: {{ count }}
+- 🟢 COULD have: {{ count }}
+
+{{ if --tdd }}
+## Task Granularity
+✓ TDD micro-tasks (2-5 min)
+{{ endif }}
+
+## Next Steps
+1. Review full plan: {{ output file path }}
+2. Execute: `/cook {{ output file path }}`
+3. Track progress: `/task-progress {{ output file path }}`
+```
+
+---
+
+### File Content Template
+
+The implementation plan file MUST contain:
+
+```markdown
+# Implementation Plan: {{ feature name }}
+
+## 1. Executive Summary
+{{ from Phase 5 }}
+
+## 2. Current State
+{{ from Phase 1 if --current }}
+
+## 3. Verification Commands Reference
+{{ from Phase 1 SUBTASK 1.4 }}
+
+## 4. Implementation Phases
+
+### Phase A: {{ name }}
+{{ tasks with cook-compatible format }}
+
+### Phase B: {{ name }}
+{{ tasks }}
+
+... (all phases)
+
+## 5. Cross-Cutting Concerns
+{{ preservation, testing, docs }}
+
+## 6. Verification Checklist
+{{ all checkboxes }}
+
+---
+
+**EXECUTION INSTRUCTIONS**:
+
+Once plan is approved:
+\```bash
+# Execute with cook iterator
+/cook {{ output path }}
+
+# Or view progress
+/task-progress {{ output path }}
+\```
+```
 
 ---
 
