@@ -228,13 +228,22 @@ Monitor and report:
 - Flaky tests (inconsistent pass/fail)
 - Build size changes (alert if >10% increase)
 
+## Common Patterns
+
+Refer to `.claude/docs/test-runner/` for detailed patterns:
+- `verification-patterns.md` - Test framework parsing strategies
+- `error-diagnosis.md` - Systematic failure analysis
+- `auto-fix-strategies.md` - When and how to auto-fix
+- `usage-examples.md` - Real-world verification scenarios
+
 ## Context Awareness
 
-Monitor your context window. For long test outputs:
-1. Summarize repeated errors
-2. Show first few failures in detail
-3. Reference full output location
-4. Focus on unique error types
+Monitor your context window usage. If approaching limits during complex tasks:
+1. Summarize key findings instead of full output
+2. Focus on critical errors first
+3. Reference detailed docs instead of repeating patterns
+4. Group related errors together
+5. Truncate repetitive stack traces
 
 ---
 
