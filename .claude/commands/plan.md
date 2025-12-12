@@ -195,6 +195,55 @@ Create structured summary:
 ```
 
 OUTPUT: Current state context
+
+---
+
+SUBTASK 1.4: Extract Verification Commands (3 min)
+
+{{ if --current }}
+**Steps**:
+1. Read project `package.json` from root
+2. Extract test-related scripts from `scripts` section:
+   - test*
+   - lint*
+   - type-check*
+   - build*
+   - coverage*
+
+3. Identify verification patterns:
+   - Unit tests: `npm test`, `jest`, `vitest`
+   - Integration: patterns with "integration"
+   - E2E: `cypress`, `playwright`
+   - Type checking: `tsc`, `type-check`
+   - Linting: `eslint`, `lint`
+   - Build: `build`, `compile`
+
+4. Create verification commands inventory:
+
+```markdown
+## Available Verification Commands
+
+### From package.json
+- `npm test` - Run all tests
+- `npm run type-check` - TypeScript validation
+- `npm run lint:fix` - Code style check
+- `npm run build` - Production build
+- `npm test -- --coverage` - Coverage report
+
+### Patterns for Specific Tests
+- Feature tests: `npm test {feature-name}`
+- Path-specific: `npm run type-check {path}`
+- Watch mode: `npm test -- --watch=false`
+```
+
+OUTPUT: Verification commands for Planner
+{{ else }}
+**Infer from project type**:
+- JavaScript/TypeScript → npm test, tsc
+- Python → pytest
+- Go → go test
+- Rust → cargo test
+{{ endif }}
 ```
 
 {{ else if --auto-explore }}
@@ -512,6 +561,156 @@ TASK STRUCTURE:
 
 ---
 
+VERIFICATION COMMANDS INTEGRATION:
+
+INPUT from Phase 1:
+- Available test commands: {{ from Scout SUBTASK 1.4 }}
+- Project conventions: {{ inferred }}
+
+USAGE in Tasks:
+
+FOR EACH task, select appropriate verification:
+
+1. **Identify task type**:
+   - CREATE new feature → feature-specific test
+   - MODIFY existing → affected module test
+   - DELETE → dependent modules tests
+   - EXECUTE → command validation
+
+2. **Select verification command**:
+   {{ if CREATE and has unit test }}
+   - **Verify**: `npm test {feature-name}`
+   {{ else if CREATE and TypeScript }}
+   - **Verify**: `npm run type-check {file-path}`
+   {{ else if MODIFY }}
+   - **Verify**: `npm test {module-name}`
+   {{ else if DELETE }}
+   - **Verify**: `npm test` (ensure no breaks)
+   {{ else if task is BUILD/DEPLOY }}
+   - **Verify**: `npm run build`
+   {{ endif }}
+
+3. **Fallback strategy** (if no specific test):
+   - TypeScript: `npm run type-check`
+   - Any JS/TS: `npm run lint:fix`
+   - Last resort: `npm run build`
+
+**CRITICAL RULES**:
+
+❌ NEVER use vague commands:
+- "Check if it works"
+- "Test manually"
+- "Verify functionality"
+
+✅ ALWAYS use runnable commands:
+- `npm test theme-security`
+- `npm run type-check src/types/theme.ts`
+- `npm run build`
+- `npm test -- --coverage`
+
+---
+
+TASK COMPLEXITY DETECTION:
+
+FOR EACH planned task:
+
+1. **Estimate complexity**:
+   - Simple: < 30 min
+   - Medium: 30 min - 2 hours
+   - Complex: 2-4 hours
+   - Very Complex: > 4 hours
+
+2. {{ if estimate > 4 hours }}
+   **AUTO-SPLIT into subtasks**:
+   
+   Example:
+   ```markdown
+   - [ ] A.1: Build Admin Dashboard [8h] → SPLIT INTO:
+   
+   - [ ] A.1: Build Admin Dashboard [Summary]
+     - [ ] A.1.a: Create layout component [2h]
+       - **File**: `src/components/admin/Layout.tsx`
+       - **Action**: CREATE
+       - **Verify**: `npm test admin/Layout`
+     
+     - [ ] A.1.b: Add user table [2h]
+       - **File**: `src/components/admin/UserTable.tsx`
+       - **Action**: CREATE
+       - **Verify**: `npm test admin/UserTable`
+     
+     - [ ] A.1.c: Implement filters [2h]
+       - **File**: `src/components/admin/Filters.tsx`
+       - **Action**: CREATE
+       - **Verify**: `npm test admin/Filters`
+     
+     - [ ] A.1.d: Add tests [2h]
+       - **File**: `src/components/admin/__tests__/`
+       - **Action**: CREATE
+       - **Verify**: `npm test admin -- --coverage`
+   ```
+   {{ endif }}
+
+3. {{ if --tdd }}
+   **TDD micro-split** (2-5 min each):
+   - Red: Write failing test
+   - Green: Make it pass
+   - Refactor: Clean up
+   {{ endif }}
+
+---
+
+CRITICAL OUTPUT FORMAT REQUIREMENTS:
+
+**Task Format** (MANDATORY for cook.md compatibility):
+```markdown
+- [ ] {Phase}.{Number}: {Description} [{Estimate}]
+  - **File**: `{path/to/file.ext}` (comma-separated if multiple)
+  - **Action**: {CREATE | MODIFY | DELETE | EXECUTE}
+  - **Verify**: {exact npm/shell command}
+  - **Depends on**: {Task IDs, optional}
+```
+
+**Subtask Format** (when task > 4h or --tdd):
+```markdown
+- [ ] A.1: Main Task [Summary]
+  - [ ] A.1.a: Subtask One [Estimate]
+    - **File**: `{path}`
+    - **Action**: {type}
+    - **Verify**: {command}
+  - [ ] A.1.b: Subtask Two [Estimate]
+    - **File**: `{path}`
+    - **Action**: {type}
+    - **Verify**: {command}
+```
+
+**Action Type Rules**:
+- `CREATE`: New files that don't exist yet
+- `MODIFY`: Changes to existing files
+- `DELETE`: Removing files
+- `EXECUTE`: Commands only (no file changes), e.g., "Run full test suite"
+
+**Verification Rules**:
+1. MUST be runnable shell command (not description)
+2. Use specific patterns when possible: `npm test {specific-test}`
+3. If no test exists, use: `npm run type-check` or `npm run build`
+4. For phase completion: `npm test -- --coverage`
+
+**Subtask Rules**:
+1. Use when:
+   - Task estimate > 4 hours
+   - --tdd flag is set
+   - Task has distinct implementation phases
+2. Format: Parent ID + lowercase letter (A.1.a, A.1.b, A.1.c)
+3. Indent with 2 spaces
+4. Each subtask needs full metadata (File, Action, Verify)
+
+**Dependency Rules**:
+- Reference by task ID: `A.1`, `B.2`
+- Multiple: `A.1, A.2`
+- cook.md will validate these before execution
+
+---
+
 PLAN STRUCTURE:
 
 ## 1. Executive Summary
@@ -525,17 +724,99 @@ PLAN STRUCTURE:
 - What's working well
 - Integration points
 
-## 3. Implementation Phases
+## 3. Verification Commands Reference
+
+> **Note**: Use these commands in task **Verify** fields
+
+{{ if --current }}
+### Available Commands (from package.json)
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `npm test {pattern}` | Run specific tests | After implementing feature code |
+| `npm run type-check {path}` | TypeScript validation | After creating/modifying types |
+| `npm run lint:fix` | Code style check | After any code changes |
+| `npm run build` | Production build | After major changes |
+| `npm test -- --coverage` | Coverage report | After completing phase |
+{{ else }}
+### Inferred Commands (for this project type)
+
+| Command | Purpose |
+|---------|----------|
+| `npm test` | Assumed test runner |
+| `npm run type-check` | If TypeScript detected |
+| `npm run build` | Standard build |
+{{ endif }}
+
+### Common Verification Patterns
+
+**For CREATE tasks** (new files):
+```bash
+npm run type-check src/path/to/new-file.ts
+npm test new-feature -- --watch=false
+```
+
+**For MODIFY tasks** (existing files):
+```bash
+npm test affected-module
+npm run lint:fix
+```
+
+**For PHASE completion**:
+```bash
+npm test -- --coverage
+npm run build
+```
+
+---
+
+## 4. Implementation Phases
 
 ### Phase A: Foundation (Est: X hours)
-**Tasks**:
+
 {{ if --tdd }}
-- A.1: [2m] Write test for [component]
-- A.2: [3m] Implement [component] to pass test
-- A.3: [2m] Verify test passes, commit
+- [ ] A.1: Create basic structure [15m]
+  - **File**: `src/components/Component.tsx`
+  - **Action**: CREATE
+  - **Verify**: `npm run type-check src/components/Component.tsx`
+  
+  - [ ] A.1.a: Write test skeleton [5m]
+    - **File**: `src/components/__tests__/Component.test.tsx`
+    - **Action**: CREATE
+    - **Verify**: `npm test Component -- --watch=false`
+  
+  - [ ] A.1.b: Implement component to pass test [10m]
+    - **File**: `src/components/Component.tsx`
+    - **Action**: MODIFY
+    - **Verify**: `npm test Component -- --watch=false --coverage`
+
+- [ ] A.2: Add component props validation [10m]
+  - **File**: `src/components/Component.tsx`
+  - **Action**: MODIFY
+  - **Verify**: `npm test Component`
+  - **Depends on**: A.1
+  
+  - [ ] A.2.a: Write prop types test [5m]
+    - **File**: `src/components/__tests__/Component.test.tsx`
+    - **Action**: MODIFY
+    - **Verify**: `npm test Component`
+  
+  - [ ] A.2.b: Implement validation [5m]
+    - **File**: `src/components/Component.tsx`
+    - **Action**: MODIFY
+    - **Verify**: `npm test Component -- --coverage`
+
 {{ else }}
-- A.1: [30m] Create type definitions
-- A.2: [45m] Set up configuration
+- [ ] A.1: Create type definitions [30m]
+  - **File**: `src/types/theme.ts`
+  - **Action**: CREATE
+  - **Verify**: `npm run type-check src/types/`
+
+- [ ] A.2: Set up configuration [45m]
+  - **File**: `src/config/theme.ts`
+  - **Action**: CREATE
+  - **Verify**: `npm test theme-config`
+  - **Depends on**: A.1
 {{ endif }}
 
 ### Phase B: Core Implementation
@@ -550,28 +831,58 @@ PLAN STRUCTURE:
 ### Phase E: Documentation
 [... detailed tasks ...]
 
-## 4. Cross-Cutting Concerns
+---
+
+## 5. Cross-Cutting Concerns
+
 {{ if --current }}
 ### Preservation Requirements
 - [ ] Existing feature X unchanged
 - [ ] Backward compatibility maintained
+- [ ] No breaking changes to public API
 {{ endif }}
 
 ### Testing Strategy
-- Unit tests: [coverage target]
-- Integration tests: [scenarios]
-- E2E tests: [key flows]
+- Unit tests: {{ coverage target, e.g., 80% }}
+- Integration tests: {{ key scenarios }}
+- E2E tests: {{ critical flows }}
 
-### Documentation
-- README updates
-- API docs
-- User guides
+### Documentation Updates
+- [ ] README.md updates
+- [ ] API documentation
+- [ ] User guides
+- [ ] Migration guide (if breaking changes)
 
-## 5. Verification Checklist
+---
+
+## 6. Verification Checklist
 - [ ] All Phase A tasks complete
+- [ ] All Phase B tasks complete
+- [ ] All Phase C tasks complete
+- [ ] All Phase D tasks complete
+- [ ] All Phase E tasks complete
 - [ ] All tests passing
-- [ ] No breaking changes
+- [ ] No breaking changes (or documented)
 - [ ] Documentation updated
+- [ ] Code review completed
+- [ ] Ready for `/cook` execution
+
+---
+
+**EXECUTION INSTRUCTIONS**:
+
+Once plan is approved:
+```bash
+# Execute with cook iterator
+/cook {{ output path }}
+
+# Or view progress
+/task-progress {{ output path }}
+
+# Or manual approach
+/task-next {{ output path }}
+/task-execute {{ output path }} --task=A.1
+```
 
 OUTPUT: Complete implementation plan
 ```
@@ -856,7 +1167,3 @@ Save executive summary to: `plans/[slug]-summary.md`
    ```bash
    /plan "v1" → /plan "v2" --current=docs/v1/ --guide=docs/v2-spec.md
    ```
-
----
-
-**Remember**: The best plans come from the best information. V3 adapts to what you have! 📋✨
