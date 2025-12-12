@@ -45,6 +45,8 @@ Execute the **next uncompleted task** from an implementation plan, verify it wor
 | `--skip-verify` | Skip test verification | `--skip-verify` |
 | `--auto-fix` | Auto-retry once on test failure | `--auto-fix` |
 | `--no-update` | Don't update plan checkbox | `--no-update` |
+| `--skip-subtasks` | Skip all subtasks of current main task | `--skip-subtasks` |
+| `--suggest-split` | Auto-suggest subtasks for large tasks | `--suggest-split` |
 
 ---
 
@@ -73,6 +75,15 @@ Execute the **next uncompleted task** from an implementation plan, verify it wor
 - `/cook` updates plan `[x]` automatically (unless --no-update)
 - Developer runs next iteration
 
+### Subtask Support
+
+**Hierarchical task breakdown**:
+- Main tasks: `- [ ] A.1: Task name`
+- Subtasks (indented): `  - [ ] A.1.a: Subtask name`
+- Auto-detect subtasks and execute them first
+- Skip subtasks with `--skip-subtasks` flag
+- Checkbox states: `[ ]` uncompleted, `[x]` completed, `[~]` skipped
+
 ---
 
 ## Workflow (4 Phases)
@@ -89,16 +100,34 @@ STEPS:
 1. Read plan file: $ARGUMENTS
 
 2. Parse markdown for tasks:
-   - Pattern: `- [ ] [Task ID]: [Description]`
-   - Example: `- [ ] A.1: Implement CSS Sanitization`
+   - Main task pattern: `- [ ] [Task ID]: [Description]`
+   - Subtask pattern: `  - [ ] [Task ID].[a-z]: [Description]` (2-space indent)
+   - Example main: `- [ ] A.1: Implement CSS Sanitization`
+   - Example subtask: `  - [ ] A.1.a: Setup dependencies`
 
-3. Find next uncompleted task:
+3. Find next uncompleted task with subtask awareness:
    {{ if --phase provided }}
    - Search within Phase {{ phase ID }} section only
-   - Find first `- [ ]` in that phase
-   {{ else }}
-   - Find first `- [ ]` in entire plan
    {{ endif }}
+   
+   a. Find first uncompleted main task (no indent): `- [ ] X.Y:`
+   
+   b. Check for subtasks:
+      - Look for indented tasks with pattern: `  - [ ] X.Y.[a-z]:`
+      - Count uncompleted subtasks
+   
+   c. Determine what to execute:
+      {{ if --skip-subtasks }}
+      - Mark all subtasks of current main task as [~] (skipped)
+      - Execute main task
+      {{ else if has uncompleted subtasks }}
+      - Execute first uncompleted subtask (e.g., A.1.a)
+      - Main task waits until all subtasks complete
+      {{ else if all subtasks [x] or [~] }}
+      - All subtasks done/skipped → Execute main task
+      {{ else }}
+      - No subtasks → Execute main task directly
+      {{ endif }}
 
 4. {{ if no uncompleted task found }}
    🎉 **PLAN COMPLETE**
@@ -133,7 +162,47 @@ STEPS:
    - Verification command
    - Dependencies
 
-7. {{ if task has dependencies }}
+7. {{ if --suggest-split and task estimate > 4 hours }}
+   Complexity Detection:
+   - Large task detected ({{ estimate }}h)
+   - Analyze task description
+   - Generate subtask suggestions
+   
+   Suggest breakdown:
+   ```markdown
+   ⚠️ LARGE TASK DETECTED
+   
+   Task {{ task ID }} is estimated at {{ estimate }}h.
+   Consider breaking into subtasks:
+   
+   ```diff
+   - - [ ] {{ task ID }}: {{ description }} [{{ estimate }}h]
+   + - [ ] {{ task ID }}: {{ description }} [Summary]
+   +   - [ ] {{ task ID }}.a: {{ subtask 1 }} [Xh]
+   +   - [ ] {{ task ID }}.b: {{ subtask 2 }} [Yh]
+   +   - [ ] {{ task ID }}.c: {{ subtask 3 }} [Zh]
+   ```
+   
+   Options:
+   1. [y] Add subtasks automatically
+   2. [n] Continue with main task
+   3. [e] Show markdown to copy manually
+   
+   {{ wait for user input }}
+   
+   {{ if user chooses y }}
+   - Insert subtasks into plan file
+   - Re-run discovery to find first subtask
+   {{ else if user chooses e }}
+   - Display suggested markdown
+   - User copies manually
+   - Exit (user re-runs /cook)
+   {{ else }}
+   - Continue with main task
+   {{ endif }}
+   {{ endif }}
+
+8. {{ if task has dependencies }}
    Validate dependencies:
    - Check if dependency tasks marked [x]
    - {{ if any incomplete }}
@@ -629,11 +698,14 @@ Remove --dry-run flag:
 
 **What happens**:
 1. Finds first `[ ]` task (e.g., A.1)
-2. Implements code
-3. Runs tests
-4. Updates plan: `[ ]` → `[x]`
-5. Shows git diff suggestion
-6. Stops
+2. Checks for subtasks (A.1.a, A.1.b, etc.)
+3. If subtasks exist → cooks first subtask (A.1.a)
+4. If no subtasks → cooks main task (A.1)
+5. Implements code
+6. Runs tests
+7. Updates plan: `[ ]` → `[x]`
+8. Shows git diff suggestion
+9. Stops
 
 Developer then: `git commit` → `/cook` again
 
@@ -685,6 +757,98 @@ Run again to do next Phase A task.
 ```
 
 If tests fail, attempts one auto-fix before giving up.
+
+---
+
+### Example 6: Subtask Workflow
+
+```bash
+# Plan has:
+- [ ] A.1: Implement Authentication [Summary]
+  - [ ] A.1.a: Setup dependencies [1h]
+  - [ ] A.1.b: Create login logic [3h]
+  - [ ] A.1.c: Add tests [2h]
+- [ ] A.2: Next task
+
+# Run 1
+/cook plan.md
+# → Cooks A.1.a (first subtask)
+# → Marks [x] A.1.a
+git commit -m "feat: setup auth dependencies (A.1.a)"
+
+# Run 2
+/cook plan.md
+# → Cooks A.1.b (next subtask)
+# → Marks [x] A.1.b
+git commit -m "feat: create login logic (A.1.b)"
+
+# Run 3
+/cook plan.md
+# → Cooks A.1.c (last subtask)
+# → Marks [x] A.1.c
+git commit -m "feat: add auth tests (A.1.c)"
+
+# Run 4
+/cook plan.md
+# → All subtasks [x], now cooks main A.1
+# → Marks [x] A.1
+git commit -m "feat: complete authentication system (A.1)"
+
+# Run 5
+/cook plan.md
+# → Cooks A.2 (next main task)
+```
+
+---
+
+### Example 7: Skip Subtasks
+
+```bash
+# Plan has:
+- [ ] B.1: Refactor Theme System [Summary]
+  - [ ] B.1.a: Extract utilities [30m]
+  - [ ] B.1.b: Update components [1h]
+  - [ ] B.1.c: Add tests [30m]
+
+# Developer knows the refactor is simple
+/cook plan.md --skip-subtasks
+
+# → Marks all B.1.x as [~] (skipped)
+# → Cooks B.1 directly as one piece
+# → Marks [x] B.1
+
+# Next run
+/cook plan.md
+# → Goes to B.2 (next main task)
+```
+
+---
+
+### Example 8: Auto-Suggest Subtasks
+
+```bash
+# Plan has large task:
+- [ ] C.1: Build Admin Dashboard [8h]
+
+/cook plan.md --suggest-split
+
+# Output:
+⚠️ LARGE TASK DETECTED
+
+Task C.1 is estimated at 8h.
+Consider breaking into subtasks:
+
+- [ ] C.1: Build Admin Dashboard [Summary]
+  - [ ] C.1.a: Create layout component [2h]
+  - [ ] C.1.b: Add user table [2h]
+  - [ ] C.1.c: Implement filters [2h]
+  - [ ] C.1.d: Add tests [2h]
+
+Add subtasks? [y/n/e]: y
+
+# → Subtasks inserted into plan
+# → Re-scans and starts with C.1.a
+```
 
 ---
 
