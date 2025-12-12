@@ -1,6 +1,18 @@
 # CREATE Operation Patterns
 
-Reference guide for creating new files with proper structure.
+Reference guide for creating new files with proper structure using MCP Filesystem tools.
+
+## Tool Usage
+
+**Primary tool**: `write_file`
+- Creates new files or overwrites existing ones
+- Syntax: `write_file(path, content)`
+- Use for all CREATE operations
+
+**Supporting tools**:
+- `create_directory` - Make parent directories if needed
+- `read_file` - Read similar files as templates
+- `list_directory` - Check what files exist
 
 ## React Components
 

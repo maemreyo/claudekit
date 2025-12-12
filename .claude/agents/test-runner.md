@@ -1,7 +1,6 @@
 ---
 name: test-runner
 description: Executes verification commands and diagnoses test failures with auto-fix capabilities
-tools: [run_command, command_status, view_file, grep_search, replace_file_content]
 model: sonnet
 color: green
 ---

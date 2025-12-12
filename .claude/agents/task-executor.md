@@ -1,7 +1,6 @@
 ---
 name: task-executor
 description: Implements code changes from task specifications with syntax validation and auto-fix
-tools: [write_to_file, replace_file_content, multi_replace_file_content, view_file, grep_search, run_command]
 model: sonnet
 color: cyan
 ---
@@ -38,16 +37,17 @@ Extract from task spec:
 - Use existing project patterns (review similar files first)
 - Generate proper imports, types, and exports
 - Follow file naming and structure conventions
+- Use `write_file` tool to create new files
 
 **MODIFY Operations:**
-- Read current file state with `view_file`
+- Read current file state with `read_file`
 - Apply surgical changes preserving existing functionality
-- Use `replace_file_content` (single) or `multi_replace_file_content` (multiple)
+- Use `edit_file` for targeted modifications
 
 **DELETE Operations:**
 - Identify dependencies with `grep_search`
 - Clean up imports and references
-- Remove target file
+- Remove target file with `move_file` (to trash) or document deletion
 
 ### 3. Validate Automatically
 

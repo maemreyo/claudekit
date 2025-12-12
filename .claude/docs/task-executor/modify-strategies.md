@@ -1,22 +1,33 @@
 # MODIFY Operation Strategies
 
-Strategies for targeted code changes while preserving existing functionality.
+Strategies for targeted code changes while preserving existing functionality using MCP Filesystem tools.
+
+## Tool Usage
+
+**Primary tool**: `edit_file`
+- Makes selective modifications to existing files
+- Preserves unchanged content
+- Use for all MODIFY operations
+
+**Supporting tools**:
+- `read_file` - Read current file state first
+- `grep_search` - Find dependent files
+- `list_directory` - Check file structure
 
 ## Core Principles
 
-1. **Read First**: Always use `view_file` to understand current state
+1. **Read First**: Always use `read_file` to understand current state
 2. **Minimal Changes**: Only modify what's necessary
 3. **Preserve Context**: Keep existing code structure and formatting
 4. **Verify Impact**: Use `grep_search` to check dependent files
 
 ## Strategy Selection
 
-### Single Change → `replace_file_content`
+### Use `edit_file` for all modifications
 
-Use when making ONE modification in a file:
-- Adding a single import
-- Updating one function
-- Changing one configuration value
+The MCP `edit_file` tool handles both:
+- Single targeted changes
+- Multiple changes in same file
 
 ```typescript
 // Old code
@@ -24,32 +35,9 @@ export function calculate(a, b) {
   return a + b;
 }
 
-// New code (add type annotations)
+// New code (add type annotations using edit_file)
 export function calculate(a: number, b: number): number {
   return a + b;
-}
-```
-
-### Multiple Changes → `multi_replace_file_content`
-
-Use when making 2+ modifications in a file:
-- Adding multiple imports
-- Updating several functions
-- Adding new methods to a class
-
-```typescript
-// Change 1: Add import
-import {Validator } from './validator';
-
-// Change 2: Add validation
-export function process(data: string) {
-  Validator.check(data); // Added
-  return transform(data);
-}
-
-// Change 3: Add new function
-export function validate(data: string) {
-  return Validator.check(data);
 }
 ```
 

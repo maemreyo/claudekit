@@ -184,13 +184,42 @@ if (condition) {
        ↓
 4. Generate fix code
    ↓
-5. Apply fix with replace_file_content
+5. Apply fix with edit_file
    ↓
 6. Re-run verification
    ↓
 7. Report result:
    ├─ Fixed → Success!
    └─ Still fails → Report both attempts
+```
+
+### Step 4: Suggest/Apply Fix
+
+```markdown
+{{ if --auto-fix and FAIL }}
+AUTO-FIX STRATEGY:
+
+1. Identify fix type needed:
+   - Type annotation
+   - Import addition
+   - Null check
+   - Syntax correction
+
+2. Generate fix code
+
+3. Apply fix using edit_file (MCP tool)
+
+4. Re-run verification command
+
+5. Report retry result
+
+{{ else if FAIL }}
+SUGGEST FIX:
+
+1. Generate suggested code fix
+2. Explain why fix should work
+3. Provide specific file/line to modify
+{{ endif }}
 ```
 
 ## Fix Templates
