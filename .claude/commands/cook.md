@@ -286,82 +286,166 @@ DRY RUN: Skip context loading
 
 ### Phase 3: Implementation (10-45 min depending on task)
 
-{{ if not --dry-run }}
+{{if not --dry-run }}
+
+**Dispatch Task-Executor Agent** (`.claude/agents/task-executor.md`):
 
 ```markdown
-Code Implementer
+Task-Executor Agent - Implement {{ task.id }}
 
-GOAL: Execute task specification
+GOAL: Implement code changes per task specification
 
-STEP 3.1: Generate Changes
+TASK SPECIFICATION:
+- ID: {{ task.id }}
+- Description: {{ task.description }}
+- Files: {{ task.files }}
+- Action: {{ task.action }}
+- Expected: {{ task.expected }}
+
+{{ if context from Phase 2 }}
+CONTEXT (from Scout):
+{{ scout analysis and modification strategy }}
+{{ endif }}
+
+IMPLEMENTATION DETAILS:
+{{ task details from plan }}
+
+{{ if task.issues }}
+KNOWN ISSUES (from plan):
+{{ task.issues }}
+{{ endif }}
+
+---
+
+INSTRUCTIONS FOR TASK-EXECUTOR:
 
 {{ if CREATE }}
+**Operation**: CREATE new file `{{ file path }}`
 
-**Creating new file**: `{{ file path }}`
-
-1. Generate file content based on:
-   - Task description
-   - Project patterns
-   - Code examples from plan (if provided)
-
-2. Add proper structure:
-   - Imports
-   - Types (TypeScript)
+Requirements:
+1. Determine file type and template (see .claude/docs/task-executor/create-patterns.md)
+2. Generate proper file structure:
+   - Imports section
+   - Type definitions
    - Main implementation
    - Exports
-   - Comments
-
 3. Follow project conventions:
-   - Formatting
-   - Naming
-   - Style
+   - Check similar files for patterns
+   - Match naming style
+   - Use consistent formatting
+4. Add JSDoc documentation
+5. Ensure all exports are correct
 
 {{ else if MODIFY }}
+**Operation**: MODIFY existing file `{{ file path }}`
 
-**Modifying file**: `{{ file path }}`
-
-1. Read current content
-
-2. Apply changes per task description:
-   - Add new functions/logic
-   - Update existing code
-   - Preserve critical sections
-
-3. Update:
-   - Imports (if needed)
-   - Types (if needed)
-   - Exports (if needed)
+Requirements (see .claude/docs/task-executor/modify-strategies.md):
+1. Read current file content first
+2. Identify exact modification points
+3. Choose edit tool:
+   - Single change → replace_file_content
+   - Multiple changes → multi_replace_file_content
+4. Preserve existing code:
+   - Keep formatting
+   - Maintain comments
+   - Preserve variable names
+5. Minimize changes - only modify what's necessary
+6. Update imports/exports if needed
 
 {{ else if DELETE }}
+**Operation**: DELETE file `{{ file path }}`
 
-**Deleting file**: `{{ file path }}`
-
-1. Remove target file
-
-2. Clean up references:
-   - Update files that imported it
+Requirements (see .claude/docs/task-executor/delete-workflows.md):
+1. Analyze dependencies FIRST:
+   ```bash
+   grep_search "from.*{{ filename }}"
+   grep_search "import.*{{ filename }}"
+   ```
+2. Create cleanup plan for all references
+3. Clean dependencies:
+   - Remove imports from consuming files
    - Remove from index files
-   - Update tests
+   - Update any re-exports
+   - Fix or remove usages
+4. Validate no references remain
+5. Only then delete the file
+6. Re-validate syntax
 
 {{ endif }}
 
-STEP 3.2: Apply Changes
+---
 
-1. Write changes to file system
+SYNTAX VALIDATION:
 
-2. Verify syntax:
-   {{ if TypeScript }}
-   - Run: npx tsc --noEmit {{ file path }}
-   {{ else if JavaScript }}
-   - Run: node --check {{ file path }}
-   {{ endif }}
+After implementing changes:
 
-3. {{ if syntax error }}
-   Fix syntax immediately and retry
-   {{ endif }}
+{{ if TypeScript project }}
+1. Run: `npx tsc --noEmit {{ changed files }}`
+2. If errors found:
+   - Apply auto-fix patterns (see .claude/docs/task-executor/error-handling.md)
+   - Common fixes:
+     * Missing imports → Add them
+     * Type errors → Add annotations
+     * Unused variables → Remove or prefix with _
+   - Re-run validation
+   - Max 3 fix attempts
+3. Report syntax status
 
-OUTPUT: Files modified/created/deleted
+{{ else if JavaScript project }}
+1. Run: `node --check {{ changed files }}`
+2. Fix syntax errors
+3. Report status
+{{ endif }}
+
+---
+
+OUTPUT FORMAT:
+
+```markdown
+## IMPLEMENTATION COMPLETE: {{ task.id }}
+
+### Files Changed
+{{ if CREATE }}
+Created: `{{ file path }}` ({{ lines }} lines)
+- Structure: {{ type }}
+- Exports: {{ list }}
+{{ endif }}
+
+{{ if MODIFY }}
+Modified: `{{ file path }}`
+- Added: {{ X }} lines
+- Modified: {{ Y }} lines
+- Deleted: {{ Z }} lines
+- Functions affected: {{ list }}
+{{ endif }}
+
+{{ if DELETE }}
+Deleted: `{{ file path }}`
+
+Dependencies Cleaned:
+- {{ file 1 }}: {{ changes }}
+- {{ file 2 }}: {{ changes }}
+{{ endif }}
+
+### Syntax Validation
+Command: `{{ validation command }}`
+Result: {{ PASS | FAIL }}
+
+{{ if auto-fixes applied }}
+Auto-Fixes Applied:
+- {{ fix 1 }}
+- {{ fix 2 }}
+{{ endif }}
+
+### Status
+{{ PASS → "🟢 READY FOR VERIFICATION" }}
+{{ FAIL → "🔴 SYNTAX ERRORS REMAIN" }}
 ```
+
+TIME LIMIT: 30 minutes
+```
+
+WAIT for Task-Executor response...
 
 {{ else }}
 
@@ -371,87 +455,193 @@ OUTPUT: Implementation preview
 
 {{ endif }}
 
+
 ---
 
 ### Phase 4: Verification & Handoff (5-20 min)
 
 {{ if not --dry-run and not --skip-verify }}
 
+**Dispatch Test-Runner Agent** (`.claude/agents/test-runner.md`):
+
 ```markdown
-Verifier & Reporter
+Test-Runner Agent - Verify {{ task.id }}
 
-GOAL: Test implementation and prepare handoff
+GOAL: Execute verification and report results
 
-STEP 4.1: Run Tests
+VERIFICATION REQUEST:
+- Task: {{ task.id }}
+- Description: {{ task.description }}
+- Files Changed: {{ from task-executor output }}
 
-1. Extract verification command from task:
-   - Example: `npm test theme-security`
-
-2. Execute command:
-   ```bash
-   {{ verification command }}
-   ```
-
-3. Capture results:
-   - Exit code (0 = pass)
-   - Test output
-   - Coverage (if applicable)
-   - Errors (if any)
-
-4. Parse results:
-   - Tests passed: {{ X/Y }}
-   - Duration: {{ time }}
-   - Status: {{ PASS | FAIL }}
-
-STEP 4.2: Handle Failures
-
-{{ if tests failed }}
-
-Analyze error:
-- Type: {{ assertion | syntax | runtime }}
-- Location: {{ file:line }}
-- Message: {{ error text }}
+VERIFICATION:
+- Command: `{{ task.verify }}`
+- Expected: {{ task.expected }}
 
 {{ if --auto-fix }}
-AUTO-FIX ATTEMPT:
+AUTO-FIX MODE: ENABLED
+- If verification fails, attempt one fix
+- Re-run verification after fix
+- Report final status
+{{ endif }}
 
-1. Read error carefully
-2. Identify likely cause
-3. Apply targeted fix
-4. Re-run verification
+---
 
-{{ if still fails }}
-Report failure (can't auto-fix)
+EXECUTION STEPS:
+
+1. **Run Verification Command**:
+   ```bash
+   {{ task.verify }}
+   ```
+   
+2. **Capture Output**:
+   - Exit code (0 = success)
+   - stdout/stderr
+   - Execution time
+   
+3. **Parse Results**:
+   {{ if command contains "test" }}
+   - Extract test counts: X/Y passed
+   - Extract coverage if available
+   - Identify failed test names
+   {{ else if command contains "type-check" }}
+   - Count TypeScript errors
+   - Extract error locations
+   - Parse error messages
+   {{ else if command contains "build" }}
+   - Check build success
+   - Note warnings
+   - Check bundle size
+   {{ else }}
+   - Generic pass/fail status
+   {{ endif }}
+
+4. **Analyze Failures** (if any):
+   - Categorize error type:
+     * Assertion failures
+     * Type errors
+     * Import errors
+     * Runtime errors
+   - Locate error source (file + line)
+   - Identify root cause
+   - Suggest fix
+
+{{ if --auto-fix }}
+5. **Attempt Auto-Fix** (if failed):
+   - Apply fix pattern (see .claude/agents/test-runner.md)
+   - Common fixes:
+     * Add missing import
+     * Fix type annotation
+     * Add null check
+     * Correct syntax
+   - Re-run verification
+   - Max 1 attempt
+   - Report retry result
+{{ endif }}
+
+---
+
+OUTPUT FORMAT:
+
+```markdown
+## VERIFICATION RESULTS: {{ task.id }}
+
+### Execution
+Command: `{{ task.verify }}`
+Working Dir: {{ cwd }}
+Exit Code: {{ code }}
+Duration: {{ seconds }}s
+Status: {{ PASS | FAIL }}
+
+### Results
+
+{{ if PASS }}
+Tests Passed: {{ X/Y }}
+{{ if coverage }}
+Coverage: {{ % }}
+{{ endif }}
+
+Output:
+\```
+{{ relevant success output }}
+\```
+
+{{ else if FAIL }}
+Tests Failed: {{ failures/total }}
+
+#### Failed Tests
+1. **{{ test name }}**
+   - Expected: {{ expected }}
+   - Actual: {{ actual }}
+   - Location: `{{ file }}:{{ line }}`
+
+2. **{{ test name }}**
+   - Error: {{ error message }}
+
+#### Error Analysis
+Type: {{ error category }}
+Root Cause: {{ diagnosis }}
+Affected Files: {{ list }}
+
+#### Full Error Output
+\```
+{{ error output
+
+ }}
+\```
+{{ endif }}
+
+{{ if --auto-fix and FAIL }}
+### Auto-Fix Attempt
+Diagnosis: {{ error type }}
+
+Fix Applied:
+\```{{ language }}
+{{ code change }}
+\```
+
+Retry Result: {{ PASS | FAIL }}
+
+{{ if still FAIL }}
+❌ Auto-fix unsuccessful. Manual intervention required.
 {{ else }}
-Continue (fixed!)
+✅ Auto-fix successful!
+{{ endif }}
 {{ endif }}
 
-{{ else }}
-Report failure and stop
-{{ endif }}
+{{ if FAIL and not auto-fixed }}
+### Suggested Fix
+\```{{ language }}
+{{ suggested code }}
+\```
 
-{{ endif }}
-
-STEP 4.3: Update Plan (if tests passed and not --no-update)
-
-{{ if tests passed and not --no-update }}
-
-1. Read plan file
-
-2. Find task line:
-   - Pattern: `- [ ] {{ task ID }}:`
-
-3. Update to complete:
-   - Replace: `- [ ]` → `- [x]`
-
-4. Write updated plan
-
-OUTPUT: Plan file updated with [x]
-
+Explanation: {{ why this should work }}
 {{ endif }}
 ```
 
+TIME LIMIT: 20 minutes
+```
+
+WAIT for Test-Runner response...
+
+**STEP 4.3: Update Plan** (if verification passed and not --no-update)
+
+{{ if tests passed and not --no-update }}
+
+1. Read plan file: `{{ plan file path }}`
+
+2. Find task line matching pattern: `- [ ] {{ task.id }}:`
+
+3. Update checkbox: `- [ ]` → `- [x]`
+
+4. Write updated plan
+
+OUTPUT: ✅ Plan updated - Task {{ task.id }} marked complete
+
+{{ endif }}
+
 {{ else if --skip-verify }}
+
 
 Skip verification (--skip-verify flag)
 
