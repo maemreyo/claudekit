@@ -460,7 +460,11 @@ OUTPUT: Implementation preview
 
 ### Phase 4: Verification & Handoff (5-20 min)
 
-{{ if not --dry-run and not --skip-verify }}
+{{ if not --dry-run }}
+
+{{ if not --skip-verify }}
+
+> **CRITICAL**: Do NOT execute verification commands yourself. You MUST dispatch the Test-Runner Agent.
 
 **Dispatch Test-Runner Agent** (`.claude/agents/test-runner.md`):
 
@@ -487,7 +491,7 @@ AUTO-FIX MODE: ENABLED
 
 ---
 
-EXECUTION STEPS:
+INSTRUCTIONS FOR TEST-RUNNER:
 
 1. **Run Verification Command**:
    ```bash
@@ -622,7 +626,31 @@ Explanation: {{ why this should work }}
 TIME LIMIT: 20 minutes
 ```
 
-WAIT for Test-Runner response...
+{{ endif }}
+
+{{ else }}
+
+Skip verification (--skip-verify flag)
+
+{{ if not --no-update }}
+
+**STEP 4.3: Update Plan** (mark as complete without verification)
+
+1. Read plan file: `{{ plan file path }}`
+
+2. Find task line matching pattern: `- [ ] {{ task.id }}:`
+
+3. Update checkbox: `- [ ]` → `- [x]`
+
+4. Write updated plan
+
+OUTPUT: ✅ Plan updated - Task {{ task.id }} marked complete (without verification)
+
+{{ endif }}
+
+{{ endif }}
+
+{{ if not --skip-verify }}
 
 **STEP 4.3: Update Plan** (if verification passed and not --no-update)
 
@@ -640,8 +668,9 @@ OUTPUT: ✅ Plan updated - Task {{ task.id }} marked complete
 
 {{ endif }}
 
-{{ else if --skip-verify }}
+{{ endif }}
 
+{{ else if --skip-verify }}
 
 Skip verification (--skip-verify flag)
 
