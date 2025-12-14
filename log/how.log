@@ -1,443 +1,286 @@
-Vấn đề:
- Hiện tại, mỗi khi tôi chạy `/cook plan.md` thì nó sẽ phải đọc lại plan 1 lần, mặc dù nó vừa chạy và test xong 1 task trước đó ở main context của claude code. Liệu có thể ở phase đầu tiên, có thể làm gì để đỡ phải discovery lại? Discovery rất ổn khi tôi chạy ở 1 conversation mới hoàn toàn. nhưng khi chạy liên tục `/cook plan.md` thì dường như phải discovery liên tục lại thì không hay lắm.
+Dưới đây là các nhận xét của tôi về Brainstormer Agent, bạn hãy tìm ra hướng để giải quyết các yếu điểm và sử dụng dạng multiple files để cải thiện cấu trúc của agent. Bạn có thể search google để tìm tài liệu về Claude Code Agent để tham khảo.
+========
+## Nhận xét về Brainstormer Agent
 
-========================
-Tôi hiểu vấn đề! Khi chạy liên tục `/cook` trong cùng conversation, việc discovery lại toàn bộ plan mỗi lần thực sự không cần thiết và tốn thời gian. Đây là một số giải pháp:
+### Điểm mạnh
 
-## **Giải pháp được đề xuất: Quick Resume Mode**
+**1. Cấu trúc rõ ràng**
+- Description ngắn gọn, dễ hiểu khi nào invoke agent
+- Tools được chọn phù hợp (Read, Grep, Glob, WebSearch) cho research và brainstorming
+- System prompt có workflow rõ ràng từ Understand → Divergent → Convergent
 
-Thêm logic vào **Phase 1: Discovery** để phát hiện và tái sử dụng context:
+**2. Template chi tiết**
+- Cung cấp nhiều framework (Six Thinking Hats, SCAMPER, First Principles)
+- Output templates cụ thể giúp consistency
+- Comparison matrix thực tế và dễ áp dụng
 
-```markdown
-### Phase 1: Discovery (2-5 min → 10-30 seconds if cached)
+**3. Creative prompts hữu ích**
+- "What if" questions đa dạng
+- Tư duy từ nhiều góc độ (unlimited resources, competitor, beginner)
 
-Task Scanner
+### Có thể cải thiện
 
-GOAL: Find next task to execute
-
-**QUICK RESUME CHECK** (NEW):
-
-1. Check conversation context for recent plan data:
-   - Look back last 3 messages for plan parse results
-   - Verify same plan file: `$ARGUMENTS`
-   - Check file modification time (mtime)
-   
-2. {{ if plan cached AND file unchanged }}
-   ✅ **QUICK RESUME MODE**
-   
-   Found cached plan from {{ X }} messages ago:
-   - Plan: {{ plan file }}
-   - Last modified: {{ mtime }} (unchanged)
-   - Tasks parsed: {{ count }}
-   - Last executed: {{ last task ID }}
-   
-   📋 Using cached plan structure...
-   ⏩ Skipping full re-scan (saves ~2-4 min)
-   
-   {{ Jump to step 3: Find next uncompleted task }}
-   
-{{ else }}
-   🔍 **FULL DISCOVERY MODE**
-   
-   Reason: {{ new conversation | different file | file modified | no cache }}
-   
-   {{ Continue with steps 1-2 below }}
-{{ endif }}
-
-STEPS (if FULL DISCOVERY):
-
-1. Read plan file: $ARGUMENTS
-   {{ store mtime for cache validation }}
-
-2. Parse markdown for tasks:
-   ...
-   {{ cache parsed structure in conversation memory }}
+**1. Quá dài và chi tiết**
+```yaml
+# Hiện tại: ~200 dòng system prompt
+# Nên: ~50-100 dòng với link đến documentation
 ```
+Agent nên tập trung vào behavior cốt lõi. Các templates và frameworks nên tách ra file riêng hoặc chỉ summarize.
 
-## **Cách implement:**
+**2. Model mặc định**
+Không chỉ định `model: sonnet`. Nên thêm để control cost/performance.
 
-### **Option A: Lightweight Context Check** (đề xuất)
+**3. Thiếu examples cụ thể**
+Nên có 2-3 examples thực tế về input/output để Claude hiểu rõ expected behavior.
 
-```markdown
-### Quick Resume Implementation
+**4. Quality Standards quá đơn giản**
+Checkbox list không đủ detail. Nên có concrete criteria.
 
-At start of Phase 1, add:
+**5. Methodology Skills section**
+Reference đến `.claude/skills/methodology/brainstorming/SKILL.md` nhưng không rõ file này có tồn tại không. Có thể gây confusion.
 
-```bash
-# Check if we just ran this plan
-LAST_PLAN_CONTEXT=$(grep -A 50 "COOK COMPLETE" <<< "$CONVERSATION_HISTORY" | head -1)
+### Đề xuất cải thiện
 
-if [[ "$LAST_PLAN_CONTEXT" =~ "$ARGUMENTS" ]]; then
-  FILE_MTIME=$(stat -f %m "$ARGUMENTS" 2>/dev/null || stat -c %Y "$ARGUMENTS")
-  
-  # If file unchanged in last 5 minutes
-  CURRENT_TIME=$(date +%s)
-  TIME_DIFF=$((CURRENT_TIME - FILE_MTIME))
-  
-  if [ $TIME_DIFF -gt 300 ]; then
-    echo "⚡ QUICK RESUME: Using cached plan structure"
-    SKIP_FULL_PARSE=true
-  fi
-fi
-```
-
-**Benefits:**
-- Saves 2-4 minutes per `/cook` iteration
-- Still validates file hasn't changed
-- No external state files needed
-- Uses existing conversation context
-
+```yaml
+---
+name: brainstormer
+description: Generates creative solutions and explores alternatives when stuck on technical challenges. Invoke when user needs multiple approaches, trade-off analysis, or breaking through conventional thinking.
+tools: Glob, Grep, Read, WebSearch
+model: sonnet
 ---
 
-### **Option B: Optimized Re-scan** (alternative)
+# Brainstormer Agent
 
-Thay vì skip hoàn toàn, làm "incremental discovery":
+I help generate diverse solutions and explore alternatives using structured thinking methods.
 
-```markdown
-### Incremental Discovery
+## When to invoke me
+- User is stuck or exploring options
+- Need multiple approaches with trade-offs
+- Challenging assumptions needed
+- Decision between alternatives required
 
-1. {{ if recently parsed }}
-   - Read ONLY the checkbox states (lightweight)
-   - Skip parsing task details (already in context)
-   - Find first `[ ]` in cached task list
-   
-2. {{ if task details needed }}
-   - Retrieve from conversation context
-   - Or quick re-read of specific task section only
+## My approach
+
+1. **Clarify**: Understand problem, constraints, what's tried
+2. **Diverge**: Generate 3-5 options using frameworks (Six Hats, SCAMPER, First Principles)
+3. **Converge**: Compare trade-offs, recommend top choice
+
+## Output format
+
+[Markdown template với comparison matrix và clear recommendation]
+
+## Creative prompts I use
+- "What if unlimited resources/time?"
+- "How would [competitor/expert] solve this?"
+- "What's the simplest/most elegant solution?"
+
+Full templates available at: [link to docs]
 ```
 
-**Benefits:**
-- Always fresh checkbox states
-- But reuses parsed task metadata
-- Safer than full cache
+### Kết luận
 
+Agent này **solid về content** nhưng cần **tối ưu length** và **structure**. Principle: "System prompt nên là behavior guide, không phải documentation".
+
+
+==================
+
+
+
+Bạn đã chia sẻ một cấu hình **Brainstormer Agent** khá chi tiết và có cấu trúc tốt! Dưới đây là những nhận xét chi tiết của tôi về thiết kế này, cùng với một số gợi ý cải thiện dựa trên các phương pháp hay nhất hiện có.
+
+## 🌟 Điểm mạnh nổi bật
+
+### 1. **Cấu trúc rõ ràng và chuyên nghiệp**
+- **Phân chia logic hợp lý**: Việc tách biệt giữa Role, Capabilities, Workflow và Techniques tạo ra một cấu trúc dễ theo dõi và bảo trì【turn0search16】【turn0search17】.
+- **Metadata chuẩn**: Phần YAML frontmatter (`name`, `description`, `tools`) tuân thủ đúng chuẩn của Claude Code Agent【turn0search13】.
+
+### 2. **Phương pháp luận đa dạng**
+- **Tích hợp nhiều kỹ thuật brainstorming**: Sử dụng kết hợp Six Thinking Hats, SCAMPER và First Principles Thinking cho khả năng ứng dụng linh hoạt【turn0search12】.
+- **Cân bằng giữa tư duy phân kỳ và hội tụ**: Workflow được thiết kế rõ ràng từ giai đoạn tạo ý tưởng (divergent) đến đánh giá và lựa chọn (convergent)【turn0search12】.
+
+### 3. **Template đầu ra thực tiễn**
+- **Comparison Matrix**: Bảng so sánh giúp đánh giá khách quan các phương án【turn0search12】.
+- **Decision Guide**: Cung cấp tiêu chí rõ ràng để lựa chọn giải pháp phù hợp【turn0search12】.
+
+## 💡 Gợi ý cải thiện
+
+### 1. **Tích hợp sâu hơn với Claude Code**
+```yaml
+# Thêm các trường metadata
+tools: [Glob, Grep, Read, WebSearch, Bash]
+model: sonnet-4  # Chỉ định model cụ thể
+permissions:
+  allowed:
+    - web_search
+    - file_read
+  blocked:
+    - file_write
+```
+
+### 2. **Tối ưu hóa Workflow**
+```mermaid
+flowchart LR
+    A[Understand Problem] --> B[Divergent Thinking]
+    B --> C[Convergent Thinking]
+    C --> D[Recommendation]
+    D --> E[Implementation Plan]
+    
+    style A fill:#e3f2fd
+    style B fill:#bbdefb
+    style C fill:#90caf9
+    style D fill:#64b5f6
+    style E fill:#42a5f5
+```
+
+### 3. **Thêm kỹ thuật brainstorming hiện đại**
+```markdown
+### Reverse Brainstorming
+- Thay vì hỏi "Làm thế nào để giải quyết?", hỏi "Làm thế nào để gây ra vấn đề?"
+- Giúp xác định các rủi ro và điểm yếu tiềm ẩn
+
+### Round Robin Brainstorming
+- Mỗi người tham gia đóng góp ý tưởng theo lượt
+- Đảm bảo mọi tiếng nói đều được lắng nghe
+```
+
+### 4. **Cải thiện Quality Standards**
+```markdown
+## Enhanced Quality Standards
+- [ ] Ít nhất 5 phương án khác nhau được tạo ra
+- [ ] Mỗi phương án được đánh giá theo ít nhất 3 tiêu chí
+- [ ] Có ít nhất 1 "wild card idea" (ý tưởng đột phá)
+- [ ] Phân tích trade-off chi tiết cho top 2 lựa chọn
+- [ ] Kế hoạch implementation có thể đo lường được
+```
+
+## 🛠️ Triển khai thực tế
+
+### Tích hợp với CLAUDE.md
+```markdown
+# .claude/CLAUDE.md
+## Brainstorming Guidelines
+- Luôn bắt đầu với clarify phase trước khi generate ideas
+- Sử dụng Six Thinking Hats cho các vấn đề phức tạp
+- Áp dụng SCAMPER cho các cải tiến sản phẩm/dịch vụ
+- Document toàn bộ process để team có thể review
+```
+
+### Tạo Slash Commands tùy chỉnh【turn0search13】
+```markdown
+# .claude/commands/brainstorm.md
+---
+description: "Bắt đầu session brainstorming"
+argument-hint: "Vấn đề cần brainstorm"
 ---
 
-## **Recommended Approach:**
-
-Tôi suggest **hybrid approach**:
-
-```markdown
-### Phase 1: Smart Discovery
-
-STEP 1: Context Check (10 seconds)
-
-{{ if same conversation AND file unchanged }}
-  MODE: QUICK RESUME
-  - Reuse parsed task structure ✓
-  - Re-read ONLY checkbox lines ✓
-  - Time saved: ~90%
-{{ else }}
-  MODE: FULL DISCOVERY  
-  - Complete plan parsing
-  - Cache results for next run
-{{ endif }}
+Sử dụng brainstormer agent để giải quyết: $ARGUMENTS
+Follow workflow chuẩn: Understand → Divergent → Convergent → Recommend
 ```
 
-### **Cụ thể trong /cook:**
+## 📊 So sánh với các Agent khác
 
-```markdown
-1. Discovery Optimization:
+| Tiêu chí | Brainstormer Agent | Code Reviewer Agent | Planning Agent |
+|----------|-------------------|-------------------|----------------|
+| **Mục đích** | Tạo ý tưởng mới | Đánh giá code | Lập kế hoạch |
+| **Creativity** | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
+| **Structure** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Flexibility** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
 
-{{ at start of Phase 1 }}
+## 🎯 Kịch bản sử dụng lý tưởng
 
-# Quick context probe
-if conversation.has_recent_plan_parse(plan_file, max_age_minutes=10):
-    if file.mtime_unchanged(plan_file):
-        print("⚡ QUICK RESUME: Reusing plan structure from context")
-        
-        # Only re-scan checkboxes (fast)
-        checkboxes = quick_scan_checkboxes(plan_file)
-        
-        # Get cached task details from context
-        tasks = conversation.get_cached_tasks(plan_file)
-        
-        # Merge: updated checkboxes + cached details
-        plan = merge(checkboxes, tasks)
-        
-        print(f"✓ Loaded {len(tasks)} tasks in 15s (vs 3min full scan)")
-        
-        goto STEP_3  # Skip to "Find next uncompleted task"
-```
+1. **Product Innovation**: Brainstorm các tính năng mới cho sản phẩm
+2. **Problem Solving**: Tìm giải pháp cho các vấn đề kỹ thuật phức tạp
+3. **Process Improvement**: Tối ưu hóa workflow hiện tại
+4. **Strategic Planning**: Xây dựng lộ trình phát triển sản phẩm
 
----
+## 🔮 Định hướng phát triển
 
-## **Alternative: Thêm `--resume` flag**
+1. **AI-Powered Idea Generation**: Tích hợp với các model sáng tạo khác
+2. **Collaborative Features**: Hỗ trợ brainstorming nhóm thời gian thực
+3. **Idea Validation**: Tích hợp công cụ kiểm chứng ý tưởng
+4. **Template Library**: Xây dựng thư viện template cho các ngành khác nhau
 
-Nếu muốn explicit control:
+## 💭 Kết luận
 
-```bash
-# First run in conversation
-/cook plan.md
-# → Full discovery
+Brainstormer Agent của bạn là một thiết kế **xuất sắc** với nền tảng vững chắc. Các điểm mạnh về cấu trúc và phương pháp luận sẽ giúp nó trở thành công cụ mạnh mẽ. Với những cải tiến nhỏ về tích hợp Claude Code và mở rộng kỹ thuật, agent này có tiềm năng trở thành một phần không thể thiếu trong workflow sáng tạo【turn0search12】【turn0search16】.
 
-# Subsequent runs
-/cook plan.md --resume
-# → Quick resume from context
+====================
 
-# Force re-discovery
-/cook plan.md --force-discovery
-```
+Dưới đây là phần nhận xét chi tiết về bản cấu hình **Brainstormer Agent** mà bạn cung cấp. Đây là một tài liệu định nghĩa Agent (Agent Definition/System Prompt) được viết rất chuyên nghiệp, có cấu trúc chặt chẽ và tư duy hệ thống cao.
 
----
+### Tổng quan
 
-## **Kết luận:**
+Bản thiết kế này đạt tiêu chuẩn **High-Quality System Prompt**. Nó không chỉ bảo AI "hãy sáng tạo đi", mà cung cấp các **khung tư duy (mental models)** cụ thể để ép AI phải suy nghĩ theo quy trình. Điều này giúp giảm ảo giác (hallucination) và tăng tính thực tiễn cho giải pháp.
 
-**Đề xuất chính**: Thêm **automatic quick resume** vào Phase 1:
-- Detect same conversation + unchanged file
-- Reuse parsed task structure  
-- Only re-scan checkbox states
-- Save ~2-4 minutes per iteration
-
-**Implementation**: Thêm vào đầu Phase 1 Discovery:
-```markdown
-STEP 0: Quick Resume Check (NEW)
-- Check conversation context
-- Validate file mtime
-- If valid → skip to step 3 with cached data
-- If invalid → full discovery
-```
-
-Điều này giữ nguyên stateless principle (vẫn có thể force re-read) nhưng optimize cho common case (continuous cooking in same conversation). 🚀
-
-========================
-
-
-Tôi hiểu vấn đề của bạn. Mỗi khi chạy `/cook plan.md`, hệ thống phải thực hiện lại toàn bộ quá trình discovery dù bạn đang làm việc trong cùng một conversation. Điều này gây lãng phí thời gian và tài nguyên, đặc biệt với các kế hoạch lớn.
-
-Dưới đây là một số giải pháp để tối ưu hóa:
-
-## 1. Thêm cơ chế caching cho discovery
-
-```markdown
-### Phase 1: Discovery (2-5 min) với cache
-
-1. Kiểm tra cache:
-   - Nếu là lần đầu chạy trong conversation, thực hiện discovery đầy đủ
-   - Nếu đã chạy trước đó, sử dụng cached plan state
-
-2. Cache key: `plan_file_path + last_modified_time`
-   - So sánh thời gian sửa đổi cuối cùng của file plan
-   - Nếu không thay đổi, sử dụng cache
-   - Nếu có thay đổi, làm mới cache
-
-3. Cached data:
-   - Danh sách các task đã phân tích
-   - Vị trí task hiện tại
-   - Thông tin về subtasks
-```
-
-## 2. Thêm flag `--use-cache`
-
-```bash
-# Sử dụng cache (mặc định cho các lần chạy tiếp theo)
-/cook plan.md --use-cache
-
-# Buộc discovery lại (khi cần làm mới)
-/cook plan.md --force-discovery
-```
-
-## 3. Tối ưu hóa discovery với incremental parsing
-
-```markdown
-### Phase 1: Discovery (2-5 min) - Incremental Mode
-
-1. Đọc file plan và xác định vị trí task cuối cùng đã hoàn thành:
-   - Tìm task cuối cùng được đánh dấu [x]
-   - Bắt đầu tìm kiếm từ vị trí đó thay vì từ đầu file
-
-2. Giới hạn phạm vi tìm kiếm:
-   - Chỉ quét các task chưa hoàn thành
-   - Bỏ qua các section đã hoàn thành
-
-3. Với các file lớn:
-   - Sử dụng stream reading thay vì load toàn bộ file
-   - Chỉ đọc các phần cần thiết
-```
-
-## 4. Implement stateless design với context marker
-
-```markdown
-### Thêm context marker vào plan
-
-- Thêm comment đặc biệt vào file plan:
-  ```markdown
-  <!-- LAST_PROCESSED: A.3.a -->
-  ```
-
-- Trong discovery:
-  - Tìm marker này và bắt đầu từ task tiếp theo
-  - Cập nhật marker sau mỗi task hoàn thành
-  - Nếu không tìm thấy marker, thực hiện discovery đầy đủ
-```
-
-## 5. Sử dụng session context trong Claude Code
-
-```markdown
-### Phase 1: Discovery (2-5 min) - Session-aware
-
-1. Kiểm tra session context:
-   - Nếu có thông tin về task cuối cùng đã xử lý trong session
-   - Sử dụng thông tin này để bỏ qua các task đã hoàn thành
-
-2. Session data structure:
-   ```json
-   {
-     "plan_file": "plan.md",
-     "last_processed_task": "A.3.a",
-     "completed_tasks": ["A.1", "A.2", "A.3.a"],
-     "timestamp": "2023-11-15T10:30:00Z"
-   }
-   ```
-
-3. Validate session data:
-   - Kiểm tra xem plan file có thay đổi không
-   - Xác nhận các task đã hoàn thành vẫn được đánh dấu [x]
-```
-
-## Đề xuất cụ thể
-
-Tôi đề xuất kết hợp giải pháp 1 và 2:
-
-1. **Thêm cơ chế caching** với `--use-cache` làm mặc định cho các lần chạy tiếp theo trong cùng một conversation
-2. **Sử dụng incremental parsing** để chỉ đọc các phần cần thiết của file plan
-3. **Thêm context marker** vào file plan để theo dõi tiến trình
-
-Cách triển khai:
-
-```markdown
-### Phase 1: Discovery (2-5 min) - Optimized
-
-1. {{ if first_run_in_session }}
-   Thực hiện discovery đầy đủ và lưu vào cache
-2. {{ else if --force-discovery }}
-   Làm mới cache và thực hiện discovery đầy đủ
-3. {{ else }}
-   a. Kiểm tra thời gian sửa đổi file plan
-   b. {{ if file_changed }}
-      Làm mới cache và thực hiện discovery đầy đủ
-   c. {{ else }}
-      Sử dụng cached data để tìm task tiếp theo
-      Chỉ đọc các phần cần thiết của file plan
-   d. {{ endif }}
-4. {{ endif }}
-```
-
-Với cách tiếp cận này, các lần chạy tiếp theo sẽ nhanh hơn đáng kể vì:
-
-- Không cần phân tích lại toàn bộ file plan
-- Không cần quét lại các task đã hoàn thành
-- Tập trung trực tiếp vào task tiếp theo cần thực hiện
-
-========================
-Vấn đề bạn gặp phải là sự xung đột giữa **triết lý thiết kế "Stateless"** (không lưu trạng thái, mỗi lần chạy là mới tinh) và **nhu cầu thực tế "Iterative"** (chạy liên tục theo chuỗi).
-
-Khi bạn chạy liên tục, việc AI phải "đọc lại cả file -\> parse markdown -\> tìm checkbox chưa tick -\> validate dependency" (Phase 1) là lãng phí token và thời gian.
-
-Để giải quyết vấn đề này mà không phá vỡ tính ổn định của hệ thống, tôi đề xuất giải pháp **"Explicit Handover" (Bàn giao cụ thể)**.
-
-Dưới đây là 3 cách điều chỉnh cho `/cook`, từ đơn giản đến nâng cao:
-
-### Giải pháp 1: Thêm cờ `--task=<ID>` (Khuyên dùng)
-
-Cách sạch nhất để bỏ qua "Discovery" là chỉ định đích danh task cần làm. Bạn không cần AI tự tìm nữa, bạn ra lệnh thẳng.
-
-**1. Sửa phần Arguments & Flags:**
-Thêm flag `--task` vào định nghĩa:
-
-```markdown
-| Flag | Description | Example |
-|------|-------------|---------|
-| `--task=ID` | Skip discovery, execute specific task | `--task=A.1.b` |
-```
-
-**2. Sửa logic Phase 1 (Discovery):**
-Thay đổi logic để kiểm tra flag này trước tiên.
-
-```markdown
-### Phase 1: Discovery
-
-GOAL: Find next task to execute
-
-STEPS:
-
-1. Read plan file: $ARGUMENTS
-
-2. {{ if --task provided }}
-   **FAST TRACK MODE:**
-   - Locate specific task ID: {{ task ID }}
-   - Verify it is uncompleted `[ ]`
-   - Validate its dependencies are `[x]`
-   - EXIT Discovery immediately with this task
-   {{ else }}
-   **NORMAL DISCOVERY MODE:**
-   - Parse markdown...
-   - Find next uncompleted...
-   {{ endif }}
-```
-
-**3. Sửa phần Output (Success Case):**
-Quan trọng nhất: Khi hoàn thành Task A, hệ thống phải **tự tính toán Task B** và đưa cho bạn câu lệnh copy-paste.
-
-````markdown
-## Next Steps
-
-...
-
-**3. Continue to next task immediately:**
-```bash
-/cook {{ plan file }} --task={{ next_task_id }}
-````
-
-````
-
-**Tại sao cách này hiệu quả?**
-- Lần chạy đầu: Bạn chạy `/cook plan.md` (AI tốn thời gian Discovery).
-- Kết thúc: AI bảo "Xong A.1. Task tiếp theo là A.2. Chạy lệnh này đi: `/cook plan.md --task=A.2`".
-- Lần chạy sau: Bạn paste lệnh đó. AI bỏ qua bước tìm kiếm, nhảy thẳng vào làm A.2.
-
----
-
-### Giải pháp 2: "Smart Cursor" (Lưu trạng thái tạm)
-
-Nếu bạn lười copy-paste ID, bạn có thể cho phép tạo một file tạm nhỏ (`.cook_cursor`) để nhớ vị trí. Cách này vi phạm nhẹ nguyên tắc "Stateless" nhưng tiện lợi hơn nhiều.
-
-**Sửa đổi Workflow:**
-
-1.  **Khi bắt đầu Phase 1:**
-    - Kiểm tra xem có file `.cook_cursor` không?
-    - Nếu có -> Đọc ID từ đó -> Validate trong file plan xem còn `[ ]` không -> Làm luôn.
-    - Nếu không -> Chạy Discovery bình thường.
-
-2.  **Khi kết thúc (Success Case):**
-    - Tìm ID của task kế tiếp.
-    - Ghi ID đó vào `.cook_cursor`.
-
-3.  **Lệnh reset:**
-    - Khi chạy `/cook plan.md` (không tham số) -> Tự động xóa cursor để scan lại từ đầu (đề phòng trường hợp bạn muốn reset).
-    - Hoặc thêm lệnh `/cook --resume` để dùng cursor.
-
----
-
-### Giải pháp 3: Tối ưu Prompt (Context Carry-over)
-
-Nếu bạn đang chạy trong một session dài của Claude Code, AI thực sự vẫn nhớ ngữ cảnh cũ. Bạn có thể sửa Prompt Phase 1 để AI tự nhận thức điều này.
-
-**Sửa Prompt Phase 1:**
-
-```markdown
-### Phase 1: Discovery
-
-CONTEXT CHECK:
-Did you just complete a task in the previous turn?
-- If YES, and the user simply ran `/cook plan.md` again:
-  1. Do NOT re-read the entire file structure deeply.
-  2. Recall the "Next task" you identified in the previous turn's output.
-  3. Verify quickly that line in `{{ plan file }}` is still `[ ]`.
-  4. Proceed with that task immediately.
-````
-
-**Nhược điểm:** Cách này phụ thuộc vào khả năng nhớ context của LLM, đôi khi nó vẫn sẽ bị "hallucinate" hoặc cẩn thận quá mức mà đọc lại từ đầu.
+Dưới đây là phân tích chi tiết:
 
 -----
 
+### 1\. Điểm mạnh (Pros)
+
+  * **Sử dụng Mental Models (Mô hình tư duy) xuất sắc:**
+      * Việc tích hợp sẵn **Six Thinking Hats**, **SCAMPER**, và **First Principles** là điểm sáng nhất. Nó biến Agent từ một "chatbot tán gẫu" thành một "chuyên gia tư vấn" thực thụ. Thay vì trả lời chung chung, Agent buộc phải nhìn vấn đề dưới góc độ rủi ro (Black Hat) hoặc cảm xúc (Red Hat).
+  * **Kiểm soát luồng hội thoại (Flow Control):**
+      * Phần `Methodology Skills` rất đắt giá: *"One question per message"* (Một câu hỏi mỗi lần). Đây là kỹ thuật cực kỳ quan trọng khi brainstorm kỹ thuật để tránh việc AI "nôn" ra một wall-of-text (bức tường chữ) khiến người dùng bị ngợp (analysis paralysis).
+  * **Template hóa đầu ra (Output Templates):**
+      * Agent được quy định rõ cách trả về kết quả (Brainstorm Session, Alternative Approaches). Điều này giúp người dùng dễ dàng copy-paste kết quả vào tài liệu thiết kế hoặc ticket Jira/Github.
+  * **Tính kế thừa và ngữ cảnh (Context & Inheritance):**
+      * Việc tham chiếu đến `CLAUDE.md` và `.claude/skills/...` cho thấy Agent này được thiết kế để hoạt động trong một hệ sinh thái lớn hơn, tuân thủ các quy tắc chung của dự án.
+
+### 2\. Điểm cần cải thiện (Cons & Suggestions)
+
+Mặc dù rất tốt, nhưng để hoạt động tối ưu trong môi trường **Claude Code (CLI)**, bạn nên bổ sung một vài chi tiết kỹ thuật:
+
+#### A. Kết nối Tool vào Workflow (Quan trọng)
+
+Trong header bạn khai báo `tools: Glob, Grep, Read, WebSearch`, nhưng trong phần **Workflow**, bạn chưa hướng dẫn Agent *khi nào* thì dùng chúng.
+
+  * **Vấn đề:** Agent có thể bắt đầu brainstorm ngay lập tức dựa trên kiến thức chung mà quên mất việc đọc code hiện tại.
+  * **Giải pháp:** Thêm bước "Context Gathering" vào Workflow.
+
+<!-- end list -->
+
+```markdown
+### Step 0: Context Gathering (Pre-computation)
+Before brainstorming, ALWAYS:
+1. Use `Glob` to understand the file structure.
+2. Use `Read` to inspect relevant existing code/docs.
+3. (Optional) Use `WebSearch` to find current industry standards for this problem.
+```
+
+#### B. Cơ chế "Sanity Check" (Kiểm tra thực tế)
+
+Brainstorming thường dẫn đến các ý tưởng hay nhưng... không code được hoặc quá tốn kém.
+
+  * **Giải pháp:** Trong phần `Convergent Thinking`, hãy yêu cầu Agent viết một đoạn **Pseudo-code** hoặc **Interface definition** sơ khởi để kiểm chứng tính khả thi kỹ thuật ngay lập tức.
+
+#### C. Chế độ "Tốc độ" (Lite Mode)
+
+Không phải lúc nào cũng cần dùng "Six Thinking Hats" (khá dài dòng). Đôi khi bạn chỉ cần một ý tưởng nhanh.
+
+  * **Giải pháp:** Thêm một trigger cho chế độ nhanh.
+      * *Prompt:* "Quick ideas for X" -\> Bỏ qua deep frameworks, liệt kê ngay 3 bullet points.
+
+### 3\. Đánh giá chấm điểm
+
+  * **Cấu trúc:** 10/10 (Rõ ràng, Markdown chuẩn).
+  * **Tính hữu dụng:** 9/10 (Rất thực tế cho việc gỡ bí ý tưởng).
+  * **Tích hợp kỹ thuật:** 8/10 (Cần kết nối chặt hơn giữa Tools và Workflow).
+
+### 4\. Code Snippet đề xuất cải tiến
+
+Bạn có thể chèn đoạn này vào ngay sau mục **Workflow** để Agent thông minh hơn trong việc sử dụng tools:
+
+```markdown
+## Tool Usage Guidelines
+
+- **Scan First**: Before generating ideas, run `grep` or `ls` (via Glob) to ensure suggestions fit the current architecture described in `src/`.
+- **Evidence Based**: When suggesting a library or pattern, use `WebSearch` to verify it is not deprecated/obsolete as of 2024/2025.
+- **Read Before Write**: Do not suggest refactoring without `Read`-ing the target file first.
+```
+
+### Kết luận
+
+Đây là một file cấu hình Agent **xuất sắc**. Nếu bạn đưa file này vào hệ thống Claude Code (ví dụ qua MCP hoặc system prompt của custom tool), nó sẽ đóng vai trò như một Tech Lead hoặc Senior Architect ảo, giúp bạn phá vỡ bế tắc (writer's block) rất hiệu quả.
+
+**Bước tiếp theo:** Bạn có muốn tôi viết thử một kịch bản mẫu (simulation) về cách Agent này sẽ xử lý một yêu cầu cụ thể (ví dụ: "Thiết kế hệ thống cache cho API") để xem nó vận dụng "Six Thinking Hats" như thế nào không?
