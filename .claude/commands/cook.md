@@ -9,8 +9,10 @@ Execute the **next uncompleted task** from an implementation plan, verify it wor
 ## Aliases
 
 ```bash
-/cook [plan-file]
-/cook-next [plan-file]
+/cook [plan-file]              # Normal mode with full discovery
+/cook [plan-file] --task=ID    # Fast-track to specific task
+/cook [plan-file] --resume     # Quick resume from last task
+/cook-next [plan-file]         # Alias for --resume
 ```
 
 ## Usage
@@ -40,6 +42,8 @@ Execute the **next uncompleted task** from an implementation plan, verify it wor
 
 | Flag | Description | Example |
 |------|-------------|---------|
+| `--task=ID` | Skip discovery, execute specific task | `--task=A.2` |
+| `--resume` | Quick resume from last completed task | `--resume` |
 | `--phase=ID` | Limit to specific phase | `--phase=A` |
 | `--dry-run` | Preview without executing | `--dry-run` |
 | `--skip-verify` | Skip test verification | `--skip-verify` |
@@ -88,14 +92,122 @@ Execute the **next uncompleted task** from an implementation plan, verify it wor
 
 ## Workflow (4 Phases)
 
-### Phase 1: Discovery (2-5 min)
+### Phase 1: Discovery (2-5 min → 10s with fast-track)
 
 ```markdown
 Task Scanner
 
 GOAL: Find next task to execute
 
-STEPS:
+---
+
+**FAST TRACK CHECK** (NEW):
+
+{{ if --task provided }}
+   ⚡ **FAST TRACK MODE: Explicit Task**
+   
+   Task specified: {{ task ID }}
+   Skipping full discovery (saves 2-5 min)
+   
+   STEPS:
+   1. Read plan file: $ARGUMENTS
+   
+   2. Search for exact task line:
+      Pattern: `- [ ] {{ task ID }}:`
+   
+   3. {{ if task not found }}
+      ❌ ERROR: Task "{{ task ID }}" not found in plan
+      
+      Possible issues:
+      - Wrong task ID
+      - Task already completed [x]
+      - Typo in --task flag
+      
+      Suggestion: Run discovery to find next task
+      ```bash
+      /cook {{ plan file }}
+      ```
+      
+      STOP
+   {{ endif }}
+   
+   4. {{ if task marked [x] }}
+      ⚠️ WARNING: Task {{ task ID }} already completed
+      
+      Re-run anyway? This will re-implement completed work.
+      
+      Suggestion: Find next uncompleted task
+      ```bash
+      /cook {{ plan file }}
+      ```
+      
+      STOP
+   {{ endif }}
+   
+   5. Extract task details (same as normal step 5-6)
+   6. Validate dependencies (same as normal step 8)
+   
+   ✅ Fast track validated: {{ task ID }}
+   ⏱️ Time saved: ~2-4 minutes
+   
+   {{ PROCEED TO PHASE 2 }}
+
+{{ else if --resume }}
+   ⚡ **RESUME MODE: Continue from last**
+   
+   Checking conversation context...
+   
+   STEPS:
+   1. Search conversation history for last completed task:
+      - Look for "COOK COMPLETE" messages
+      - Extract last task ID marked [x]
+   
+   2. {{ if found last task }}
+      Last completed: {{ last task ID }} ✅
+      
+      Read plan file: $ARGUMENTS
+      
+      Find next uncompleted task after {{ last task ID }}:
+      - Same phase if available
+      - Next phase if current phase complete
+      
+      {{ if found next task }}
+         ✅ Resume point: {{ next task ID }}
+         ⏱️ Quick lookup: ~20 seconds (vs 2-5 min full scan)
+         
+         Extract task details and proceed
+         
+         {{ PROCEED with this task }}
+      {{ else }}
+         No tasks found after {{ last task ID }}
+         
+         Possible reasons:
+         - Plan complete 🎉
+         - All remaining tasks in different phase
+         
+         {{ Fall back to NORMAL DISCOVERY }}
+      {{ endif }}
+   {{ else }}
+      ⚠️ No previous completion found in conversation
+      
+      This might be:
+      - First run in this conversation
+      - Long conversation (history truncated)
+      - Different plan file
+      
+      {{ Fall back to NORMAL DISCOVERY }}
+   {{ endif }}
+
+{{ else }}
+   🔍 **NORMAL DISCOVERY MODE**
+   
+   Full plan analysis required
+   
+{{ endif }}
+
+---
+
+STEPS (if NORMAL DISCOVERY):
 
 1. Read plan file: $ARGUMENTS
 
@@ -750,15 +862,35 @@ git add .
 git commit -m "{{ commit message suggestion }}"
 ```
 
-**3. Continue to next task**:
+**3. Continue to next task** ⚡:
+
+{{ if next task preview }}
+**Next task**: {{ next task ID }}: {{ next description }}
+
+**Fast-track option** (recommended - saves 2-5 min):
+```bash
+/cook {{ plan file }} --task={{ next task ID }}
+```
+
+**Auto-resume option** (finds next task automatically):
+```bash
+/cook {{ plan file }} --resume
+```
+
+**Normal mode** (full discovery):
 ```bash
 /cook {{ plan file }}
 ```
 
-{{ if next task preview }}
-**Next task**: {{ next task ID }}: {{ next description }}
 {{ else }}
 🎉 **This was the last task!** Plan complete.
+
+**Final verification**:
+```bash
+npm test
+npm run build
+git push
+```
 {{ endif }}
 
 ═══════════════════════════════════════════════
@@ -1043,7 +1175,55 @@ git commit -m "feat: complete authentication system (A.1)"
 
 ---
 
-### Example 8: Auto-Suggest Subtasks
+### Example 8: Fast-Track Mode
+
+```bash
+# Scenario: Continuous cooking in same conversation
+
+# First run - needs discovery
+/cook plans/feature.md
+# ✅ Task A.1 complete
+# Output suggests: /cook plans/feature.md --task=A.2
+
+git commit -m "feat: task A.1"
+
+# Second run - use suggested command (FAST! ~10 seconds vs 3 min)
+/cook plans/feature.md --task=A.2
+# ✅ Task A.2 complete  
+# Output suggests: /cook plans/feature.md --task=A.3
+
+git commit -m "feat: task A.2"
+
+# Third run - even faster with auto-resume
+/cook plans/feature.md --resume
+# 🔍 Found last task: A.2 ✅
+# ⚡ Resume point: A.3
+# ✅ Task A.3 complete
+```
+
+**Time savings**: 
+- Normal: 3 min + 3 min + 3 min = 9 min
+- Fast-track: 3 min + 10s + 10s = ~3.5 min
+- **Saved: 5.5 minutes** (60%+ faster)
+
+---
+
+### Example 9: Jump to Specific Task
+
+```bash
+# Skip ahead to critical task that blocks others
+/cook plans/feature.md --task=C.5
+
+# Go back to fix something without marking complete
+/cook plans/feature.md --task=A.2 --no-update
+
+# Preview specific task
+/cook plans/feature.md --task=B.3 --dry-run
+```
+
+---
+
+### Example 10: Auto-Suggest Subtasks
 
 ```bash
 # Plan has large task:
@@ -1198,31 +1378,75 @@ git commit
 
 ## Pro Tips
 
-1. **Use dry-run to preview**:
+1. **Use fast-track for continuous cooking** ⚡:
+   ```bash
+   # First run (needs discovery)
+   /cook plan.md
+   # Output suggests: /cook plan.md --task=A.2
+   
+   git commit -m "feat: task A.1"
+   
+   # Copy-paste the suggested command (saves 2-5 min)
+   /cook plan.md --task=A.2
+   # Output suggests: /cook plan.md --task=A.3
+   
+   git commit -m "feat: task A.2"
+   
+   # Or use auto-resume
+   /cook plan.md --resume
+   ```
+
+2. **Use dry-run to preview**:
    ```bash
    /cook plan.md --dry-run
+   /cook plan.md --task=A.5 --dry-run  # Preview specific task
    ```
 
-2. **Commit after each successful cook**:
+3. **Keyboard-driven workflow** (bash/zsh):
    ```bash
-   /cook plan.md && git add . && git commit -m "$(git diff --cached --name-only | head -1)"
+   # Add to ~/.zshrc or ~/.bashrc
+   function cook-next() {
+     /cook "$1" --resume
+   }
+   
+   # Usage - super fast iteration:
+   cook-next plan.md  # runs next task
+   git commit -m "auto"
+   cook-next plan.md  # runs next task
+   git commit -m "auto"
+   # repeat...
    ```
 
-3. **Focus on one phase at a time**:
+4. **One-liner for rapid execution**:
+   ```bash
+   # Execute and commit in one go (review first!)
+   /cook plan.md --resume && git add . && git commit -m "$(git diff --cached --name-only | head -1)"
+   ```
+
+5. **Focus on one phase at a time**:
    ```bash
    /cook plan.md --phase=A  # Security phase
    # Complete all Phase A
    /cook plan.md --phase=B  # Architecture phase
    ```
 
-4. **Use --auto-fix for routine refactoring**:
+6. **Use --auto-fix for routine refactoring**:
    ```bash
-   /cook refactor-plan.md --auto-fix
+   /cook refactor-plan.md --auto-fix --resume
    ```
 
-5. **Check progress anytime**:
+7. **Check progress anytime**:
    ```bash
    /task-progress plan.md
+   ```
+
+8. **Jump to specific task when needed**:
+   ```bash
+   # Skip ahead to critical task
+   /cook plan.md --task=B.3
+   
+   # Go back to fix something
+   /cook plan.md --task=A.1 --no-update  # Don't mark complete again
    ```
 
 ---
