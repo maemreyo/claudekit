@@ -97,91 +97,57 @@ function parseJSON(json: string): Result<any> {
 const result = parseJSON(input)
   .flatMap(validateData)
   .flatMap(transformData);
-
-if (result.success) {
-  console.log(result.data);
-} else {
-  console.error(result.error);
-}
 ```
 
-### 2. Retry with Exponential Backoff
-```javascript
-class RetryHandler {
-  async execute(fn, options = {}) {
-    const {
-      maxAttempts = 3,
-      baseDelay = 1000,
-      maxDelay = 30000,
-      factor = 2,
-      jitter = true
-    } = options;
-
-    let lastError;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        return await fn();
-      } catch (error) {
-        lastError = error;
-
-        if (attempt === maxAttempts || !this.isRetryable(error)) {
-          throw error;
-        }
-
-        const delay = this.calculateDelay(
-          attempt,
-          baseDelay,
-          maxDelay,
-          factor,
-          jitter
-        );
-
-        await this.sleep(delay);
-      }
-    }
-
-    throw lastError;
+### 2. Error Boundary Pattern
+```typescript
+// React Error Boundary
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
   }
 
-  isRetryable(error) {
-    const retryableCodes = ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND'];
-    return retryableCodes.includes(error.code);
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
   }
 
-  calculateDelay(attempt, base, max, factor, jitter) {
-    let delay = Math.min(base * Math.pow(factor, attempt - 1), max);
+  componentDidCatch(error, errorInfo) {
+    this.props.onError(error, errorInfo);
+  }
 
-    if (jitter) {
-      delay *= 0.8 + Math.random() * 0.4; // ±20%
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <ErrorFallback />;
     }
-
-    return delay;
+    return this.props.children;
   }
 }
 ```
 
 ### 3. Circuit Breaker Pattern
-```javascript
+```typescript
 class CircuitBreaker {
-  constructor(options = {}) {
-    this.threshold = options.threshold || 5;
-    this.timeout = options.timeout || 60000;
+  constructor(
+    private threshold = 5,
+    private timeout = 60000
+  ) {
+    this.failureCount = 0;
+    this.lastFailureTime = null;
     this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
-    this.failures = 0;
-    this.nextAttempt = Date.now();
   }
 
-  async execute(fn) {
+  async execute(operation) {
     if (this.state === 'OPEN') {
-      if (Date.now() < this.nextAttempt) {
+      if (Date.now() - this.lastFailureTime > this.timeout) {
+        this.state = 'HALF_OPEN';
+      } else {
         throw new Error('Circuit breaker is OPEN');
       }
-      this.state = 'HALF_OPEN';
     }
 
     try {
-      const result = await fn();
+      const result = await operation();
       this.onSuccess();
       return result;
     } catch (error) {
@@ -190,265 +156,281 @@ class CircuitBreaker {
     }
   }
 
-  onSuccess() {
-    this.failures = 0;
+  private onSuccess() {
+    this.failureCount = 0;
     this.state = 'CLOSED';
   }
 
-  onFailure() {
-    this.failures++;
-    if (this.failures >= this.threshold) {
+  private onFailure() {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    if (this.failureCount >= this.threshold) {
       this.state = 'OPEN';
-      this.nextAttempt = Date.now() + this.timeout;
     }
   }
 }
 ```
 
-### 4. Graceful Degradation
-```javascript
-class UserService {
-  async getUserProfile(userId) {
-    // Try multiple data sources in order of preference
-    const strategies = [
-      () => this.getFromCache(userId),
-      () => this.getFromDatabase(userId),
-      () => this.getFromAPI(userId),
-      () => this.getDefaultProfile()
-    ];
+## Specific Error Types
 
-    for (const strategy of strategies) {
-      try {
-        const profile = await strategy();
-        if (profile) return profile;
-      } catch (error) {
-        console.warn(`Strategy failed:`, error.message);
-        // Continue to next strategy
-      }
-    }
-
-    // All strategies failed
-    throw new Error('Unable to fetch user profile');
+### Validation Errors
+```typescript
+class ValidationError extends Error {
+  constructor(
+    message: string,
+    public field?: string,
+    public value?: any
+  ) {
+    super(message);
+    this.name = 'ValidationError';
   }
 }
-```
-
-## Error Categories & Handling
-
-| Error Type | Detection | Handling Strategy |
-|------------|-----------|-------------------|
-| **Network** | `ECONNREFUSED`, timeout | Retry with backoff |
-| **Validation** | Schema errors | Immediate failure, user feedback |
-| **Permission** | `EACCES`, 403 | Fail fast, log security event |
-| **Resource** | `ENOMEM`, quota exceeded | Graceful degradation |
-| **Timeout** | Operation duration > threshold | Cancel operation, cleanup |
-
-## Framework-Specific Patterns
-
-### React Error Boundaries
-```jsx
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    // Send to error reporting service
-    errorReporting.captureException(error, {
-      extra: errorInfo
-    });
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <ErrorFallback
-          error={this.state.error}
-          reset={() => this.setState({ hasError: false, error: null })}
-        />
-      );
-    }
-    return this.props.children;
-  }
-}
-```
-
-### Express.js Global Handler
-```javascript
-// Async route wrapper
-const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-// Error handling middleware
-app.use((error, req, res, next) => {
-  // Don't expose stack trace in production
-  const isDev = process.env.NODE_ENV === 'development';
-
-  // Handle different error types
-  if (error.name === 'ValidationError') {
-    return res.status(400).json({
-      error: 'Validation failed',
-      details: error.details,
-      code: 'VALIDATION_ERROR'
-    });
-  }
-
-  if (error.name === 'UnauthorizedError') {
-    return res.status(401).json({
-      error: 'Authentication required',
-      code: 'UNAUTHORIZED'
-    });
-  }
-
-  // Log all errors
-  console.error(error);
-
-  // Generic error response
-  res.status(error.status || 500).json({
-    error: isDev ? error.message : 'Internal server error',
-    code: error.code || 'INTERNAL_ERROR',
-    ...(isDev && { stack: error.stack })
-  });
-});
-```
-
-### Async/Await Error Propagation
-```javascript
-// Wrap async functions to ensure errors are handled
-const withErrorHandling = (fn) => {
-  return async (...args) => {
-    try {
-      return await fn(...args);
-    } catch (error) {
-      // Add context to error
-      error.context = {
-        function: fn.name,
-        args: args.map(a => typeof a === 'object' ? '[Object]' : a)
-      };
-
-      // Re-throw with additional context
-      throw error;
-    }
-  };
-};
 
 // Usage
-const processData = withErrorHandling(async (data) => {
-  // Process data
-  return result;
-});
-```
-
-## Monitoring & Alerting
-
-### Structured Error Logging
-```javascript
-const logger = winston.createLogger({
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  )
-});
-
-// Log errors with full context
-logger.error('Payment processing failed', {
-  error: error.message,
-  stack: error.stack,
-  userId: payment.userId,
-  amount: payment.amount,
-  orderId: payment.orderId,
-  paymentMethod: payment.method,
-  timestamp: new Date().toISOString(),
-  traceId: generateTraceId()
-});
-```
-
-### Error Metrics
-```javascript
-class ErrorMetrics {
-  constructor() {
-    this.counters = new Map();
-  }
-
-  record(error, context = {}) {
-    const key = `${error.name}:${error.code || 'UNKNOWN'}`;
-
-    if (!this.counters.has(key)) {
-      this.counters.set(key, {
-        count: 0,
-        lastOccurred: null,
-        contexts: []
-      });
-    }
-
-    const metric = this.counters.get(key);
-    metric.count++;
-    metric.lastOccurred = new Date();
-    metric.contexts.push(context);
-
-    // Keep only last 100 contexts
-    if (metric.contexts.length > 100) {
-      metric.contexts.shift();
-    }
-
-    // Alert on threshold
-    if (metric.count === 10) {
-      this.alert(key, metric);
-    }
-  }
-
-  alert(errorKey, metric) {
-    alerting.send({
-      level: 'warning',
-      message: `Error ${errorKey} occurred ${metric.count} times`,
-      metric
-    });
+function validateUser(user: User) {
+  if (!user.email.includes('@')) {
+    throw new ValidationError('Invalid email format', 'email', user.email);
   }
 }
 ```
 
-## Testing Error Handling
+### Network Errors
+```typescript
+class NetworkError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public retryable: boolean = false
+  ) {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
 
-```javascript
-describe('error handling', () => {
-  it('handles network failures gracefully', async () => {
-    // Mock network failure
-    mockNetwork.mockRejectedValue(new Error('Network error'));
-
-    const result = await service.fetchData();
-
-    expect(result.success).toBe(false);
-    expect(result.error).toMatch(/network/i);
-  });
-
-  it('retries transient failures', async () => {
-    // Fail twice, then succeed
-    mockNetwork
-      .mockRejectedValueOnce(new Error('Timeout'))
-      .mockRejectedValueOnce(new Error('Timeout'))
-      .mockResolvedValueOnce({ data: 'success' });
-
-    const result = await service.fetchDataWithRetry();
-
-    expect(result).toEqual({ data: 'success' });
-    expect(mockNetwork).toHaveBeenCalledTimes(3);
-  });
-
-  it('preserves error context', async () => {
-    const error = new Error('Database error');
-    error.code = 'DB_CONNECTION_FAILED';
-
-    mockDB.mockRejectedValue(error);
-
-    await expect(service.processOrder('123'))
-      .rejects.toThrow('Failed to process order 123: Database error');
-  });
-});
+// Usage
+async function fetchWithRetry(url: string, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new NetworkError(
+          `HTTP ${response.status}`,
+          response.status,
+          response.status >= 500
+        );
+      }
+      return await response.json();
+    } catch (error) {
+      if (error instanceof NetworkError && error.retryable && i < maxRetries - 1) {
+        await delay(1000 * Math.pow(2, i)); // Exponential backoff
+        continue;
+      }
+      throw error;
+    }
+  }
+}
 ```
+
+### Database Errors
+```typescript
+class DatabaseError extends Error {
+  constructor(
+    message: string,
+    public query?: string,
+    public code?: string
+  ) {
+    super(message);
+    this.name = 'DatabaseError';
+  }
+}
+
+// Usage
+async function queryDatabase(sql: string, params: any[]) {
+  try {
+    return await db.query(sql, params);
+  } catch (error) {
+    if (error.code === '23505') {
+      throw new DatabaseError('Duplicate entry', sql, error.code);
+    }
+    throw new DatabaseError(error.message, sql, error.code);
+  }
+}
+```
+
+## Error Recovery Strategies
+
+### Retry with Exponential Backoff
+```typescript
+async function retry<T>(
+  operation: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelay = 1000
+): Promise<T> {
+  let lastError: Error;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === maxAttempts) {
+        throw error;
+      }
+
+      const delay = baseDelay * Math.pow(2, attempt - 1);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError!;
+}
+```
+
+### Fallback Pattern
+```typescript
+class FallbackCache {
+  constructor(private primary: DataService, private fallback: DataService) {}
+
+  async getData(key: string) {
+    try {
+      return await this.primary.getData(key);
+    } catch (error) {
+      logger.warn('Primary service failed, using fallback', { key, error });
+      return await this.fallback.getData(key);
+    }
+  }
+}
+```
+
+### Graceful Degradation
+```typescript
+function renderUserProfile(user: User) {
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      {user.avatar ? (
+        <img src={user.avatar} alt={user.name} />
+      ) : (
+        <div className="avatar-placeholder" /> // Fallback UI
+      )}
+      {user.email && (
+        <p>{user.email}</p>
+      )}
+    </div>
+  );
+}
+```
+
+For comprehensive error handling patterns and language-specific implementations, see:
+- [error-patterns-catalog.md](resources/error-patterns-catalog.md)
+- [error-handling-by-language.md](resources/error-handling-by-language.md)
+
+## Error Logging and Monitoring
+
+### Structured Error Logging
+```typescript
+interface ErrorContext {
+  userId?: string;
+  requestId?: string;
+  operation?: string;
+  metadata?: Record<string, any>;
+}
+
+class ErrorLogger {
+  error(message: string, error: Error, context?: ErrorContext) {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level: 'ERROR',
+      message,
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      },
+      context
+    };
+
+    this.writeLog(logEntry);
+  }
+
+  private writeLog(entry: any) {
+    // Send to logging service
+    if (process.env.NODE_ENV === 'production') {
+      this.sendToRemoteLogger(entry);
+    } else {
+      console.error(JSON.stringify(entry, null, 2));
+    }
+  }
+}
+```
+
+### Error Reporting
+```typescript
+class ErrorReporter {
+  async report(error: Error, context?: ErrorContext) {
+    const report = {
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      },
+      context,
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      await fetch('https://error-reporting-service.com/api/errors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(report)
+      });
+    } catch (reportingError) {
+      console.error('Failed to report error:', reportingError);
+    }
+  }
+}
+```
+
+## Error Handling Best Practices
+
+### DO ✅
+- Handle errors at appropriate abstraction levels
+- Provide meaningful error messages
+- Include context for debugging
+- Implement recovery mechanisms
+- Log errors with sufficient detail
+- Use typed errors when possible
+- Implement circuit breakers for external services
+
+### DON'T ❌
+- Silently swallow errors
+- Expose internal error details to users
+- Use exceptions for control flow
+- Log sensitive information
+- Return null instead of proper error handling
+- Ignore error boundaries in UI
+- Skip error handling in async operations
+
+## Error Handling Checklist
+
+### Before Implementation
+- [ ] Identify all possible error conditions
+- [ ] Define error types and categories
+- [ ] Plan error recovery strategies
+- [ ] Design error logging format
+
+### During Implementation
+- [ ] Use consistent error types
+- [ ] Include relevant context
+- [ ] Implement proper error propagation
+- [ ] Add user-friendly error messages
+- [ ] Set up error logging and monitoring
+
+### After Implementation
+- [ ] Test error scenarios
+- [ ] Verify error recovery works
+- [ ] Check logging in production
+- [ ] Review error rates
+- [ ] Update documentation

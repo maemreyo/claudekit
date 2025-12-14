@@ -89,470 +89,306 @@ RIGHT: Delete, write test, rewrite from scratch
 
 ## Examples
 
-### Example 1: User Validation
+For comprehensive TDD examples and patterns, see [tdd-patterns.md](resources/tdd-patterns.md).
+
+Quick examples:
+- **Feature development**: Write test for behavior, implement to pass
+- **Bug fix**: Write test that reproduces bug, fix until test passes
+- **Refactoring**: Ensure tests pass, then refactor with confidence
+
+## TDD for Different Scenarios
+
+### New Feature Development
+1. Write test for desired behavior
+2. Verify test fails (feature doesn't exist)
+3. Implement minimal code
+4. Refactor while tests green
+
+### Bug Fixes
+1. Write test that reproduces bug
+2. Verify test fails (bug exists)
+3. Fix bug
+4. Verify test passes
+5. Add related edge case tests
+
+### Refactoring
+1. Ensure comprehensive test coverage
+2. Run tests to confirm green
+3. Refactor incrementally
+4. Run tests after each change
+
+For language-specific TDD practices, see [tdd-language-examples.md](resources/tdd-language-examples.md).
+
+## Test Structure Guidelines
+
+### AAA Pattern (Arrange-Act-Assert)
 ```typescript
-// Step 1: RED - Write failing test
-describe('User Validation', () => {
-  it('should reject invalid email', () => {
-    const user = { email: 'invalid-email', name: 'Test' };
-    expect(() => validateUser(user)).toThrow('Invalid email format');
-  });
-});
+it('should calculate discount for premium user', () => {
+  // Arrange
+  const user = { tier: 'premium' };
+  const amount = 100;
 
-// Step 3: GREEN - Minimal implementation
-function validateUser(user: User): void {
-  if (!user.email.includes('@')) {
-    throw new Error('Invalid email format');
-  }
-}
+  // Act
+  const result = calculateDiscount(user, amount);
 
-// Step 5: REFACTOR - Improve implementation
-function validateUser(user: User): void {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(user.email)) {
-    throw new Error('Invalid email format');
-  }
-  if (!user.name || user.name.trim().length === 0) {
-    throw new Error('Name is required');
-  }
-}
-```
-
-### Example 2: Bug Fix TDD
-```typescript
-// Bug: calculateTotal doesn't handle negative prices
-
-// Step 1: RED - Test that reproduces bug
-it('should handle negative prices correctly', () => {
-  const items = [
-    { price: 10, quantity: 2 },
-    { price: -5, quantity: 1 }, // Discount item
-    { price: 20, quantity: 1 }
-  ];
-  expect(calculateTotal(items)).toBe(45);
-});
-
-// Step 3: GREEN - Fix to make test pass
-function calculateTotal(items: Item[]): number {
-  return items.reduce((sum, item) => {
-    return sum + (item.price * item.quantity);
-  }, 0);
-}
-```
-
-### Example 3: API Endpoint
-```typescript
-// Step 1: RED - Test desired API behavior
-describe('POST /api/users', () => {
-  it('should create user and return 201', async () => {
-    const userData = { name: 'John', email: 'john@example.com' };
-    const response = await request(app)
-      .post('/api/users')
-      .send(userData)
-      .expect(201);
-
-    expect(response.body).toMatchObject({
-      id: expect.any(Number),
-      name: userData.name,
-      email: userData.email
-    });
-  });
-});
-
-// Step 3: GREEN - Minimal implementation
-app.post('/api/users', async (req, res) => {
-  const user = await userService.create(req.body);
-  res.status(201).json(user);
+  // Assert
+  expect(result).toBe(10); // 10% discount
 });
 ```
 
-## Best Practices
+### Test Naming
+- Use "should" or "should not"
+- Describe behavior, not implementation
+- Be specific about expected outcome
 
-### 🎯 Test Quality
-
-#### One Behavior Per Test
+### One Assertion Per Test
 ```typescript
-// BAD: Multiple assertions
-it('should validate and save user', () => {
-  expect(validateUser(user)).toBe(true);
-  expect(saveUser(user).id).toBeDefined();
-});
-
-// GOOD: Single behavior
+// Good
 it('should validate email format', () => {
-  expect(validateUser({ email: 'valid@example.com' })).toBe(true);
+  expect(isValidEmail('test@example.com')).toBe(true);
 });
 
-it('should throw on invalid email', () => {
-  expect(() => validateUser({ email: 'invalid' }))
-    .toThrow('Invalid email');
+it('should reject invalid email', () => {
+  expect(isValidEmail('invalid')).toBe(false);
+});
+
+// Avoid
+it('should handle email validation', () => {
+  expect(isValidEmail('test@example.com')).toBe(true);
+  expect(isValidEmail('invalid')).toBe(false);
+  expect(isValidEmail(null)).toBe(false);
 });
 ```
 
-#### Clear Test Names
+## Common TDD Anti-patterns
+
+### 1. Writing Tests After Code
 ```typescript
-// BAD: Generic names
-it('test1', () => {});
-it('user test', () => {});
-
-// GOOD: Descriptive names
-it('should return 0 for empty cart', () => {});
-it('should apply 10% discount for premium members', () => {});
-```
-
-#### Test Observable Behavior
-```typescript
-// BAD: Testing implementation
-it('should call database save', () => {
-  createUser(user);
-  expect(database.save).toHaveBeenCalled();
-});
-
-// GOOD: Testing behavior
-it('should persist user and return with ID', () => {
-  const result = createUser(user);
-  expect(result.id).toBeDefined();
-});
-```
-
-### 🔄 The TDD Mindset
-
-#### Before Writing Code
-1. What behavior do I want?
-2. How would I prove it works?
-3. Write the proof (test)
-4. Now write the code
-
-#### Common Anti-patterns
-- **"I'll test later"** - Never works as well
-- **"This is too simple"** - Simple code breaks too
-- **"Manual testing is enough"** - Not repeatable
-- **"I already wrote it"** - Sunk cost fallacy
-
-### 📝 Test Organization
-
-#### Test Structure
-```typescript
-describe('Feature Name', () => {
-  describe('Specific Functionality', () => {
-    it('should do X when Y', () => {
-      // Arrange
-      const input = createInput();
-
-      // Act
-      const result = functionUnderTest(input);
-
-      // Assert
-      expect(result).toBe(expected);
-    });
-  });
-});
-```
-
-#### Test Data
-```typescript
-// Use factories for test data
-const createTestUser = (overrides = {}) => ({
-  name: 'Test User',
-  email: 'test@example.com',
-  ...overrides
-});
-```
-
-### 🛠️ Refactoring Safely
-
-#### With Green Tests
-- Extract functions
-- Rename variables
-- Remove duplication
-- Improve performance
-- Run tests after each small change
-
-#### When Tests Fail
-- Stop refactoring immediately
-- Make tests green again
-- Only then continue
-
-### 📊 Coverage Guidelines
-
-- Aim for high coverage of business logic
-- 100% of critical paths
-- Edge cases and error handling
-- Don't test trivial getters/setters
-
-## Requirements
-
-### Prerequisites
-- Test framework installed (Jest, Vitest, Pytest, etc.)
-- Understanding of the problem domain
-- Patience to write tests first
-
-### Dependencies
-- Test framework (choose based on language)
-- Mocking/stubbing libraries if needed
-- Test database for integration tests
-
-### Tools
-- IDE with good test runner support
-- Coverage reporting tools
-- CI/CD pipeline for automated testing
-
-### Common Test Frameworks
-
-#### JavaScript/TypeScript
-- **Vitest**: Fast, modern, Vite-based
-- **Jest**: Feature-rich, widely used
-- **Mocha**: Flexible, minimal
-
-#### Python
-- **Pytest**: Powerful, plugin-rich
-- **Unittest**: Built-in, simple
-
-## Edge Cases to Test
-
-Always test:
-- Empty inputs
-- Null/undefined values
-- Boundary conditions
-- Error scenarios
-- Invalid inputs
-- Large datasets
-- Concurrent access (if applicable)
-
-## Troubleshooting TDD
-
-### Test Won't Fail
-- Check test is actually running
-- Verify assertion is correct
-- Ensure you're testing the right thing
-
-### Implementation Too Complex
-- Split into smaller functions
-- Each with its own test
-- Compose in higher-level test
-
-### Tests Too Slow
-- Use test databases
-- Mock external services
-- Run tests in parallel
-
-### 1. RED: Write Failing Test
-
-Write a minimal test demonstrating the desired behavior:
-
-```typescript
-describe('calculateTotal', () => {
-  it('should sum item prices', () => {
-    const items = [{ price: 10 }, { price: 20 }];
-    expect(calculateTotal(items)).toBe(30);
-  });
-});
-```
-
-### 2. VERIFY RED: Confirm Test Fails
-
-Run the test and confirm it fails **for the right reason**:
-
-```bash
-npm test -- --grep "sum item prices"
-# Expected: FAIL
-# Reason: calculateTotal is not defined
-```
-
-**Critical**: The failure should be because the feature doesn't exist, not because of typos or syntax errors.
-
-### 3. GREEN: Write Minimal Code
-
-Write the simplest code that makes the test pass:
-
-```typescript
-function calculateTotal(items: Item[]): number {
-  return items.reduce((sum, item) => sum + item.price, 0);
+// WRONG: Write code then tests
+function addUser(user) {
+  // ... implementation
 }
+
+// Then write test to verify
+test('addUser adds user', () => {
+  // ... verifies implementation
+});
+
+// RIGHT: Test first
+test('addUser adds user', () => {
+  // ... describe desired behavior
+});
+// Then implement
 ```
 
-**Don't over-engineer**. If the test passes with simple code, stop.
-
-### 4. VERIFY GREEN: Confirm Test Passes
-
-Run the test and confirm it passes:
-
-```bash
-npm test -- --grep "sum item prices"
-# Expected: PASS
-```
-
-### 5. REFACTOR: Clean Up
-
-With green tests, refactor safely:
-- Extract functions
-- Rename variables
-- Remove duplication
-- Run tests after each change
-
----
-
-## The Non-Negotiable Rule
-
-**NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST**
-
-This is not a guideline. It's a rule.
-
-### What If I Already Wrote Code?
-
-Delete it. Completely.
-
-```
-WRONG: "I'll keep this code as reference while writing tests"
-RIGHT: Delete the code, write test, rewrite implementation
-```
-
-### Why So Strict?
-
-- Code written before tests wasn't driven by tests
-- Keeping it as reference leads to rationalization
-- Tests written after code often just verify what was written
-- True TDD produces different (usually better) designs
-
----
-
-## Test Quality Standards
-
-### One Behavior Per Test
-
+### 2. Testing Implementation Details
 ```typescript
-// BAD: Multiple behaviors
-it('should validate and save user', () => {
-  expect(validateUser(user)).toBe(true);
-  expect(saveUser(user)).toBe(1);
+// WRONG: Tests internal structure
+test('uses array internally', () => {
+  expect(users.data).toBeInstanceOf(Array);
 });
 
-// GOOD: Single behavior
-it('should validate user email format', () => {
-  expect(validateUser({ email: 'test@example.com' })).toBe(true);
-});
-
-it('should save valid user', () => {
-  const user = createValidUser();
-  expect(saveUser(user)).toBe(1);
+// RIGHT: Tests behavior
+test('can add multiple users', () => {
+  addUser(user1);
+  addUser(user2);
+  expect(getAllUsers()).toEqual([user1, user2]);
 });
 ```
 
-### Clear Naming
-
-Test names should describe the behavior:
-
+### 3. Skipping Red Phase
 ```typescript
-// BAD
-it('test1', () => {});
-it('calculateTotal', () => {});
-
-// GOOD
-it('should return 0 for empty cart', () => {});
-it('should apply discount when coupon is valid', () => {});
-```
-
-### Real Code Over Mocks
-
-Use real implementations when possible:
-
-```typescript
-// PREFER: Real database (test container)
-const db = await startTestDatabase();
-const result = await userRepo.save(user);
-
-// AVOID: Excessive mocking
-const mockDb = { save: jest.fn().mockResolvedValue(1) };
-```
-
-### Test Observable Behavior
-
-Test what the code does, not how it does it:
-
-```typescript
-// BAD: Testing implementation
-it('should call helper function', () => {
-  calculateTotal(items);
-  expect(helperFn).toHaveBeenCalled();
-});
-
-// GOOD: Testing behavior
-it('should return correct total', () => {
+// WRONG: Write test and code together
+test('calculates total', () => {
   expect(calculateTotal(items)).toBe(30);
 });
+function calculateTotal(items) { /* implementation */ }
+
+// RIGHT: Ensure test fails first
+test('calculates total', () => {
+  expect(calculateTotal(items)).toBe(30);
+});
+// Run: FAIL (function doesn't exist)
+// Then implement
 ```
 
----
+## Test First vs Test After
 
-## Common Rationalizations (Reject These)
+### Test First (True TDD)
+- ✅ Drives design
+- ✅ Ensures testability
+- ✅ Prevents over-engineering
+- ✅ Guarantees all behavior is tested
+- ✅ Produces better code organization
 
-### "I'll write tests after"
+### Test After
+- ❌ Just verifies implementation
+- ❌ Can lead to untestable code
+- ❌ May miss edge cases
+- ❌ Encourages writing too much code
 
-Tests written after code verify what was written, not what should happen. The test can't prove the code is correct if it was shaped to match existing code.
+## TDD Workflow Checklist
 
-### "Manual testing is enough"
+### Before Writing Code
+- [ ] Test written for behavior
+- [ ] Test fails (feature doesn't exist)
+- [ ] Failure reason is correct
+- [ ] Test is isolated
+- [ ] Test has clear assertion
 
-Ad-hoc testing is not systematic. It misses edge cases, isn't repeatable, and doesn't prevent regressions.
+### While Writing Code
+- [ ] Write minimal implementation
+- [ ] Run tests frequently
+- [ ] No extra features
+- [ ] No over-engineering
+- [ ] Keep it simple
 
-### "This code is too simple to test"
+### After Code Passes
+- [ ] All tests pass
+- [ ] No test duplication
+- [ ] Code is clean
+- [ ] Refactor if needed
+- [ ] Run full test suite
 
-Simple code breaks too. A test takes seconds and provides permanent verification.
+## TDD by Example
 
-### "I don't have time"
+### Shopping Cart Feature
 
-TDD is faster in the medium term. Debugging time saved far exceeds test-writing time.
-
-### "I already wrote it, might as well keep it"
-
-Sunk cost fallacy. Delete and rewrite properly.
-
----
-
-## Edge Cases to Test
-
-Always include tests for:
-
-- Empty inputs
-- Null/undefined values
-- Boundary conditions
-- Error scenarios
-- Large inputs
-- Invalid inputs
-
+#### Step 1: Write Failing Test
 ```typescript
-describe('calculateTotal', () => {
-  it('should return 0 for empty array', () => {
-    expect(calculateTotal([])).toBe(0);
-  });
+describe('Shopping Cart', () => {
+  it('should calculate total with tax', () => {
+    const cart = new ShoppingCart();
+    cart.addItem({ name: 'Book', price: 20 });
+    cart.addItem({ name: 'Pen', price: 5 });
 
-  it('should handle null items array', () => {
-    expect(() => calculateTotal(null)).toThrow();
-  });
+    const total = cart.getTotal(0.1); // 10% tax
 
-  it('should handle negative prices', () => {
-    const items = [{ price: -10 }, { price: 20 }];
-    expect(calculateTotal(items)).toBe(10);
+    expect(total).toBe(27.5); // 25 + 2.5 tax
   });
 });
 ```
 
----
+#### Step 2: Verify Failure
+```bash
+FAIL: ShoppingCart is not defined
+```
 
-## TDD Catches Bugs
+#### Step 3: Implement to Pass
+```typescript
+class ShoppingCart {
+  private items: Item[] = [];
 
-The methodology catches bugs before commit:
-- Writing test first forces you to think about edge cases
-- Seeing test fail proves it can catch failures
-- Green bar confirms the fix works
-- Test prevents regression forever
+  addItem(item: Item) {
+    this.items.push(item);
+  }
 
-This is faster than:
-1. Write code
-2. Manual test (miss edge case)
-3. Ship
-4. Bug reported
-5. Debug
-6. Fix
-7. Ship again
+  getTotal(taxRate: number) {
+    const subtotal = this.items.reduce((sum, item) => sum + item.price, 0);
+    return subtotal * (1 + taxRate);
+  }
+}
+```
 
----
+#### Step 4: Refactor
+```typescript
+class ShoppingCart {
+  private items: Item[] = [];
+
+  addItem(item: Item) {
+    this.items.push(item);
+  }
+
+  getTotal(taxRate: number) {
+    return this.getSubtotal() * (1 + taxRate);
+  }
+
+  private getSubtotal() {
+    return this.items.reduce((sum, item) => sum + item.price, 0);
+  }
+}
+```
+
+## TDD for Bug Fixes
+
+### Example: Login Bug
+
+#### Bug Report
+"Users with special characters in password can't login"
+
+#### Step 1: Write Test that Reproduces Bug
+```typescript
+describe('Login', () => {
+  it('should handle passwords with special characters', () => {
+    const user = {
+      email: 'test@example.com',
+      password: 'p@$$w0rd!123'
+    };
+
+    expect(() => loginUser(user)).not.toThrow();
+  });
+});
+```
+
+#### Step 2: Verify Test Fails
+```bash
+FAIL: Invalid password format
+```
+
+#### Step 3: Fix Bug
+```typescript
+function loginUser(credentials: UserCredentials) {
+  // Fix: Remove invalid password validation
+  if (!credentials.password || credentials.password.length < 8) {
+    throw new Error('Password too short');
+  }
+  // ... rest of login logic
+}
+```
+
+#### Step 4: Add More Edge Cases
+```typescript
+it('should handle empty password', () => {
+  expect(() => loginUser({ email: 'test@test.com', password: '' }))
+    .toThrow('Password too short');
+});
+
+it('should handle unicode characters', () => {
+  const user = {
+    email: 'user@example.com',
+    password: 'pássword123' // Contains accent
+  };
+  expect(() => loginUser(user)).not.toThrow();
+});
+```
+
+## TDD Best Practices
+
+### 1. Keep Tests Simple
+- Test one behavior per test
+- Use clear, descriptive names
+- Arrange-Act-Assert pattern
+
+### 2. Write Fast Tests
+- Avoid external dependencies
+- Use mocks/doubles when needed
+- Focus on unit tests first
+
+### 3. Maintain Test Independence
+- Tests should not depend on each other
+- Use fresh setup for each test
+- Avoid shared state
+
+### 4. Run Tests Frequently
+- After each code change
+- Before committing
+- In CI/CD pipeline
+
+### 5. Refactor Mercilessly
+- Improve code while tests are green
+- Remove duplication
+- Enhance readability
+
+For comprehensive TDD patterns and language-specific examples, see:
+- [tdd-patterns.md](resources/tdd-patterns.md)
+- [tdd-language-examples.md](resources/tdd-language-examples.md)

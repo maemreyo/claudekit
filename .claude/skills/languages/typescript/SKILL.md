@@ -148,443 +148,368 @@ function isUser(obj: unknown): obj is User {
 
 ## Patterns & Best Practices
 
-### 1. Strict Configuration
+For comprehensive TypeScript patterns and advanced techniques, see:
+- [typescript-patterns.md](resources/typescript-patterns.md)
+- [typescript-advanced-types.md](resources/typescript-advanced-types.md)
+- [typescript-by-framework.md](resources/typescript-by-framework.md)
 
+## Working with Generics
+
+### Generic Functions
+```typescript
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+// Generic constraints
+interface Lengthwise {
+  length: number;
+}
+
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+  console.log(arg.length);
+  return arg;
+}
+
+// Using key of with generics
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+```
+
+### Generic Classes
+```typescript
+class GenericNumber<T> {
+  zeroValue: T;
+  add: (x: T, y: T) => T;
+
+  constructor(zero: T, addFn: (x: T, y: T) => T) {
+    this.zeroValue = zero;
+    this.add = addFn;
+  }
+}
+
+let myGenericNumber = new GenericNumber<number>(0, (x, y) => x + y);
+```
+
+## tsconfig.json Best Practices
+
+### Recommended Configuration
 ```json
-// tsconfig.json
 {
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022"],
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "importHelpers": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}
+```
+
+## Type-Safe APIs
+
+### Request/Response Types
+```typescript
+// API request types
+interface CreateUserRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+// API response wrapper
+interface ApiSuccess<T> {
+  success: true;
+  data: T;
+}
+
+interface ApiError {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+}
+
+type ApiResponse<T> = ApiSuccess<T> | ApiError;
+
+// Type-safe API client
+class ApiClient {
+  async post<T>(
+    endpoint: string,
+    data: unknown
+  ): Promise<ApiResponse<T>> {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        return { success: true, data: result };
+      } else {
+        return {
+          success: false,
+          error: result.error || { code: 'UNKNOWN', message: 'Unknown error' }
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Network request failed'
+        }
+      };
+    }
   }
 }
 ```
 
-### 2. Discriminated Unions
+## Type Guards and Discriminated Unions
 
+### Discriminated Unions
 ```typescript
-// State management with discriminated unions
-type LoadingState = {
-  type: 'loading';
-};
+// Shape types with discriminant
+interface Circle {
+  kind: 'circle';
+  radius: number;
+}
 
-type SuccessState<T> = {
-  type: 'success';
-  data: T;
-};
+interface Square {
+  kind: 'square';
+  sideLength: number;
+}
 
-type ErrorState = {
-  type: 'error';
-  error: Error;
-};
+type Shape = Circle | Square;
 
-type AsyncState<T> = LoadingState | SuccessState<T> | ErrorState;
-
-// Usage with exhaustive checking
-function handleState<T>(state: AsyncState<T>): string {
-  switch (state.type) {
-    case 'loading':
-      return 'Loading...';
-    case 'success':
-      return `Success: ${JSON.stringify(state.data)}`;
-    case 'error':
-      return `Error: ${state.error.message}`;
+// Type guard using discriminant
+function getArea(shape: Shape): number {
+  switch (shape.kind) {
+    case 'circle':
+      return Math.PI * shape.radius ** 2;
+    case 'square':
+      return shape.sideLength ** 2;
     default:
-      // Compile-time error if we miss a case
-      const _exhaustiveCheck: never = state;
+      const _exhaustiveCheck: never = shape;
       return _exhaustiveCheck;
   }
 }
 ```
 
-### 3. Type-safe API
-
+### User-Defined Type Guards
 ```typescript
-// Type-safe API client
-class ApiClient {
-  private baseUrl: string;
+interface Cat {
+  name: string;
+  meow(): void;
+}
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+interface Dog {
+  name: string;
+  bark(): void;
+}
+
+type Animal = Cat | Dog;
+
+// Type guard functions
+function isCat(animal: Animal): animal is Cat {
+  return 'meow' in animal;
+}
+
+function makeSound(animal: Animal): void {
+  if (isCat(animal)) {
+    animal.meow();
+  } else {
+    animal.bark();
   }
+}
+```
 
-  async get<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`);
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-    return response.json();
-  }
+## Module System
 
-  async post<T, D>(endpoint: string, data: D): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+### ES Modules
+```typescript
+// math.ts
+export function add(a: number, b: number): number {
+  return a + b;
+}
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-    return response.json();
+export const PI = 3.14159;
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+// Default export
+export default class Calculator {
+  add(a: number, b: number): number {
+    return a + b;
   }
 }
 
-// Usage
-interface User {
+// Using modules
+// main.ts
+import Calculator, { add, PI, Point } from './math';
+import * as MathUtils from './math';
+```
+
+### Type-Only Imports/Exports
+```typescript
+// types.ts
+export interface User {
   id: number;
   name: string;
 }
 
-interface CreateUserDto {
-  name: string;
-  email: string;
-}
+// type-only import
+import type { User } from './types';
 
-const api = new ApiClient('https://api.example.com');
-
-const user = await api.get<User>('/users/1');
-const newUser = await api.post<User, CreateUserDto>('/users', {
-  name: 'John',
-  email: 'john@example.com'
-});
+// type-only export
+export type { User };
 ```
 
-### 4. Dependency Injection
+## Declaration Files
 
+### Writing Declaration Files
 ```typescript
-// Generic repository pattern
-interface Repository<T, ID> {
-  findById(id: ID): Promise<T | null>;
-  save(entity: T): Promise<T>;
-  delete(id: ID): Promise<void>;
+// my-library.d.ts
+export interface MyLibraryOptions {
+  debug?: boolean;
+  version?: string;
 }
 
-class UserRepository implements Repository<User, number> {
-  constructor(private db: Database) {}
-
-  async findById(id: number): Promise<User | null> {
-    return this.db.users.findUnique({ where: { id } });
-  }
-
-  async save(user: User): Promise<User> {
-    return this.db.users.upsert({
-      where: { id: user.id },
-      update: user,
-      create: user,
-    });
-  }
-
-  async delete(id: number): Promise<void> {
-    await this.db.users.delete({ where: { id } });
-  }
+export class MyLibrary {
+  constructor(options?: MyLibraryOptions);
+  start(): void;
+  stop(): void;
 }
 
-// Service using repository
-class UserService {
-  constructor(private userRepo: Repository<User, number>) {}
+export function createLibrary(options?: MyLibraryOptions): MyLibrary;
 
-  async updateUserStatus(id: number, status: Status): Promise<User> {
-    const user = await this.userRepo.findById(id);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const updatedUser = { ...user, status };
-    return this.userRepo.save(updatedUser);
+// Global augmentation
+declare global {
+  interface Window {
+    myLibrary: MyLibrary;
   }
 }
 ```
 
-## Advanced Techniques
-
-### 1. Type-safe Event System
-
+### Using Declaration Files
 ```typescript
-// Type-safe event emitter
-interface EventMap {
-  userCreated: { id: number; name: string };
-  userDeleted: { id: number };
-  error: { message: string; code: string };
+/// <reference path="path/to/declaration.d.ts" />
+
+// Or include in tsconfig.json
+{
+  "include": ["src/**/*", "types/**/*"]
 }
-
-class EventEmitter<T extends Record<string, any>> {
-  private listeners: { [K in keyof T]?: Array<(payload: T[K]) => void> } = {};
-
-  on<K extends keyof T>(event: K, listener: (payload: T[K]) => void): void {
-    if (!this.listeners[event]) {
-      this.listeners[event] = [];
-    }
-    this.listeners[event]!.push(listener);
-  }
-
-  emit<K extends keyof T>(event: K, payload: T[K]): void {
-    const listeners = this.listeners[event];
-    if (listeners) {
-      listeners.forEach(listener => listener(payload));
-    }
-  }
-}
-
-// Usage
-const events = new EventEmitter<EventMap>();
-
-events.on('userCreated', ({ id, name }) => {
-  console.log(`User ${name} created with ID ${id}`);
-});
-
-events.emit('userCreated', { id: 1, name: 'John' });
 ```
 
-### 2. Functional Programming
+## Performance Considerations
 
-```typescript
-// Type-safe pipe function
-function pipe<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
-  return (value: T) => fns.reduce((acc, fn) => fn(acc), value);
+### Type Performance
+- Use interfaces over type aliases for object types
+- Prefer generic constraints over any
+- Use type predicates for complex conditions
+- Avoid deep conditional types in hot paths
+
+### Compilation Performance
+```json
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
+  }
 }
-
-// Type-safe curry function
-function curry<A, B, C>(fn: (a: A, b: B) => C): (a: A) => (b: B) => C {
-  return (a: A) => (b: B) => fn(a, b);
-}
-
-// Usage
-const add = (a: number, b: number) => a + b;
-const curriedAdd = curry(add);
-const add5 = curriedAdd(5);
-console.log(add5(10)); // 15
-
-const processNumbers = pipe(
-  (nums: number[]) => nums.filter(n => n > 0),
-  (nums: number[]) => nums.map(n => n * 2),
-  (nums: number[]) => nums.reduce((a, b) => a + b, 0)
-);
 ```
 
-### 3. Builder Pattern
+## Common Pitfalls
 
+### 1. Using `any` Type
 ```typescript
-// Type-safe query builder
-interface QueryConfig {
-  select?: string[];
-  where?: Record<string, any>;
-  orderBy?: Record<string, 'asc' | 'desc'>;
-  limit?: number;
-  offset?: number;
+// Bad
+function process(data: any) {
+  return data.result;
 }
 
-class QueryBuilder<T = any> {
-  private config: QueryConfig = {};
-
-  select<K extends keyof T>(...fields: K[]): QueryBuilder<Pick<T, K>> {
-    this.config.select = fields as string[];
-    return this;
-  }
-
-  where(condition: Partial<T>): this {
-    this.config.where = { ...this.config.where, ...condition };
-    return this;
-  }
-
-  orderBy(field: keyof T, direction: 'asc' | 'desc' = 'asc'): this {
-    this.config.orderBy = { [field]: direction };
-    return this;
-  }
-
-  limit(count: number): this {
-    this.config.limit = count;
-    return this;
-  }
-
-  build(): string {
-    // Build SQL or other query format
-    return `SELECT ${this.config.select?.join(', ') || '*'}
-            WHERE ${JSON.stringify(this.config.where || {})}`;
-  }
+// Good
+interface Data {
+  result: string;
 }
-
-// Usage
-const query = new QueryBuilder<User>()
-  .select('id', 'name')
-  .where({ active: true })
-  .orderBy('name')
-  .limit(10)
-  .build();
+function process(data: Data) {
+  return data.result;
+}
 ```
 
-## Working with Libraries
-
-### React + TypeScript
+### 2. Type Assertion Abuse
 ```typescript
-// Functional component with props
-interface ButtonProps {
-  children: React.ReactNode;
-  variant?: 'primary' | 'secondary';
-  onClick?: () => void;
-  disabled?: boolean;
-}
+// Bad
+const user = {} as User;
 
-const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = 'primary',
-  onClick,
-  disabled = false
-}) => {
-  return (
-    <button
-      className={`btn btn-${variant}`}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  );
+// Good
+const user: User = {
+  id: 1,
+  name: 'John'
 };
-
-// Custom hook with typing
-function useApi<T>(url: string) {
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    fetch(url)
-      .then(res => res.json())
-      .then(setData)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [url]);
-
-  return { data, loading, error };
-}
 ```
 
-### Express.js + TypeScript
+### 3. Optional vs Undefined Properties
 ```typescript
-import { Request, Response, NextFunction } from 'express';
-
-// Extend Request interface
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    email: string;
-  };
+// Bad - unclear if property exists or can be undefined
+interface Config {
+  timeout?: number | undefined;
 }
 
-// Middleware
-function authenticate(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
-
-  // Verify token and set user
-  req.user = { id: 1, email: 'user@example.com' };
-  next();
-}
-
-// Route handler
-async function getUser(
-  req: AuthenticatedRequest,
-  res: Response
-): Promise<void> {
-  if (!req.user) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  const user = await userService.findById(req.user.id);
-  res.json(user);
+// Good
+interface Config {
+  timeout?: number;
 }
 ```
 
-## Best Practices Summary
+## TypeScript Best Practices Checklist
 
-### 1. Configuration
-- Always enable `strict: true`
-- Use `exactOptionalPropertyTypes`
-- Avoid `any` at all costs
-- Use `unknown` for untyped data
+- [ ] Enable strict mode in tsconfig.json
+- [ ] Use interfaces for object shapes
+- [ ] Prefer union types over enums
+- [ ] Use type guards for runtime type checking
+- [ ] Leverage utility types
+- [ ] Avoid `any` - use `unknown` instead
+- [ ] Use generic types for reusable code
+- [ ] Document complex types with comments
+- [ ] Use `readonly` for immutable data
+- [ ] Implement proper error types
+- [ ] Use declaration files for untyped libraries
+- [ ] Configure proper module resolution
 
-### 2. Type Design
-- Prefer interfaces for object shapes
-- Use types for unions, computed types
-- Create small, focused types
-- Use discriminated unions for state
-
-### 3. Code Organization
-- Group related types in modules
-- Use barrel exports for type bundles
-- Keep types close to their usage
-- Use .d.ts files for declaration
-
-### 4. Performance
-- Use type narrowing early
-- Avoid excessive generic depth
-- Use readonly where appropriate
-- Consider type inference costs
-
-## Common Anti-Patterns
-
-### 1. Type Assertions (Bad)
-```typescript
-// Bad - unsafe
-const data = response.data as User;
-
-// Good - type guards
-if (isUser(response.data)) {
-  const user = response.data;
-}
-```
-
-### 2. Loose Types (Bad)
-```typescript
-// Bad - too permissive
-function process(items: any[]): any {
-  return items.map(item => item.value);
-}
-
-// Good - specific types
-interface Item {
-  id: number;
-  value: string;
-}
-function process(items: Item[]): string[] {
-  return items.map(item => item.value);
-}
-```
-
-### 3. Missing Error Handling (Bad)
-```typescript
-// Bad - no error handling
-const result = await api.get('/users');
-
-// Good - proper error handling
-try {
-  const result = await api.get<User[]>('/users');
-  console.log(result);
-} catch (error) {
-  if (error instanceof Error) {
-    console.error('Failed to fetch users:', error.message);
-  }
-}
-```
-
-## Resources
-
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
-- [TypeScript Deep Dive](https://basarat.gitbook.io/typescript/)
-- [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html)
-- [TypeScript Playground](https://www.typescriptlang.org/play)
+For detailed examples and patterns, see the resource files in the `resources/` directory.

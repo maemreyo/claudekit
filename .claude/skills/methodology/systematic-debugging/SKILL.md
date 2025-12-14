@@ -99,473 +99,123 @@ console.error('[DEBUG] Phase 1 - Before database:', JSON.stringify(query));
 - Environment differences
 - API version differences
 
-#### 2.4 Understand Dependencies
-- What does this code depend on?
-- What depends on this code?
-- Are dependencies behaving correctly?
-
-### Phase 3: Hypothesis and Testing
+### Phase 3: Hypothesis Testing
 
 #### 3.1 Form Specific Hypothesis
-Write it explicitly:
-```
-"The bug occurs because [X] causes [Y] when [Z]"
+"Bug occurs because [specific reason] when [specific condition]"
 
-Example:
-"The bug occurs because stale cache data
- returns when user session expires during request"
-```
-
-#### 3.2 Test with Minimal Changes
-- Change ONE variable at a time
-- Never combine multiple fixes
-- Verify results after each change
-- Document what each test reveals
-
-#### 3.3 Validate Hypothesis
-- Does the fix address the root cause?
-- Can you explain WHY it works?
-- Does it make the bug impossible, not just unlikely?
-
-### Phase 4: Implementation
-
-#### 4.1 Write Failing Test First
+#### 3.2 Create Minimal Test
 ```typescript
-it('should handle the bug scenario', () => {
-  // Reproduce exact conditions
-  const result = functionUnderTest(bugTriggeringInput);
-
-  // Should fail before fix
-  expect(result.error).toBeDefined();
+// Isolate the specific issue
+describe('Bug hypothesis test', () => {
+  it('reproduces the exact issue', () => {
+    const input = { /* exact failing input */ };
+    const result = functionUnderTest(input);
+    expect(result).toEqual({ /* expected result */ });
+  });
 });
 ```
 
-#### 4.2 Implement Single Targeted Fix
-- Fix root cause, not symptom
-- Make minimal, surgical change
-- Don't add unnecessary complexity
+#### 3.3 Test Hypothesis
+- Make the smallest possible change
+- Verify it reproduces the issue
+- If wrong, go back to Phase 2
 
-#### 4.3 Verify Fix Works
-```bash
-# Run the specific test
-npm test -- --grep "should handle the bug scenario"
+### Phase 4: Implementation
 
-# Should pass
+#### 4.1 Write Test First (TDD)
+```typescript
+// Test that will pass after fix
+it('should handle [specific case] correctly', () => {
+  const result = fixedFunction(testInput);
+  expect(result).toBe(expectedOutput);
+});
 ```
 
-#### 4.4 Verify No Regressions
-```bash
-# Run full test suite
-npm test
+#### 4.2 Fix Root Cause Only
+- Fix only the root cause identified
+- Don't add unnecessary changes
+- Keep fix minimal and focused
 
-# All tests should pass
-```
-
-### The Three-Fix Rule
-
-**STOP after 3 failed fix attempts**
-
-This indicates architectural problem, not simple bug:
-1. Document all attempted fixes
-2. Explain why each failed
-3. Discuss with user/team
-4. Propose architectural changes
+#### 4.3 Verify No Regressions
+- Run full test suite
+- Check related functionality
+- Manual verification of critical paths
 
 ## Examples
 
-### Example 1: API Returns Wrong Data
-```typescript
-// Error: API returning null values for user field
+For detailed debugging examples and case studies, see [debugging-examples.md](resources/debugging-examples.md).
 
-// Phase 1: Investigation
-// Error: "Cannot read property 'name' of null"
-// Location: user-profile.ts:45
-// Reproduces: When user has no posts
+## Required Tools
 
-// Phase 2: Pattern Analysis
-// Working: /api/users/{id} returns full user object
-// Broken: /api/users/{id}/profile returns null user
-// Difference: Profile endpoint uses different query
+### Debugging Tools
+- Terminal for log analysis
+- IDE with debugger
+- Browser DevTools
+- Network analysis tools
 
-// Phase 3: Hypothesis
-// "Profile endpoint query LEFT JOINs posts,
-//  returns NULL user when user has no posts"
+### Version Control
+- git bisect for finding breaking changes
+- git blame for code history
+- git log for change tracking
 
-// Phase 4: Implementation
-it('should return user even with no posts', async () => {
-  const user = await createUserWithNoPosts();
-  const profile = await getUserProfile(user.id);
-  expect(profile.user).not.toBeNull();
-});
+For detailed debugging techniques and tool-specific guides, see [debugging-techniques.md](resources/debugging-techniques.md).
 
-// Fix: Change LEFT JOIN to separate queries
-```
+## Common Debugging Patterns
 
-### Example 2: Test Fails Intermittently
-```typescript
-// Error: Test sometimes fails with timeout
+### Binary Search Debugging
+Use git bisect to find the exact commit that introduced the bug.
 
-// Phase 1: Investigation
-// Error: "Test timeout after 5000ms"
-// Occurs: 1 in 10 runs
-// Recent change: Added async operation
+### Rubber Duck Debugging
+Explain the problem line by line to identify gaps in understanding.
 
-// Phase 2: Pattern Analysis
-// Working tests: All use await properly
-// Broken test: Missing await on async call
-// Pattern: Always await async operations
+### Divide and Conquer
+Isolate components to narrow down the source of the issue.
 
-// Phase 3: Hypothesis
-// "Missing await causes test to finish before async operation"
+### Working Backwards
+Start from the error and trace backwards through the execution path.
 
-// Phase 4: Implementation
-it('should save user asynchronously', async () => {
-  const user = new User({ name: 'Test' });
-  await user.save(); // Added missing await
-  expect(user.id).toBeDefined();
-});
-```
+## Anti-patterns to Avoid
 
-### Example 3: Memory Leak in Production
-```typescript
-// Error: Memory usage increases over time
+### Fixing Without Understanding
+❌ Making changes that seem to work without knowing why
+✅ Always understand the root cause before fixing
 
-// Phase 1: Investigation
-// Error: "Heap out of memory"
-// Occurs: After 1000+ API calls
-// Pattern: Memory never decreases
+### Shotgun Debugging
+❌ Changing multiple things at once
+✅ Make one change at a time and test
 
-// Phase 2: Pattern Analysis
-// Working endpoints: Clean up event listeners
-// Broken endpoint: Adds listener but never removes
-// Pattern: Always cleanup on response complete
+### Ignoring Error Messages
+❌ Skimming over error details
+✅ Read and understand every part of the error
 
-// Phase 3: Hypothesis
-// "Event listeners accumulate because never removed"
-
-// Phase 4: Implementation
-app.use((req, res, next) => {
-  res.on('finish', () => {
-    // Cleanup resources
-    req.removeAllListeners();
-  });
-  next();
-});
-```
-
-## Best Practices
-
-### 🔍 Investigation Phase
-- **Document everything**: Write down exact error messages
-- **Reproduce first**: Never fix without reliable reproduction
-- **Check git history**: Often reveals the breaking change
-- **Add logging strategically**: At boundaries, not everywhere
-
-### 📊 Analysis Phase
-- **Find working examples**: Always look for similar working code
-- **Study differences**: What makes working code different?
-- **Check dependencies**: Version conflicts cause many bugs
-- **Consider environment**: Different from dev to prod
-
-### 🧪 Hypothesis Phase
-- **Be specific**: "X causes Y when Z" not "something is wrong"
-- **Test one thing**: Change only one variable at a time
-- **Document results**: Keep track of what each test reveals
-- **Stay curious**: Be ready to abandon initial hypothesis
-
-### 🛠️ Implementation Phase
-- **Test first**: Write failing test before fix
-- **Minimal changes**: Fix root cause, don't rewrite everything
-- **Verify thoroughly**: Run specific test + full suite
-- **Explain why**: You should be able to articulate the fix
-
-### 🚫 Common Anti-patterns
-- **Jumping to conclusions**: Fixing without investigation
-- **Shooting in the dark**: Making random changes
-- **Fix and forget**: Not understanding why fix worked
-- **Over-engineering**: Making problem worse with complex fixes
-
-### ✅ Success Indicators
-- Clear root cause identified
-- Fix makes bug impossible, not just unlikely
-- Test proves fix works
-- No regressions introduced
-- Can explain fix to others
-
-## Requirements
-
-### Prerequisites
-- Access to error logs and stack traces
-- Ability to reproduce the bug
-- Permission to add instrumentation/logging
-- Understanding of the codebase
-
-### Dependencies
-- `root-cause-tracing` skill (for deep stack analysis)
-- `defense-in-depth` skill (for preventing similar bugs)
-- Test framework (pytest, jest, vitest, etc.)
-
-### Tools
-- Debugger (VS Code, Chrome DevTools, etc.)
-- Git for history analysis
-- Logging tools
-- Monitoring/observability platforms
+### Assuming Instead of Testing
+❌ "This should fix it"
+✅ "Let me test if this fixes the actual issue"
 
 ## Debugging Checklist
 
-### Before Any Fix
-- [ ] Error message fully documented
-- [ ] Bug consistently reproduced
-- [ ] Recent changes reviewed
-- [ ] Similar working code found
-- [ ] Specific hypothesis formed
-- [ ] Root cause (not symptom) identified
-
-### After Fix
-- [ ] Failing test written first
-- [ ] Minimal fix implemented
-- [ ] Test passes
-- [ ] Full test suite passes
-- [ ] No performance regressions
-- [ ] Fix documented/explained
-
-### Phase 1: Root Cause Investigation
-
-**Goal**: Understand what's happening before attempting to fix.
-
-**Steps**:
-
-1. **Read error messages carefully**
-   ```markdown
-   - What is the exact error message?
-   - What is the stack trace?
-   - What line numbers are mentioned?
-   - What values are shown?
-   ```
-
-2. **Reproduce consistently**
-   ```markdown
-   - Can you trigger the bug reliably?
-   - What exact steps reproduce it?
-   - What environment is required?
-   - Document the reproduction steps
-   ```
-
-3. **Track recent changes**
-   ```markdown
-   - What changed recently?
-   - git log --oneline -20
-   - When did it last work?
-   - What was deployed?
-   ```
-
-4. **Gather evidence**
-   ```markdown
-   - Collect logs
-   - Check monitoring/metrics
-   - Review related code
-   - Note any patterns
-   ```
-
-5. **Add instrumentation** (for multi-component systems)
-   ```typescript
-   // Add diagnostic logging at each boundary
-   console.error('[DEBUG] Input received:', JSON.stringify(input));
-   console.error('[DEBUG] After validation:', JSON.stringify(validated));
-   console.error('[DEBUG] Before database call:', JSON.stringify(query));
-   console.error('[DEBUG] Database result:', JSON.stringify(result));
-   ```
-
----
+### Phase 1: Investigation
+- [ ] Full error message documented
+- [ ] Bug can be reproduced consistently
+- [ ] Recent changes identified
+- [ ] Relevant evidence collected
+- [ ] Instrumentation added if needed
 
 ### Phase 2: Pattern Analysis
+- [ ] Working reference found
+- [ ] Key differences identified
+- [ ] Pattern of failure understood
+- [ ] Root cause hypothesis formed
 
-**Goal**: Find comparable working code to identify differences.
-
-**Steps**:
-
-1. **Find working code**
-   ```markdown
-   - Is there similar functionality that works?
-   - What did this code look like before?
-   - Are there reference implementations?
-   ```
-
-2. **Study reference thoroughly**
-   ```markdown
-   - How does the working version handle this case?
-   - What dependencies does it use?
-   - What assumptions does it make?
-   ```
-
-3. **Identify differences**
-   ```markdown
-   - What's different between working and broken?
-   - Configuration differences?
-   - Data differences?
-   - Environment differences?
-   ```
-
-4. **Understand dependencies**
-   ```markdown
-   - What does this code depend on?
-   - What depends on this code?
-   - Are dependencies behaving correctly?
-   ```
-
----
-
-### Phase 3: Hypothesis and Testing
-
-**Goal**: Form and test a specific theory about the cause.
-
-**Steps**:
-
-1. **Form specific hypothesis**
-   ```markdown
-   Write it down explicitly:
-   "The bug occurs because [X] causes [Y] when [Z]"
-
-   Example:
-   "The bug occurs because the cache returns stale data
-    when the user's session expires during an active request"
-   ```
-
-2. **Test with minimal changes**
-   ```markdown
-   - Change ONE variable at a time
-   - Don't combine multiple fixes
-   - Verify results after each change
-   ```
-
-3. **Validate hypothesis**
-   ```markdown
-   - Does the fix address the hypothesis?
-   - Can you explain WHY it works?
-   - Does it make the bug impossible, not just unlikely?
-   ```
-
----
+### Phase 3: Hypothesis Testing
+- [ ] Specific hypothesis stated
+- [ ] Minimal test created
+- [ ] Hypothesis validated/invalidated
+- [ ] Root cause confirmed
 
 ### Phase 4: Implementation
-
-**Goal**: Fix properly with verification.
-
-**Steps**:
-
-1. **Write failing test first**
-   ```typescript
-   it('should handle expired session during request', () => {
-     // Reproduce the bug scenario
-     const session = createExpiredSession();
-     const result = processRequest(session);
-
-     // This should fail before the fix
-     expect(result.error).toBe('SESSION_EXPIRED');
-   });
-   ```
-
-2. **Implement single targeted fix**
-   ```typescript
-   // Fix addresses root cause, not symptom
-   function processRequest(session: Session) {
-     if (session.isExpired()) {
-       return { error: 'SESSION_EXPIRED' };
-     }
-     // ... rest of logic
-   }
-   ```
-
-3. **Verify fix works**
-   ```bash
-   npm test -- --grep "expired session"
-   # Should pass
-   ```
-
-4. **Verify no regressions**
-   ```bash
-   npm test
-   # All tests should pass
-   ```
-
----
-
-## The Three-Fix Rule
-
-**If three or more fixes fail consecutively, STOP.**
-
-This signals an architectural problem, not a simple bug:
-
-```markdown
-Fix attempt 1: Failed
-Fix attempt 2: Failed
-Fix attempt 3: Failed
-
-STOP: This is not a bug - this is a design problem.
-
-Action: Discuss with user/team before proceeding
-- Explain what's been tried
-- Explain why it's not working
-- Propose architectural changes
-```
-
----
-
-## Key Principles
-
-### Never Skip Error Details
-
-```markdown
-BAD: "There's an error somewhere"
-GOOD: "TypeError: Cannot read property 'id' of undefined
-       at UserService.getUser (user-service.ts:42)"
-```
-
-### Reproduce Before Investigating
-
-```markdown
-BAD: "I think I know what's wrong" (starts coding)
-GOOD: "Let me reproduce this first" (writes repro steps)
-```
-
-### Trace Backward to Origin
-
-```markdown
-BAD: Fix where error appears
-GOOD: Trace data backward to find where it became invalid
-```
-
-### One Change Per Test
-
-```markdown
-BAD: "I changed A, B, and C - now it works!"
-     (Which one fixed it? Are the others safe?)
-
-GOOD: "I changed A - still broken.
-       I reverted A and changed B - now it works.
-       B was the fix."
-```
-
----
-
-## Debugging Checklist
-
-Before attempting any fix:
-
-- [ ] Error message fully read and understood
-- [ ] Bug reproduced consistently
-- [ ] Recent changes reviewed
-- [ ] Evidence gathered (logs, traces)
-- [ ] Hypothesis written down
-- [ ] Similar working code identified
-- [ ] Root cause identified (not just symptom)
-
-Before declaring fixed:
-
-- [ ] Failing test written
-- [ ] Fix implemented
-- [ ] Test passes
-- [ ] No regressions (full test suite passes)
-- [ ] Fix explained (can articulate why it works)
-
----
+- [ ] Test written before fix
+- [ ] Root cause fixed
+- [ ] Full test suite passes
+- [ ] No regressions introduced
