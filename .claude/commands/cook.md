@@ -572,13 +572,62 @@ OUTPUT: Implementation preview
 
 ### Phase 4: Verification & Handoff (5-20 min)
 
-{{ if not --dry-run }}
+{{ if --dry-run }}
 
-{{ if not --skip-verify }}
+**DRY RUN MODE: Skip verification**
 
-> **CRITICAL**: Do NOT execute verification commands yourself. You MUST dispatch the Test-Runner Agent.
+Show what verification would run:
+- Command: `{{ task.verify }}`
+- Expected: {{ task.expected }}
 
-**Dispatch Test-Runner Agent** (`.claude/agents/test-runner.md`):
+{{ PROCEED TO OUTPUT }}
+
+{{ else if --skip-verify }}
+
+**SKIP VERIFICATION MODE**
+
+⚠️ Verification skipped (--skip-verify flag)
+
+{{ if not --no-update }}
+   Update plan immediately (no verification):
+   1. Read plan file: `{{ plan file path }}`
+   2. Find task line: `- [ ] {{ task.id }}:`
+   3. Update checkbox: `- [ ]` → `- [x]`
+   4. Write updated plan
+   
+   ✅ Plan updated - Task {{ task.id }} marked complete (without verification)
+{{ else }}
+   Plan NOT updated (--no-update flag)
+{{ endif }}
+
+{{ PROCEED TO OUTPUT }}
+
+{{ else }}
+
+**VERIFICATION MODE** (default)
+
+---
+
+> **🚨 CRITICAL INSTRUCTION FOR MAIN AI 🚨**
+> 
+> You are the DISPATCHER, NOT the executor.
+> 
+> **DO NOT**:
+> - ❌ Run `npm test` yourself
+> - ❌ Run `npm run build` yourself  
+> - ❌ Execute ANY verification commands directly
+> - ❌ Parse test output yourself
+> 
+> **DO**:
+> - ✅ Dispatch the Test-Runner Agent
+> - ✅ WAIT for Test-Runner's response
+> - ✅ Use Test-Runner's results to update plan
+> 
+> Your role: Orchestrate, not execute.
+
+---
+
+**STEP 4.1: Dispatch Test-Runner Agent** (`.claude/agents/test-runner.md`)
 
 ```markdown
 Test-Runner Agent - Verify {{ task.id }}
@@ -644,7 +693,7 @@ INSTRUCTIONS FOR TEST-RUNNER:
 
 {{ if --auto-fix }}
 5. **Attempt Auto-Fix** (if failed):
-   - Apply fix pattern (see .claude/agents/test-runner.md)
+   - Apply fix pattern (see .claude/docs/test-runner/auto-fix-strategies.md)
    - Common fixes:
      * Add missing import
      * Fix type annotation
@@ -701,9 +750,7 @@ Affected Files: {{ list }}
 
 #### Full Error Output
 \```
-{{ error output
-
- }}
+{{ error output }}
 \```
 {{ endif }}
 
@@ -738,57 +785,45 @@ Explanation: {{ why this should work }}
 TIME LIMIT: 20 minutes
 ```
 
-{{ endif }}
+---
 
-{{ else }}
+**STEP 4.2: WAIT for Test-Runner Response**
 
-Skip verification (--skip-verify flag)
+⏳ Waiting for Test-Runner Agent to complete...
 
-{{ if not --no-update }}
+Do NOT proceed until Test-Runner returns with VERIFICATION RESULTS.
 
-**STEP 4.3: Update Plan** (mark as complete without verification)
+---
 
-1. Read plan file: `{{ plan file path }}`
+**STEP 4.3: Process Test-Runner Results**
 
-2. Find task line matching pattern: `- [ ] {{ task.id }}:`
+{{ if Test-Runner returned PASS }}
 
-3. Update checkbox: `- [ ]` → `- [x]`
+   ✅ Verification PASSED
+   
+   {{ if not --no-update }}
+      **Update Plan**:
+      1. Read plan file: `{{ plan file path }}`
+      2. Find task line: `- [ ] {{ task.id }}:`
+      3. Update checkbox: `- [ ]` → `- [x]`
+      4. Write updated plan
+      
+      ✅ Plan updated - Task {{ task.id }} marked complete
+   {{ else }}
+      ⏸️ Plan NOT updated (--no-update flag)
+   {{ endif }}
+   
+   {{ PROCEED TO SUCCESS OUTPUT }}
 
-4. Write updated plan
+{{ else if Test-Runner returned FAIL }}
 
-OUTPUT: ✅ Plan updated - Task {{ task.id }} marked complete (without verification)
-
-{{ endif }}
-
-{{ endif }}
-
-{{ if not --skip-verify }}
-
-**STEP 4.3: Update Plan** (if verification passed and not --no-update)
-
-{{ if tests passed and not --no-update }}
-
-1. Read plan file: `{{ plan file path }}`
-
-2. Find task line matching pattern: `- [ ] {{ task.id }}:`
-
-3. Update checkbox: `- [ ]` → `- [x]`
-
-4. Write updated plan
-
-OUTPUT: ✅ Plan updated - Task {{ task.id }} marked complete
+   ❌ Verification FAILED
+   
+   **Do NOT update plan** - Task {{ task.id }} remains `[ ]`
+   
+   {{ PROCEED TO FAILURE OUTPUT }}
 
 {{ endif }}
-
-{{ endif }}
-
-{{ else if --skip-verify }}
-
-Skip verification (--skip-verify flag)
-
-{{ else }}
-
-DRY RUN: Skip verification
 
 {{ endif }}
 
