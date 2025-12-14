@@ -1,3 +1,8 @@
+---
+name: javascript
+description: Modern JavaScript (ES6+) patterns and best practices for Node.js and browser environments. Covers async/await, promises, modules, classes, destructuring, spread operators, and ES6+ features. Use when working with .js/.mjs files, browser scripting, Node.js development, or modern JavaScript applications.
+---
+
 # JavaScript
 
 ## Description

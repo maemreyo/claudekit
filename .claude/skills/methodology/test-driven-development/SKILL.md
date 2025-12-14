@@ -1,25 +1,340 @@
+---
+name: test-driven-development
+description: Strict TDD methodology following Red-Green-Refactor cycle. Fundamental principle: "If you didn't watch the test fail, you don't know if it tests the right thing." Requires writing failing test first, implementing minimal code to pass, then refactoring. Use for new feature development, bug fixes, or refactoring existing code.
+---
+
 # Test-Driven Development (TDD)
 
-## Description
+## Quick Start
 
-Strict test-driven development methodology requiring tests before implementation. The fundamental practice: "If you didn't watch the test fail, you don't know if it tests the right thing."
+1. **Write failing test** for desired behavior
+2. **Verify it fails** for the right reason
+3. **Write minimal code** to make test pass
+4. **Refactor** while keeping tests green
 
-## When to Use
+## Instructions
 
+### When to Use TDD
+✅ **Always use for**:
 - New feature development
 - Bug fixes (write test that reproduces bug first)
 - Refactoring (ensure tests exist before changing)
 - Any behavior change
 
-## When NOT to Use (Requires Explicit Approval)
-
+❌ **NOT for** (requires explicit approval):
 - Throwaway prototypes
 - Generated/scaffolded code
 - Pure configuration changes
 
----
+### Core Principle
+**"If you didn't watch the test fail, you don't know if it tests the right thing."**
 
-## The Red-Green-Refactor Cycle
+### The Red-Green-Refactor Cycle
+
+#### Step 1: RED - Write Failing Test
+```typescript
+describe('calculateTotal', () => {
+  it('should sum item prices', () => {
+    const items = [{ price: 10 }, { price: 20 }];
+    expect(calculateTotal(items)).toBe(30);
+  });
+});
+```
+
+#### Step 2: Verify Test Fails
+```bash
+npm test -- --grep "sum item prices"
+# Expected: FAIL - "calculateTotal is not defined"
+```
+The failure should be because feature doesn't exist, not syntax errors.
+
+#### Step 3: GREEN - Write Minimal Code
+```typescript
+function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+```
+Write the simplest code that passes. Don't over-engineer.
+
+#### Step 4: Verify Test Passes
+```bash
+npm test -- --grep "sum item prices"
+# Expected: PASS
+```
+
+#### Step 5: REFACTOR - Clean Up
+- Extract functions
+- Rename variables
+- Remove duplication
+- Run tests after each change
+
+### The Non-Negotiable Rule
+
+**NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST**
+
+This is a rule, not a guideline.
+
+### Already Wrote Code?
+Delete it completely. Don't keep as reference.
+
+```
+WRONG: "I'll keep this code as reference"
+RIGHT: Delete, write test, rewrite from scratch
+```
+
+### Why So Strict?
+- Tests written after code just verify what was written
+- True TDD produces better designs
+- Prevents rationalization and bias
+
+## Examples
+
+### Example 1: User Validation
+```typescript
+// Step 1: RED - Write failing test
+describe('User Validation', () => {
+  it('should reject invalid email', () => {
+    const user = { email: 'invalid-email', name: 'Test' };
+    expect(() => validateUser(user)).toThrow('Invalid email format');
+  });
+});
+
+// Step 3: GREEN - Minimal implementation
+function validateUser(user: User): void {
+  if (!user.email.includes('@')) {
+    throw new Error('Invalid email format');
+  }
+}
+
+// Step 5: REFACTOR - Improve implementation
+function validateUser(user: User): void {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(user.email)) {
+    throw new Error('Invalid email format');
+  }
+  if (!user.name || user.name.trim().length === 0) {
+    throw new Error('Name is required');
+  }
+}
+```
+
+### Example 2: Bug Fix TDD
+```typescript
+// Bug: calculateTotal doesn't handle negative prices
+
+// Step 1: RED - Test that reproduces bug
+it('should handle negative prices correctly', () => {
+  const items = [
+    { price: 10, quantity: 2 },
+    { price: -5, quantity: 1 }, // Discount item
+    { price: 20, quantity: 1 }
+  ];
+  expect(calculateTotal(items)).toBe(45);
+});
+
+// Step 3: GREEN - Fix to make test pass
+function calculateTotal(items: Item[]): number {
+  return items.reduce((sum, item) => {
+    return sum + (item.price * item.quantity);
+  }, 0);
+}
+```
+
+### Example 3: API Endpoint
+```typescript
+// Step 1: RED - Test desired API behavior
+describe('POST /api/users', () => {
+  it('should create user and return 201', async () => {
+    const userData = { name: 'John', email: 'john@example.com' };
+    const response = await request(app)
+      .post('/api/users')
+      .send(userData)
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      id: expect.any(Number),
+      name: userData.name,
+      email: userData.email
+    });
+  });
+});
+
+// Step 3: GREEN - Minimal implementation
+app.post('/api/users', async (req, res) => {
+  const user = await userService.create(req.body);
+  res.status(201).json(user);
+});
+```
+
+## Best Practices
+
+### 🎯 Test Quality
+
+#### One Behavior Per Test
+```typescript
+// BAD: Multiple assertions
+it('should validate and save user', () => {
+  expect(validateUser(user)).toBe(true);
+  expect(saveUser(user).id).toBeDefined();
+});
+
+// GOOD: Single behavior
+it('should validate email format', () => {
+  expect(validateUser({ email: 'valid@example.com' })).toBe(true);
+});
+
+it('should throw on invalid email', () => {
+  expect(() => validateUser({ email: 'invalid' }))
+    .toThrow('Invalid email');
+});
+```
+
+#### Clear Test Names
+```typescript
+// BAD: Generic names
+it('test1', () => {});
+it('user test', () => {});
+
+// GOOD: Descriptive names
+it('should return 0 for empty cart', () => {});
+it('should apply 10% discount for premium members', () => {});
+```
+
+#### Test Observable Behavior
+```typescript
+// BAD: Testing implementation
+it('should call database save', () => {
+  createUser(user);
+  expect(database.save).toHaveBeenCalled();
+});
+
+// GOOD: Testing behavior
+it('should persist user and return with ID', () => {
+  const result = createUser(user);
+  expect(result.id).toBeDefined();
+});
+```
+
+### 🔄 The TDD Mindset
+
+#### Before Writing Code
+1. What behavior do I want?
+2. How would I prove it works?
+3. Write the proof (test)
+4. Now write the code
+
+#### Common Anti-patterns
+- **"I'll test later"** - Never works as well
+- **"This is too simple"** - Simple code breaks too
+- **"Manual testing is enough"** - Not repeatable
+- **"I already wrote it"** - Sunk cost fallacy
+
+### 📝 Test Organization
+
+#### Test Structure
+```typescript
+describe('Feature Name', () => {
+  describe('Specific Functionality', () => {
+    it('should do X when Y', () => {
+      // Arrange
+      const input = createInput();
+
+      // Act
+      const result = functionUnderTest(input);
+
+      // Assert
+      expect(result).toBe(expected);
+    });
+  });
+});
+```
+
+#### Test Data
+```typescript
+// Use factories for test data
+const createTestUser = (overrides = {}) => ({
+  name: 'Test User',
+  email: 'test@example.com',
+  ...overrides
+});
+```
+
+### 🛠️ Refactoring Safely
+
+#### With Green Tests
+- Extract functions
+- Rename variables
+- Remove duplication
+- Improve performance
+- Run tests after each small change
+
+#### When Tests Fail
+- Stop refactoring immediately
+- Make tests green again
+- Only then continue
+
+### 📊 Coverage Guidelines
+
+- Aim for high coverage of business logic
+- 100% of critical paths
+- Edge cases and error handling
+- Don't test trivial getters/setters
+
+## Requirements
+
+### Prerequisites
+- Test framework installed (Jest, Vitest, Pytest, etc.)
+- Understanding of the problem domain
+- Patience to write tests first
+
+### Dependencies
+- Test framework (choose based on language)
+- Mocking/stubbing libraries if needed
+- Test database for integration tests
+
+### Tools
+- IDE with good test runner support
+- Coverage reporting tools
+- CI/CD pipeline for automated testing
+
+### Common Test Frameworks
+
+#### JavaScript/TypeScript
+- **Vitest**: Fast, modern, Vite-based
+- **Jest**: Feature-rich, widely used
+- **Mocha**: Flexible, minimal
+
+#### Python
+- **Pytest**: Powerful, plugin-rich
+- **Unittest**: Built-in, simple
+
+## Edge Cases to Test
+
+Always test:
+- Empty inputs
+- Null/undefined values
+- Boundary conditions
+- Error scenarios
+- Invalid inputs
+- Large datasets
+- Concurrent access (if applicable)
+
+## Troubleshooting TDD
+
+### Test Won't Fail
+- Check test is actually running
+- Verify assertion is correct
+- Ensure you're testing the right thing
+
+### Implementation Too Complex
+- Split into smaller functions
+- Each with its own test
+- Compose in higher-level test
+
+### Tests Too Slow
+- Use test databases
+- Mock external services
+- Run tests in parallel
 
 ### 1. RED: Write Failing Test
 

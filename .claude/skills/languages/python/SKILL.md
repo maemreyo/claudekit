@@ -1,3 +1,8 @@
+---
+name: python
+description: Python development expertise including type hints, async/await patterns, virtual environments, and Pythonic idioms. Covers PEP 8 standards, context managers, generators, decorators, dataclasses, and modern Python features. Use when working with .py files, writing scripts, building applications, or implementing Python-based services.
+---
+
 # Python
 
 ## Description

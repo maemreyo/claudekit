@@ -1,21 +1,207 @@
+---
+name: executing-plans
+description: Subagent-driven development pattern for executing detailed implementation plans with quality gates. Uses fresh agents per task to prevent context pollution and mandatory code review between tasks for quality assurance. Use when executing plans created with writing-plans skill, implementing independent tasks, or systematic development with verification.
+---
+
 # Executing Plans
 
-## Description
+## Quick Start
 
-Subagent-driven development pattern for executing detailed implementation plans with quality gates. Uses fresh agents per task and mandatory code review between tasks.
+1. Load the implementation plan file
+2. Create TodoWrite with all tasks from plan
+3. For each task: dispatch subagent → code review → handle findings
+4. Complete with final review and branch cleanup
+
+## Instructions
+
+### Prerequisites
+- Must have an approved implementation plan (created with `writing-plans` skill)
+- Plan should be saved in a readable file
+- All requirements should be clearly defined
+
+### Execution Process
+
+#### Step 1: Load and Prepare
+1. Read the plan file completely
+2. Verify plan is approved and ready for execution
+3. Create TodoWrite with all tasks extracted from plan
+4. Set first task status to `in_progress`
+
+#### Step 2: Execute Each Task
+For every task in the plan:
+
+1. **Dispatch implementation subagent** with:
+   - Task details and requirements
+   - Files to modify/create
+   - Success criteria from plan
+
+2. **Subagent follows TDD**:
+   - Write failing test first
+   - Verify test actually fails
+   - Implement minimal code to pass
+   - Verify test passes
+   - Commit changes with clear message
+
+3. **Get completion summary**:
+   - Files modified
+   - Tests added/updated
+   - Commit hash
+   - Any deviations from plan
+
+#### Step 3: Code Review Gate
+1. **Dispatch code-reviewer subagent**
+2. Review scope: ONLY changes from current task
+3. Review against:
+   - Plan requirements for this task
+   - Code quality standards
+   - Security best practices
+   - Test coverage
+
+4. **Categorize findings**:
+   - **Critical**: Security issues, broken functionality
+   - **Important**: Performance, maintainability, test gaps
+   - **Minor**: Style, documentation, optimizations
+
+#### Step 4: Handle Review Results
+```yaml
+IF Critical or Important issues:
+  - Fix immediately before proceeding
+  - Re-request code review
+  - Repeat until clean
+
+IF only Minor issues:
+  - Note for cleanup task
+  - Proceed to next task
+```
+
+#### Step 5: Update Progress
+1. Mark current task `completed` in TodoWrite
+2. Move to next task (`pending` → `in_progress`)
+3. Repeat from Step 2
+
+### Final Steps (After All Tasks)
+1. Comprehensive code review of entire implementation
+2. Verify all success criteria from plan are met
+3. Run full test suite
+4. Use `finishing-development-branch` skill for cleanup
+5. Provide execution summary to user
 
 ## When to Use
 
-- Executing plans created with `writing-plans` skill
-- Staying in current session with independent tasks
-- Wanting quality gates without human delays
+✅ **Perfect for**:
+- Executing approved plans from `writing-plans` skill
+- Implementing independent tasks in current session
+- Quality-focused development without human delays
 - Systematic implementation with verification
 
-## When NOT to Use
+❌ **NOT for**:
+- Plans that need review first (use `brainstorming` skill)
+- Tightly coupled tasks requiring shared context
+- Plans that need revision during execution
+- Simple one-off tasks (implement directly)
 
-- Plan needs review first (use brainstorming)
-- Tasks are tightly coupled and need shared context
-- Plan requires revision during execution
+## Critical Rules
+
+### 🚫 Never Skip Code Reviews
+Every task MUST be reviewed before proceeding. No exceptions.
+
+### 🚫 Never Proceed with Critical Issues
+Critical issues block progress until fixed.
+
+### 🚫 Never Run Parallel Tasks
+Tasks execute sequentially: Implement → Review → Next Task
+
+### ✅ Always Read Plan First
+Never implement from memory - read plan file for each task.
+
+## Examples
+
+### Example 1: Simple 3-Task Plan
+```markdown
+# Plan: Add User Authentication
+
+## Tasks
+1. Create User model with validation
+2. Implement JWT authentication endpoints
+3. Add authentication middleware
+
+## Execution Flow:
+Task 1 → Review → Task 2 → Review → Task 3 → Review → Final Review
+```
+
+### Example 2: Subagent Communication
+```markdown
+### Dispatching Implementation Subagent
+"Implement user login endpoint following these requirements:
+- POST /auth/login
+- Validate email/password
+- Return JWT token on success
+- Use bcrypt for password hashing
+- Follow TDD pattern
+- Return completion summary"
+
+### Handling Code Review
+"Code review completed:
+- Critical: Missing rate limiting (must fix)
+- Important: Add logging for failed attempts (should fix)
+- Minor: Extract password policy to config (can defer)
+
+Fixing critical issues before proceeding..."
+```
+
+### Example 3: TodoWrite Tracking
+```markdown
+| Task | Status | Notes |
+|------|--------|-------|
+| 1. User model | completed | ✅ Reviewed, no issues |
+| 2. Auth endpoints | in_progress | 🔄 Fixing critical security issue |
+| 3. Middleware | pending | ⏳ Waiting for task 2 |
+```
+
+## Best Practices
+
+### Planning Phase
+- Always use `writing-plans` skill to create detailed plans
+- Ensure every task has clear success criteria
+- Get plan approved before execution
+
+### Implementation Phase
+- Use fresh subagent for each task (no context carryover)
+- Follow TDD: test first, implement minimal code
+- Commit after each completed task
+- Never skip code review gates
+
+### Quality Assurance
+- Critical issues block progress - fix immediately
+- Important issues should be fixed before proceeding
+- Minor issues can be deferred to cleanup task
+- Always review against plan requirements
+
+### Progress Tracking
+- Update TodoWrite in real-time
+- Clear status transitions: pending → in_progress → completed
+- Document any deviations from plan
+- Provide regular summaries to user
+
+### Error Handling
+- If task fails after 2 retries, pause and report
+- Major review issues after 2 cycles may need plan revision
+- Always communicate blockers to user
+- Keep detailed logs of decisions and changes
+
+## Requirements
+
+### Prerequisites
+- Approved implementation plan file
+- Write access to target repository
+- Test framework configured
+- Code review guidelines established
+
+### Dependencies
+- `writing-plans` skill (for plan creation)
+- `code-reviewer` skill (for quality gates)
+- `finishing-development-branch` skill (for cleanup)
+- Task management with TodoWrite
 
 ---
 
