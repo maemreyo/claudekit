@@ -1,0 +1,443 @@
+Vấn đề:
+ Hiện tại, mỗi khi tôi chạy `/cook plan.md` thì nó sẽ phải đọc lại plan 1 lần, mặc dù nó vừa chạy và test xong 1 task trước đó ở main context của claude code. Liệu có thể ở phase đầu tiên, có thể làm gì để đỡ phải discovery lại? Discovery rất ổn khi tôi chạy ở 1 conversation mới hoàn toàn. nhưng khi chạy liên tục `/cook plan.md` thì dường như phải discovery liên tục lại thì không hay lắm.
+
+========================
+Tôi hiểu vấn đề! Khi chạy liên tục `/cook` trong cùng conversation, việc discovery lại toàn bộ plan mỗi lần thực sự không cần thiết và tốn thời gian. Đây là một số giải pháp:
+
+## **Giải pháp được đề xuất: Quick Resume Mode**
+
+Thêm logic vào **Phase 1: Discovery** để phát hiện và tái sử dụng context:
+
+```markdown
+### Phase 1: Discovery (2-5 min → 10-30 seconds if cached)
+
+Task Scanner
+
+GOAL: Find next task to execute
+
+**QUICK RESUME CHECK** (NEW):
+
+1. Check conversation context for recent plan data:
+   - Look back last 3 messages for plan parse results
+   - Verify same plan file: `$ARGUMENTS`
+   - Check file modification time (mtime)
+   
+2. {{ if plan cached AND file unchanged }}
+   ✅ **QUICK RESUME MODE**
+   
+   Found cached plan from {{ X }} messages ago:
+   - Plan: {{ plan file }}
+   - Last modified: {{ mtime }} (unchanged)
+   - Tasks parsed: {{ count }}
+   - Last executed: {{ last task ID }}
+   
+   📋 Using cached plan structure...
+   ⏩ Skipping full re-scan (saves ~2-4 min)
+   
+   {{ Jump to step 3: Find next uncompleted task }}
+   
+{{ else }}
+   🔍 **FULL DISCOVERY MODE**
+   
+   Reason: {{ new conversation | different file | file modified | no cache }}
+   
+   {{ Continue with steps 1-2 below }}
+{{ endif }}
+
+STEPS (if FULL DISCOVERY):
+
+1. Read plan file: $ARGUMENTS
+   {{ store mtime for cache validation }}
+
+2. Parse markdown for tasks:
+   ...
+   {{ cache parsed structure in conversation memory }}
+```
+
+## **Cách implement:**
+
+### **Option A: Lightweight Context Check** (đề xuất)
+
+```markdown
+### Quick Resume Implementation
+
+At start of Phase 1, add:
+
+```bash
+# Check if we just ran this plan
+LAST_PLAN_CONTEXT=$(grep -A 50 "COOK COMPLETE" <<< "$CONVERSATION_HISTORY" | head -1)
+
+if [[ "$LAST_PLAN_CONTEXT" =~ "$ARGUMENTS" ]]; then
+  FILE_MTIME=$(stat -f %m "$ARGUMENTS" 2>/dev/null || stat -c %Y "$ARGUMENTS")
+  
+  # If file unchanged in last 5 minutes
+  CURRENT_TIME=$(date +%s)
+  TIME_DIFF=$((CURRENT_TIME - FILE_MTIME))
+  
+  if [ $TIME_DIFF -gt 300 ]; then
+    echo "⚡ QUICK RESUME: Using cached plan structure"
+    SKIP_FULL_PARSE=true
+  fi
+fi
+```
+
+**Benefits:**
+- Saves 2-4 minutes per `/cook` iteration
+- Still validates file hasn't changed
+- No external state files needed
+- Uses existing conversation context
+
+---
+
+### **Option B: Optimized Re-scan** (alternative)
+
+Thay vì skip hoàn toàn, làm "incremental discovery":
+
+```markdown
+### Incremental Discovery
+
+1. {{ if recently parsed }}
+   - Read ONLY the checkbox states (lightweight)
+   - Skip parsing task details (already in context)
+   - Find first `[ ]` in cached task list
+   
+2. {{ if task details needed }}
+   - Retrieve from conversation context
+   - Or quick re-read of specific task section only
+```
+
+**Benefits:**
+- Always fresh checkbox states
+- But reuses parsed task metadata
+- Safer than full cache
+
+---
+
+## **Recommended Approach:**
+
+Tôi suggest **hybrid approach**:
+
+```markdown
+### Phase 1: Smart Discovery
+
+STEP 1: Context Check (10 seconds)
+
+{{ if same conversation AND file unchanged }}
+  MODE: QUICK RESUME
+  - Reuse parsed task structure ✓
+  - Re-read ONLY checkbox lines ✓
+  - Time saved: ~90%
+{{ else }}
+  MODE: FULL DISCOVERY  
+  - Complete plan parsing
+  - Cache results for next run
+{{ endif }}
+```
+
+### **Cụ thể trong /cook:**
+
+```markdown
+1. Discovery Optimization:
+
+{{ at start of Phase 1 }}
+
+# Quick context probe
+if conversation.has_recent_plan_parse(plan_file, max_age_minutes=10):
+    if file.mtime_unchanged(plan_file):
+        print("⚡ QUICK RESUME: Reusing plan structure from context")
+        
+        # Only re-scan checkboxes (fast)
+        checkboxes = quick_scan_checkboxes(plan_file)
+        
+        # Get cached task details from context
+        tasks = conversation.get_cached_tasks(plan_file)
+        
+        # Merge: updated checkboxes + cached details
+        plan = merge(checkboxes, tasks)
+        
+        print(f"✓ Loaded {len(tasks)} tasks in 15s (vs 3min full scan)")
+        
+        goto STEP_3  # Skip to "Find next uncompleted task"
+```
+
+---
+
+## **Alternative: Thêm `--resume` flag**
+
+Nếu muốn explicit control:
+
+```bash
+# First run in conversation
+/cook plan.md
+# → Full discovery
+
+# Subsequent runs
+/cook plan.md --resume
+# → Quick resume from context
+
+# Force re-discovery
+/cook plan.md --force-discovery
+```
+
+---
+
+## **Kết luận:**
+
+**Đề xuất chính**: Thêm **automatic quick resume** vào Phase 1:
+- Detect same conversation + unchanged file
+- Reuse parsed task structure  
+- Only re-scan checkbox states
+- Save ~2-4 minutes per iteration
+
+**Implementation**: Thêm vào đầu Phase 1 Discovery:
+```markdown
+STEP 0: Quick Resume Check (NEW)
+- Check conversation context
+- Validate file mtime
+- If valid → skip to step 3 with cached data
+- If invalid → full discovery
+```
+
+Điều này giữ nguyên stateless principle (vẫn có thể force re-read) nhưng optimize cho common case (continuous cooking in same conversation). 🚀
+
+========================
+
+
+Tôi hiểu vấn đề của bạn. Mỗi khi chạy `/cook plan.md`, hệ thống phải thực hiện lại toàn bộ quá trình discovery dù bạn đang làm việc trong cùng một conversation. Điều này gây lãng phí thời gian và tài nguyên, đặc biệt với các kế hoạch lớn.
+
+Dưới đây là một số giải pháp để tối ưu hóa:
+
+## 1. Thêm cơ chế caching cho discovery
+
+```markdown
+### Phase 1: Discovery (2-5 min) với cache
+
+1. Kiểm tra cache:
+   - Nếu là lần đầu chạy trong conversation, thực hiện discovery đầy đủ
+   - Nếu đã chạy trước đó, sử dụng cached plan state
+
+2. Cache key: `plan_file_path + last_modified_time`
+   - So sánh thời gian sửa đổi cuối cùng của file plan
+   - Nếu không thay đổi, sử dụng cache
+   - Nếu có thay đổi, làm mới cache
+
+3. Cached data:
+   - Danh sách các task đã phân tích
+   - Vị trí task hiện tại
+   - Thông tin về subtasks
+```
+
+## 2. Thêm flag `--use-cache`
+
+```bash
+# Sử dụng cache (mặc định cho các lần chạy tiếp theo)
+/cook plan.md --use-cache
+
+# Buộc discovery lại (khi cần làm mới)
+/cook plan.md --force-discovery
+```
+
+## 3. Tối ưu hóa discovery với incremental parsing
+
+```markdown
+### Phase 1: Discovery (2-5 min) - Incremental Mode
+
+1. Đọc file plan và xác định vị trí task cuối cùng đã hoàn thành:
+   - Tìm task cuối cùng được đánh dấu [x]
+   - Bắt đầu tìm kiếm từ vị trí đó thay vì từ đầu file
+
+2. Giới hạn phạm vi tìm kiếm:
+   - Chỉ quét các task chưa hoàn thành
+   - Bỏ qua các section đã hoàn thành
+
+3. Với các file lớn:
+   - Sử dụng stream reading thay vì load toàn bộ file
+   - Chỉ đọc các phần cần thiết
+```
+
+## 4. Implement stateless design với context marker
+
+```markdown
+### Thêm context marker vào plan
+
+- Thêm comment đặc biệt vào file plan:
+  ```markdown
+  <!-- LAST_PROCESSED: A.3.a -->
+  ```
+
+- Trong discovery:
+  - Tìm marker này và bắt đầu từ task tiếp theo
+  - Cập nhật marker sau mỗi task hoàn thành
+  - Nếu không tìm thấy marker, thực hiện discovery đầy đủ
+```
+
+## 5. Sử dụng session context trong Claude Code
+
+```markdown
+### Phase 1: Discovery (2-5 min) - Session-aware
+
+1. Kiểm tra session context:
+   - Nếu có thông tin về task cuối cùng đã xử lý trong session
+   - Sử dụng thông tin này để bỏ qua các task đã hoàn thành
+
+2. Session data structure:
+   ```json
+   {
+     "plan_file": "plan.md",
+     "last_processed_task": "A.3.a",
+     "completed_tasks": ["A.1", "A.2", "A.3.a"],
+     "timestamp": "2023-11-15T10:30:00Z"
+   }
+   ```
+
+3. Validate session data:
+   - Kiểm tra xem plan file có thay đổi không
+   - Xác nhận các task đã hoàn thành vẫn được đánh dấu [x]
+```
+
+## Đề xuất cụ thể
+
+Tôi đề xuất kết hợp giải pháp 1 và 2:
+
+1. **Thêm cơ chế caching** với `--use-cache` làm mặc định cho các lần chạy tiếp theo trong cùng một conversation
+2. **Sử dụng incremental parsing** để chỉ đọc các phần cần thiết của file plan
+3. **Thêm context marker** vào file plan để theo dõi tiến trình
+
+Cách triển khai:
+
+```markdown
+### Phase 1: Discovery (2-5 min) - Optimized
+
+1. {{ if first_run_in_session }}
+   Thực hiện discovery đầy đủ và lưu vào cache
+2. {{ else if --force-discovery }}
+   Làm mới cache và thực hiện discovery đầy đủ
+3. {{ else }}
+   a. Kiểm tra thời gian sửa đổi file plan
+   b. {{ if file_changed }}
+      Làm mới cache và thực hiện discovery đầy đủ
+   c. {{ else }}
+      Sử dụng cached data để tìm task tiếp theo
+      Chỉ đọc các phần cần thiết của file plan
+   d. {{ endif }}
+4. {{ endif }}
+```
+
+Với cách tiếp cận này, các lần chạy tiếp theo sẽ nhanh hơn đáng kể vì:
+
+- Không cần phân tích lại toàn bộ file plan
+- Không cần quét lại các task đã hoàn thành
+- Tập trung trực tiếp vào task tiếp theo cần thực hiện
+
+========================
+Vấn đề bạn gặp phải là sự xung đột giữa **triết lý thiết kế "Stateless"** (không lưu trạng thái, mỗi lần chạy là mới tinh) và **nhu cầu thực tế "Iterative"** (chạy liên tục theo chuỗi).
+
+Khi bạn chạy liên tục, việc AI phải "đọc lại cả file -\> parse markdown -\> tìm checkbox chưa tick -\> validate dependency" (Phase 1) là lãng phí token và thời gian.
+
+Để giải quyết vấn đề này mà không phá vỡ tính ổn định của hệ thống, tôi đề xuất giải pháp **"Explicit Handover" (Bàn giao cụ thể)**.
+
+Dưới đây là 3 cách điều chỉnh cho `/cook`, từ đơn giản đến nâng cao:
+
+### Giải pháp 1: Thêm cờ `--task=<ID>` (Khuyên dùng)
+
+Cách sạch nhất để bỏ qua "Discovery" là chỉ định đích danh task cần làm. Bạn không cần AI tự tìm nữa, bạn ra lệnh thẳng.
+
+**1. Sửa phần Arguments & Flags:**
+Thêm flag `--task` vào định nghĩa:
+
+```markdown
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--task=ID` | Skip discovery, execute specific task | `--task=A.1.b` |
+```
+
+**2. Sửa logic Phase 1 (Discovery):**
+Thay đổi logic để kiểm tra flag này trước tiên.
+
+```markdown
+### Phase 1: Discovery
+
+GOAL: Find next task to execute
+
+STEPS:
+
+1. Read plan file: $ARGUMENTS
+
+2. {{ if --task provided }}
+   **FAST TRACK MODE:**
+   - Locate specific task ID: {{ task ID }}
+   - Verify it is uncompleted `[ ]`
+   - Validate its dependencies are `[x]`
+   - EXIT Discovery immediately with this task
+   {{ else }}
+   **NORMAL DISCOVERY MODE:**
+   - Parse markdown...
+   - Find next uncompleted...
+   {{ endif }}
+```
+
+**3. Sửa phần Output (Success Case):**
+Quan trọng nhất: Khi hoàn thành Task A, hệ thống phải **tự tính toán Task B** và đưa cho bạn câu lệnh copy-paste.
+
+````markdown
+## Next Steps
+
+...
+
+**3. Continue to next task immediately:**
+```bash
+/cook {{ plan file }} --task={{ next_task_id }}
+````
+
+````
+
+**Tại sao cách này hiệu quả?**
+- Lần chạy đầu: Bạn chạy `/cook plan.md` (AI tốn thời gian Discovery).
+- Kết thúc: AI bảo "Xong A.1. Task tiếp theo là A.2. Chạy lệnh này đi: `/cook plan.md --task=A.2`".
+- Lần chạy sau: Bạn paste lệnh đó. AI bỏ qua bước tìm kiếm, nhảy thẳng vào làm A.2.
+
+---
+
+### Giải pháp 2: "Smart Cursor" (Lưu trạng thái tạm)
+
+Nếu bạn lười copy-paste ID, bạn có thể cho phép tạo một file tạm nhỏ (`.cook_cursor`) để nhớ vị trí. Cách này vi phạm nhẹ nguyên tắc "Stateless" nhưng tiện lợi hơn nhiều.
+
+**Sửa đổi Workflow:**
+
+1.  **Khi bắt đầu Phase 1:**
+    - Kiểm tra xem có file `.cook_cursor` không?
+    - Nếu có -> Đọc ID từ đó -> Validate trong file plan xem còn `[ ]` không -> Làm luôn.
+    - Nếu không -> Chạy Discovery bình thường.
+
+2.  **Khi kết thúc (Success Case):**
+    - Tìm ID của task kế tiếp.
+    - Ghi ID đó vào `.cook_cursor`.
+
+3.  **Lệnh reset:**
+    - Khi chạy `/cook plan.md` (không tham số) -> Tự động xóa cursor để scan lại từ đầu (đề phòng trường hợp bạn muốn reset).
+    - Hoặc thêm lệnh `/cook --resume` để dùng cursor.
+
+---
+
+### Giải pháp 3: Tối ưu Prompt (Context Carry-over)
+
+Nếu bạn đang chạy trong một session dài của Claude Code, AI thực sự vẫn nhớ ngữ cảnh cũ. Bạn có thể sửa Prompt Phase 1 để AI tự nhận thức điều này.
+
+**Sửa Prompt Phase 1:**
+
+```markdown
+### Phase 1: Discovery
+
+CONTEXT CHECK:
+Did you just complete a task in the previous turn?
+- If YES, and the user simply ran `/cook plan.md` again:
+  1. Do NOT re-read the entire file structure deeply.
+  2. Recall the "Next task" you identified in the previous turn's output.
+  3. Verify quickly that line in `{{ plan file }}` is still `[ ]`.
+  4. Proceed with that task immediately.
+````
+
+**Nhược điểm:** Cách này phụ thuộc vào khả năng nhớ context của LLM, đôi khi nó vẫn sẽ bị "hallucinate" hoặc cẩn thận quá mức mà đọc lại từ đầu.
+
+-----
+
