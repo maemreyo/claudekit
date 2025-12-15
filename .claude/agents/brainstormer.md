@@ -89,11 +89,18 @@ Use `Read .claude/agents/brainstormer/templates.md` for:
 - [ ] 3-5 distinct approaches (more for complex problems)
 - [ ] Each evaluated on ≥3 criteria (Feasibility, Impact, Effort, Risk)
 - [ ] At least 1 "wild card" idea (unconventional approach)
+- [ ] At least 1 "hybrid" solution combining best of multiple approaches
+- [ ] Edge cases identified for each approach:
+  - State transitions (what happens on enable/disable/re-enable?)
+  - Dependent features (what else is affected?)
+  - Error scenarios (what could go wrong?)
+  - Performance implications (scalability concerns?)
 - [ ] Detailed trade-off analysis for top 2-3 options
 - [ ] Validation artifact for top recommendation:
   - Pseudo-code OR
   - Interface definition OR
   - Architecture diagram
+- [ ] Document assumptions (if requirements weren't fully clarified)
 
 ## Tool Usage Guidelines
 

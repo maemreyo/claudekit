@@ -2,7 +2,7 @@
 
 This file contains complete worked examples showing how the Brainstormer Agent analyzes real problems.
 
-<!-- Last updated: 2024-12-14 -->
+<!-- Last updated: 2024-12-15 -->
 <!-- Note: Technologies and patterns evolve. Review examples periodically. -->
 
 ---
@@ -242,3 +242,238 @@ Each module has:
 - No cross-module imports (except via public API)
 - Independent tests
 - Deployment ability (when ready to extract)
+
+---
+
+## Example 4: Interactive Mode - Hide/Show Background Feature
+
+### User Request (Interactive Mode)
+```bash
+/brainstorm --interactive "hide/show background in screenshot app"
+```
+
+### Agent Response: Clarifying Questions
+
+```markdown
+## Clarifying Questions: Hide/Show Background Feature
+
+Before generating solutions, I need to understand:
+
+1. **State Preservation**: When hiding background, should padding and corner radius:
+   a) Remain functional with transparent background
+   b) Be disabled and set to 0
+   c) Other preference?
+
+2. **Re-enable Behavior**: When showing background again:
+   a) Restore previous padding/corner radius values
+   b) Reset to default values
+   c) User manually sets again?
+
+3. **Visual Effect**: Should the background:
+   a) Fade to transparent (keep element, change opacity)
+   b) Remove completely (hide element)
+
+4. **User Expectations**: Do you anticipate different users wanting different behaviors? (e.g., some want 1a, others want 1b)
+
+5. **Performance**: Are there any performance concerns with frequent hide/show toggling?
+
+Please answer briefly (e.g., "1b, 2a, 3a, 4: yes") or type "auto" to let me decide.
+```
+
+### User Answers
+"Hmm, actually both 1a and 1b make sense for different users. So 4: yes"
+
+### Agent Follow-up
+
+```markdown
+Great insight! I see that different users have different needs.
+
+**Clarification**: Should we:
+- a) Provide a setting/toggle for users to choose between Mode A (transparent) and Mode B (disabled)?
+- b) Create two separate buttons/controls?
+- c) Default to one mode but make it easy to switch later?
+
+This will help me design the best hybrid solution.
+```
+
+### User Answers
+"a) Provide a setting"
+
+### Generated Solutions (After Clarification)
+
+#### Recommended: Hybrid Solution with User Preference
+
+**Description**: Implement both modes with a setting toggle
+
+```typescript
+// Settings
+interface BackgroundSettings {
+  hideMode: 'transparent' | 'disable'; // User preference
+  preserveState: boolean; // Restore on re-enable
+}
+
+// State management
+interface BackgroundState {
+  visible: boolean;
+  padding: number;
+  cornerRadius: number;
+  // Store original values
+  _previousPadding?: number;
+  _previousCornerRadius?: number;
+}
+
+// Hide logic
+function hideBackground(settings: BackgroundSettings, state: BackgroundState) {
+  state.visible = false;
+  
+  if (settings.hideMode === 'disable') {
+    // Mode B: Disable controls
+    if (settings.preserveState) {
+      state._previousPadding = state.padding;
+      state._previousCornerRadius = state.cornerRadius;
+    }
+    state.padding = 0;
+    state.cornerRadius = 0;
+    disableControls(['padding', 'cornerRadius']);
+  } else {
+    // Mode A: Transparent background
+    backgroundElement.style.opacity = '0';
+    // Controls remain functional
+  }
+}
+
+// Show logic
+function showBackground(settings: BackgroundSettings, state: BackgroundState) {
+  state.visible = true;
+  
+  if (settings.hideMode === 'disable') {
+    // Restore state
+    if (settings.preserveState && state._previousPadding !== undefined) {
+      state.padding = state._previousPadding;
+      state.cornerRadius = state._previousCornerRadius;
+    }
+    enableControls(['padding', 'cornerRadius']);
+  } else {
+    // Restore opacity
+    backgroundElement.style.opacity = '1';
+  }
+}
+```
+
+**Edge Cases Handled**:
+- ✅ State transitions (hide → show → hide again)
+- ✅ Setting changes mid-session (switch from Mode A to Mode B)
+- ✅ Default values for new users
+- ✅ Migration from old version (if exists)
+
+**Trade-offs**:
+- (+) Satisfies both user groups
+- (+) Flexible for future needs
+- (-) Slightly more complex implementation
+- (-) Need to design settings UI
+
+**Alternatives Considered**:
+1. **Mode A only**: Simpler but doesn't satisfy users who want clean screenshots
+2. **Mode B only**: Cleaner but limits creative use of padding/radius
+3. **Two separate buttons**: More UI clutter, confusing
+
+**Why Hybrid Wins**: User feedback indicated real need for both modes. Small additional complexity is worth better UX.
+
+---
+
+## Example 5: Edge Case Discovery
+
+### Problem
+"Add dark mode toggle to app"
+
+### Clarifying Questions (Auto-generated)
+
+1. **State Persistence**: Should dark mode preference be:
+   - Saved per user account?
+   - Saved in browser localStorage?
+   - Reset on browser close?
+
+2. **Transition**: Should the theme switch be:
+   - Instant?
+   - Animated (fade/slide)?
+   - Require page reload?
+
+3. **System Preference**: Should we:
+   - Respect OS dark mode setting?
+   - Ignore OS setting, use app preference only?
+   - OS default, allow override?
+
+4. **Content Adaptation**: Are there images/assets that need dark mode versions?
+
+5. **Third-party**: Any third-party widgets that might not support dark mode?
+
+### Edge Cases Identified from Questions
+
+- **Browser compatibility**: Some CSS variables not supported in old browsers
+- **Flash of unstyled content**: Page loads before theme applied
+- **Embedded content**: iframes, third-party widgets
+- **Print mode**: Should print use light theme always?
+- **Accessibility**: Ensure sufficient contrast in both modes
+
+### Solutions Generated (With Edge Cases)
+
+Each solution includes:
+- Main implementation
+- Edge case handling
+- Fallback strategies
+- Testing approach
+
+---
+
+## Template: Clarifying Questions Example
+
+Use this template when in `--clarify` or `--interactive` mode:
+
+```markdown
+## Clarifying Questions: {{ PROBLEM }}
+
+Before generating solutions, I need to understand:
+
+1. **State Management**: [Question about state transitions]
+   a) [Option A]
+   b) [Option B]
+   c) [Other?]
+
+2. **User Expectations**: [Question about different user needs]
+   - [Scenario A]
+   - [Scenario B]
+   - Could both scenarios exist?
+
+3. **Edge Cases**: [Question about error/edge scenarios]
+   - [What if X happens?]
+   - [What if Y changes?]
+
+4. **Dependencies**: [Question about affected features]
+   - [Are there other features that depend on this?]
+   - [Will this change impact X?]
+
+5. **Assumptions**: [Question to validate assumptions]
+   - [Are we solving the right problem?]
+   - [Is constraint X real or assumed?]
+
+Please answer briefly or type "auto" for best practices.
+```
+
+---
+
+## Key Learnings from Examples
+
+### Pattern 1: Hybrid Solutions Often Best
+When users indicate multiple valid scenarios (Example 4), hybrid solutions that support both modes usually provide better UX despite slightly higher complexity.
+
+### Pattern 2: State Transitions Critical
+Always ask: "What happens when feature is re-enabled?" (Examples 1, 4)
+
+### Pattern 3: Edge Cases Through Questions
+Interactive mode reveals edge cases users haven't considered (Example 5)
+
+### Pattern 4: Document Assumptions
+When requirements aren't fully clarified, document assumptions clearly (All examples)
+
+### Pattern 5: Validate with Artifacts
+Pseudo-code/diagrams prove feasibility and reveal implementation challenges early (All examples)

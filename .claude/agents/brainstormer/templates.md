@@ -322,3 +322,349 @@ For simple/urgent requests, use this condensed format:
 
 **Recommend**: [Option X] because [one sentence rationale]
 ```
+
+---
+
+## Template 3: Assumption Challenging
+
+Use this template to challenge assumptions before generating solutions.
+
+```markdown
+## Assumption Challenge: {{ PROBLEM }}
+
+### Problem Statement (As Given)
+{{ original problem description }}
+
+### Assumptions to Challenge
+
+#### 1. Scope Assumption
+**Assumed**: {{ what we think the scope is }}
+**Challenge**: Are we solving the right problem?
+**Questions**:
+- Is this the root cause or just a symptom?
+- Could a different framing be more valuable?
+- What problem are users *actually* trying to solve?
+
+**Reframe**: {{ alternative problem statement if applicable }}
+
+---
+
+#### 2. State Assumption
+**Assumed**: {{ assumptions about state/data }}
+**Challenge**: What state needs to be preserved?
+**Questions**:
+- What happens when feature is enabled/disabled/re-enabled?
+- Should previous state be restored or reset?
+- What's the user mental model for state transitions?
+
+**Edge Cases**:
+- {{ state transition scenario 1 }}
+- {{ state transition scenario 2 }}
+
+---
+
+#### 3. User Assumption
+**Assumed**: {{ single user type or use case }}
+**Challenge**: Are there different user groups?
+**Questions**:
+- Could different users want different behaviors?
+- Are there power users vs casual users?
+- Could multiple modes coexist?
+
+**User Segments**:
+- **Group A**: {{ needs/expectations }}
+- **Group B**: {{ different needs }}
+- **Implication**: {{ hybrid solution? settings toggle? }}
+
+---
+
+#### 4. Constraint Assumption
+**Assumed**: {{ constraints we're accepting }}
+**Challenge**: Are constraints real or assumed?
+**Questions**:
+- Is this technical constraint or business constraint?
+- Could constraint be relaxed with different approach?
+- What would we do with unlimited resources/time?
+
+**Re-evaluation**:
+- {{ which constraints are hard (real) }}
+- {{ which constraints are soft (assumed) }}
+- {{ opportunities if soft constraints removed }}
+
+---
+
+#### 5. Dependency Assumption
+**Assumed**: {{ what we think depends on what }}
+**Challenge**: What else is affected?
+**Questions**:
+- Are there features dependent on this?
+- Could this change break existing functionality?
+- What's the cascade of effects?
+
+**Impact Analysis**:
+- **Direct impacts**: {{ features directly affected }}
+- **Indirect impacts**: {{ downstream effects }}
+- **Mitigation**: {{ how to handle dependencies }}
+
+---
+
+#### 6. Reversibility Assumption
+**Assumed**: {{ assumptions about undo/rollback }}
+**Challenge**: Can this be undone? How?
+**Questions**:
+- Is this change reversible?
+- What needs to be saved/logged for rollback?
+- What's the recovery path if things go wrong?
+
+**Reversibility Plan**:
+- {{ what can be undone automatically }}
+- {{ what requires manual intervention }}
+- {{ what's permanent/irreversible }}
+
+---
+
+### Challenged Problem Statement
+
+Based on assumption challenges:
+
+**Original**: {{ original problem }}
+
+**Refined**: {{ refined problem statement addressing challenged assumptions }}
+
+**New Constraints**:
+- {{ real constraints identified }}
+- {{ assumptions removed }}
+
+**New Opportunities**:
+- {{ opportunities from challenged assumptions }}
+
+---
+
+### Ready for Solutions
+
+Now generate solutions for the **refined** problem statement with:
+- Challenged assumptions documented
+- Edge cases identified
+- User segments considered
+- Dependencies mapped
+- Reversibility planned
+```
+
+---
+
+## Template 4: Hybrid Solution Design
+
+Use this when multiple valid approaches exist and hybrid solution is needed.
+
+```markdown
+## Hybrid Solution: {{ PROBLEM }}
+
+### Context
+Multiple valid approaches exist because:
+- {{ reason 1: e.g., "Different user groups have different needs" }}
+- {{ reason 2: e.g., "Multiple scenarios are equally common" }}
+- {{ reason 3: e.g., "Trade-offs vary by context" }}
+
+---
+
+### Approaches Being Combined
+
+#### Approach A: {{ Name }}
+**Best for**: {{ use case A }}
+**Strengths**: {{ pros }}
+**Weaknesses**: {{ cons }}
+
+#### Approach B: {{ Name }}
+**Best for**: {{ use case B }}
+**Strengths**: {{ pros }}
+**Weaknesses**: {{ cons }}
+
+{{ if more approaches }}
+#### Approach C: {{ Name }}
+**Best for**: {{ use case C }}
+**Strengths**: {{ pros }}
+**Weaknesses**: {{ cons }}
+{{ endif }}
+
+---
+
+### Hybrid Design
+
+**Core Idea**: {{ how approaches are combined }}
+
+**Architecture**:
+```{{ language }}
+// Interface/structure showing hybrid design
+{{ code showing how both modes coexist }}
+```
+
+**Mode Selection**:
+- **Default mode**: {{ which approach is default and why }}
+- **Switch mechanism**: {{ how users switch between modes }}
+- **Auto-detection**: {{ if applicable, what triggers which mode }}
+
+**Examples**:
+
+**Scenario 1** ({{ use case A }}):
+```{{ language }}
+// Using Mode A
+{{ code example }}
+```
+
+**Scenario 2** ({{ use case B }}):
+```{{ language }}
+// Using Mode B
+{{ code example }}
+```
+
+---
+
+### Implementation Details
+
+#### State Management
+```{{ language }}
+// How to manage state across modes
+interface HybridState {
+  currentMode: 'A' | 'B' {{ | 'C' }};
+  // Mode-specific state
+  modeAState: {{ ... }};
+  modeBState: {{ ... }};
+  // Shared state
+  sharedState: {{ ... }};
+  // Transition history (for undo/redo)
+  previousMode?: 'A' | 'B';
+}
+```
+
+#### Mode Switching
+```{{ language }}
+function switchMode(from: Mode, to: Mode, state: HybridState) {
+  // Save current state
+  state.previousMode = from;
+  
+  // Mode-specific transition logic
+  if (from === 'A' && to === 'B') {
+    {{ transition logic }}
+  }
+  
+  // Update current mode
+  state.currentMode = to;
+}
+```
+
+#### Settings/Preferences
+```{{ language }}
+interface UserPreferences {
+  defaultMode: 'A' | 'B';
+  rememberLastMode: boolean;
+  {{ other preferences }}
+}
+```
+
+---
+
+### Edge Cases Handled
+
+#### Edge Case 1: Mode Switch Mid-Operation
+**Scenario**: {{ what happens if user switches mode while X is happening }}
+**Handling**: {{ how to handle gracefully }}
+
+#### Edge Case 2: State Conflict
+**Scenario**: {{ when state from Mode A conflicts with Mode B }}
+**Handling**: {{ conflict resolution strategy }}
+
+#### Edge Case 3: Missing Data
+**Scenario**: {{ mode requires data that doesn't exist }}
+**Handling**: {{ fallback, defaults, or error }}
+
+#### Edge Case 4: Performance
+**Scenario**: {{ performance implications of hybrid approach }}
+**Handling**: {{ optimization strategy }}
+
+---
+
+### Trade-offs
+
+**Hybrid Approach**:
+- ✅ **Pros**:
+  - Satisfies multiple user groups
+  - Flexible for future needs
+  - Covers more use cases
+- ❌ **Cons**:
+  - More complex implementation
+  - More code to maintain
+  - Potential for mode confusion
+  - Settings UI needed
+
+**Compared to Single Approach**:
+- **vs Mode A only**: {{ comparison }}
+- **vs Mode B only**: {{ comparison }}
+
+**Complexity Justification**:
+{{ why the additional complexity is worth it }}
+{{ measurable benefit: e.g., "serves 70% more users" }}
+
+---
+
+### Testing Strategy
+
+**Test Cases**:
+1. Mode A in isolation
+2. Mode B in isolation
+3. Switch A → B
+4. Switch B → A
+5. Rapid switching
+6. State persistence across modes
+7. Default mode selection
+8. Settings save/load
+9. Edge cases handling
+10. Performance under load
+
+**Test Data**:
+```{{ language }}
+// Sample test scenarios
+const testScenarios = [
+  { mode: 'A', input: {{ ... }}, expected: {{ ... }} },
+  { mode: 'B', input: {{ ... }}, expected: {{ ... }} },
+  { transition: 'A->B', state: {{ ... }}, expected: {{ ... }} }
+];
+```
+
+---
+
+### Migration Path
+
+{{ if replacing existing feature }}
+**From Current Implementation**:
+
+1. **Phase 1**: Add Mode A (or B) alongside existing
+2. **Phase 2**: Add mode switching capability
+3. **Phase 3**: Add Mode B (or A)
+4. **Phase 4**: Deprecate old implementation
+5. **Phase 5**: Remove old code
+
+**User Communication**:
+- {{ how to announce new modes }}
+- {{ how to help users choose right mode }}
+- {{ migration guide for power users }}
+{{ endif }}
+
+---
+
+### Recommendation
+
+**Use Hybrid Approach** when:
+- ✅ Multiple user groups with different needs
+- ✅ Trade-offs vary significantly by use case
+- ✅ No single "winner" approach
+- ✅ Flexibility is valued over simplicity
+- ✅ Additional complexity is justified by user value
+
+**Use Single Approach** when:
+- ❌ Clear winner exists for 90%+ of use cases
+- ❌ Complexity cost > user value benefit
+- ❌ Team resources limited
+- ❌ Maintenance burden too high
+
+**Decision for this case**: {{ HYBRID or SINGLE }} because {{ reasoning }}
+```

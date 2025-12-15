@@ -37,6 +37,12 @@ Generate creative solutions and explore alternatives using structured thinking m
 # Compare multiple approaches
 /brainstorm --compare "state management options"
 
+# Interactive mode - ask questions first
+/brainstorm --interactive "hide/show background feature"
+
+# Clarify only - just get questions, no solutions
+/brainstorm --clarify "user authentication"
+
 # Save output to file
 /brainstorm "API caching" --save=docs/brainstorm-caching.md
 
@@ -54,6 +60,8 @@ Generate creative solutions and explore alternatives using structured thinking m
 |------|-------------|---------|
 | `--quick` | Force Quick Mode (3-5 bullet points) | Auto-detect |
 | `--deep` | Force Deep Mode (full framework analysis) | Auto-detect |
+| `--interactive` | Ask clarifying questions before generating solutions | Off |
+| `--clarify` | Only generate clarifying questions, no solutions | Off |
 | `--framework=NAME` | Use specific framework: `six-hats`, `scamper`, `first-principles` | Auto-select |
 | `--compare` | Auto-compare multiple approaches | Off |
 | `--save=PATH` | Save output to markdown file | Display only |
@@ -182,7 +190,90 @@ INPUT CONTEXT:
 
 AGENT INSTRUCTIONS:
 
-{{ if MODE == Quick }}
+{{ if --clarify flag }}
+**CLARIFY-ONLY MODE**:
+
+Do NOT generate solutions. Only generate clarifying questions.
+
+**Generate 3-5 clarifying questions about:**
+
+1. **State Transitions**:
+   - "What happens when feature is re-enabled?"
+   - "Should previous state be restored or reset?"
+
+2. **Dependent Features**:
+   - "Are there other features dependent on this?"
+   - "If X is disabled, what happens to Y and Z?"
+
+3. **User Expectations**:
+   - "Are there different user groups with different needs?"
+   - "Could multiple approaches coexist?"
+
+4. **Edge Cases**:
+   - "What happens in error scenarios?"
+   - "Are there performance implications?"
+
+5. **Assumptions**:
+   - "Are we solving the right problem?"
+   - "Are constraints real or assumed?"
+
+**Output Format**:
+```markdown
+## Clarifying Questions: {{ PROBLEM }}
+
+Before generating solutions, I need to understand:
+
+1. **[Category]**: [Question]
+   a) [Option A]
+   b) [Option B]
+   c) [Other preference?]
+
+2. **[Category]**: [Question]
+   a) [Option A]
+   b) [Option B]
+
+3. **[Category]**: [Question]
+   [Open-ended question]
+
+4. **[Category]**: [Question]
+   [Yes/No or specific options]
+
+5. **[Category]**: [Question]
+   [Exploration question]
+
+Please answer briefly (e.g., "1a, 2b, 3: yes") or type "auto" to let me decide based on best practices.
+
+After answering, I'll generate tailored solutions.
+```
+
+STOP after questions. Do NOT generate solutions.
+{{ endif }}
+
+{{ if --interactive flag and not --clarify }}
+**INTERACTIVE MODE** (2-step process):
+
+**STEP 1: Clarifying Questions** (Do NOT generate solutions yet)
+
+Ask 3-5 targeted questions to discover:
+- Edge cases user might not have considered
+- State transition requirements
+- User expectations and different use cases
+- Dependent features and constraints
+- Assumptions that need validation
+
+**Question Format**: Multiple choice when possible, open-ended when needed
+
+**Output**: Present questions clearly, then WAIT for user response
+
+**STEP 2: After user answers**
+- Analyze responses
+- Generate solutions that address clarified requirements
+- Emphasize hybrid approaches if user indicated multiple valid scenarios
+- Include edge case handling based on answers
+
+{{ endif }}
+
+{{ if MODE == Quick and not --interactive and not --clarify }}
 **QUICK MODE** (3-5 ideas, <10 seconds):
 1. Skip Step 0 (context gathering) unless critical
 2. Generate 3-5 distinct approaches immediately
@@ -213,8 +304,20 @@ OUTPUT FORMAT:
 ```
 {{ endif }}
 
-{{ if MODE == Deep }}
+{{ if MODE == Deep and not --interactive and not --clarify }}
 **DEEP MODE** (Comprehensive analysis):
+
+{{ if not --interactive }}
+**Step 0.5: Quick Clarification Check** (Optional but recommended)
+
+Before deep context gathering, quickly assess if clarification needed:
+- Are there obvious ambiguities in the problem statement?
+- Are there multiple valid interpretations?
+- Could edge cases significantly impact approach?
+
+If YES to any: Ask 1-2 quick clarifying questions, wait for response.
+If NO or user says "auto": Proceed with assumptions documented.
+{{ endif }}
 
 Follow your complete workflow:
 
@@ -247,11 +350,18 @@ Follow your complete workflow:
 - Include comparison matrix
 - Provide validation artifact (pseudo-code/diagram)
 
-**Quality Standards:**
+**Quality Standards (ENHANCED):**
 - 5+ distinct approaches (or 3-5 if problem is simpler)
-- At least 1 "wild card" idea
+- At least 1 "wild card" idea (unconventional approach)
+- At least 1 "hybrid" solution combining best of multiple approaches
+- Edge cases identified for each approach:
+  - State transitions (enable/disable/re-enable)
+  - Dependent features impact
+  - Error scenarios
+  - Performance implications
 - Detailed trade-off analysis for top 2-3
-- Validation artifact for top recommendation
+- Validation artifact for top recommendation (pseudo-code/diagram)
+- Assumption documentation (what was assumed if not clarified)
 {{ endif }}
 
 {{ if --compare }}
