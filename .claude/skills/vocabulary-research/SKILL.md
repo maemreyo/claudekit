@@ -212,6 +212,7 @@ Before completing vocabulary research, verify:
 |------|----|----- |
 | **Single-pass completion** | Fill all sections in one go | Leave sections incomplete |
 | **Preserve structure** | Keep all template sections and formatting | Remove or reorganize sections |
+| **Obsidian Links** | Format related words, synonyms, antonyms, and word family members as `[[word]]` | Use plain text `word` or bold `**word**` only |
 | **Clear examples** | Use complete, context-rich sentences | Use fragments or unclear examples |
 | **Spaced repetition cards** | Create testable, clear flashcards | Write vague or multi-part questions |
 

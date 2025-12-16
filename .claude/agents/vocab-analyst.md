@@ -124,10 +124,12 @@ This agent leverages the **vocabulary-research** skill (`.claude/skills/vocabula
 - Etymology: [Historical development]
 - Root: [Core morphemes and meanings]
 - Word Family:
-  - Noun: [forms]
-  - Verb: [forms]
-  - Adjective: [forms]
-  - Adverb: [forms]
+  - Noun: [[noun form]]
+  - Verb: [[verb form]]
+  - Adjective: [[adjective form]]
+  - Adverb: [[adverb form]]
+
+**Note**: Word family members MUST be wrapped in `[[ ]]`.
 
 ## 💡 Meaning
 ### Root Meaning
@@ -144,11 +146,13 @@ This agent leverages the **vocabulary-research** skill (`.claude/skills/vocabula
 
 ## 🔗 Relations
 ### Synonyms
-- **Nuance 1**: [synonym group 1]
-- **Nuance 2**: [synonym group 2]
+- **Nuance 1**: [[synonym 1]]
+- **Nuance 2**: [[synonym 2]]
 
 ### Antonyms
-[Direct opposites]
+[[antonym 1]] (context)
+
+**Note**: Always wrap related words, synonyms, and antonyms in `[[ ]]` to create Obsidian links.
 
 ## 📝 Usage
 ### Examples
