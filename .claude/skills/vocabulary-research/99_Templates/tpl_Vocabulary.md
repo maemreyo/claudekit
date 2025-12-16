@@ -1,9 +1,9 @@
----
 created: <% tp.file.creation_date("YYYY-MM-DD") %>
 tags: vocabulary, flashcard
 category: word
 confidence: 
 mastery: 🔴 New
+process_status: pending
 ---
 
 # <% tp.file.title %>

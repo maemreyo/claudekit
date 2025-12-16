@@ -3,6 +3,7 @@ created: <% tp.file.creation_date("YYYY-MM-DD") %>
 tags: structure, flashcard, grammar
 mastery: 🔴 New
 type: structure
+process_status: pending
 ---
 
 ## 📊 Meta Information
